@@ -1,0 +1,287 @@
+/* Welcome to Compass.
+ * In this file you should write your main styles. (or centralize your imports)
+ * Import this file using the following HTML or equivalent:
+ * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
+
+@import "compass/reset";
+@import 'mixins';
+
+/************
+** COLORS **/
+$control-bg-color: #E3E3E3 /*#dddddd*/;
+$control-mbg-color: #F9FAFF /*#f8f8f8*/; 
+$highlight-color: #aa5500;
+
+
+/************
+** Layout **/
+$left-row-width: 250px;
+$filter-height: 500px;
+$legend-height: 250px;
+$timeline-height: 200px;
+$timeline-min-height: 100px;
+$controls-padding: 5px;
+$map-margin: $controls-padding;
+
+
+$left-row-width: 250px;
+$body-padding: 1%;
+$header-height: 4%;
+$timeline-height: 25%;
+$timeline-min-height: 140px;
+$timelline-max-height: 280px;
+
+$sidebar-height: (100)-(2*($body-padding))-($header-height);
+$filter-height: 60%;
+$legend-height: (100)-($filter-height); /*(100)-(2*($body-padding))-($header-height)-($filter-height);*/
+
+$controls-padding: 5px;
+$box-padding: 10px;
+$box-margin-v: 5px;
+$map-padding: 0.2%;
+
+/***********
+** FANCY **/
+$outer-border-radius: 8px;
+
+
+html {
+	height: 100%;
+}
+
+body {
+	padding: $body-padding;
+	height: (100)-(4*($body-padding));
+}
+
+h1 {
+	font-size: 2em;
+	/*margin: .4em;*/
+	font-weight: bold;
+	height: $header-height;
+}
+
+menu {
+	background: $control-bg-color;
+	padding: $controls-padding;
+	@include border-radius($outer-border-radius);
+	div {
+		@include border-radius($outer-border-radius/2);
+	}
+
+}
+
+menu#timefilter {
+	height: $timeline-height;
+	min-height: $timeline-min-height;
+	max-height: $timelline-max-height;
+	/*margin-left: ($left-row-width)-($controls-padding);*/
+}
+
+#sidebar {
+	height: $sidebar-height;
+	width: $left-row-width;
+	float: left;
+}
+
+#sidebar>menu{
+	/*height: $filter-height;*/
+	min-height: $timelline-max-height;
+	
+	div {
+		/*height: 100-(2*($filter-padding));*/
+		background: $control-mbg-color;
+		padding: $box-padding;
+		margin-bottom: $box-margin-v;
+	}
+	div:last-child {
+		margin-bottom: 0;
+	}
+}
+
+#sidebar>div {
+	@include border-radius($outer-border-radius/2);
+	border: 1px solid #ECECEC;
+}
+
+#filter {
+	/*height: 100-(2*($filter-padding));d*/
+	background: $control-mbg-color;
+	padding: $box-padding;
+}
+
+#chart {
+	/*height: $timeline-height;*/
+	/*min-height: $timeline-min-height;*/
+	height: 100%;
+	margin-left: ($left-row-width)-($controls-padding);
+}
+
+#legend {
+	width: ($left-row-width)-2*($controls-padding);
+	/*height: $legend-height;*/
+	margin: $controls-padding;
+	padding: $box-padding;
+	background: $control-mbg-color;
+}
+
+#stuff {
+	@extend #legend;
+	font-size: .8em;
+	line-height: 1em;
+}
+
+#map {
+	height: (100)-(2*($map-padding))-($header-height)-($timeline-height);/*($filter-height)+($legend-height)-($timeline-height);*/
+	/*margin: $map-margin;*/
+	padding: $map-padding;
+	margin-left: ($left-row-width);/*+$map-margin;*/
+}
+
+
+#bubble {
+	position: absolute;
+	bottom: 1337px;
+	display: inline-block;
+	text-align: right;
+	min-width: 80px;
+	/*height: 100px;*/
+	background: rgba(225,245,255,.9);
+	border: 2px solid rgba(170 ,85,0,.1);
+	@include border-radius(3px);
+	@include transition(all 0.6s);
+	padding: .3em;
+	pointer-events: none;
+}
+
+#bubble>span,
+#legend>span {
+		font-size: .7em;
+		color: rgba(0,0,0,.5);
+		font-family: sans-serif;
+	}
+
+/************
+*** Forms **/
+select, label{
+	display: block;
+}
+
+#controls>label {
+	line-height: 1.5em;
+	margin: .5em 0;
+
+	input {
+		display: inline-block;
+		padding: 2%;
+		margin: 0;
+		border: none;
+		vertical-align: middle;
+		width: 74%;
+	}
+
+	input:last-child {
+		width: 14%;
+		margin-left: 2%;
+		text-align: center;
+	}
+}
+
+#controls>label:after {
+	border-bottom: 1px solid black;
+	width: 100%;
+	height: 1px;
+	content: "";
+}
+
+button {
+	width: 100%;
+	border: 1px solid #ACACAC;
+	background: #ECECEC;
+	@include border-radius($outer-border-radius/4);
+	@include transition(all 0.5s);
+	font-family: sans-serif;
+	padding: .3em;
+	@include box-shadow(0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2));
+}
+button:hover {
+	color: #ffffff;
+	background: #BBBED1;
+	cursor: pointer;
+	/*@include box-shadow(0 -3px 3px -3px rgba(100, 0, 0, 0.8), 0 3px 3px -3px rgba(100, 0, 0, 0.8));*/
+}
+
+button[disabled] {
+	background: #ECECEC;
+	cursor: default;
+	color: #CFCFCF;
+	@include box-shadow(none);
+}
+
+/*#reso-slider{
+    display: inline;
+    position: relative;
+
+
+}
+/*#reso-slider:hover:after{
+    background: #333;
+    background: rgba(0,0,0,.8);
+    border-radius: 5px;
+    bottom: 26px;
+    color: #fff;
+    content: attr(data-tooltip);
+    left: 20%;
+    padding: 5px 15px;
+    position: absolute;
+    z-index: 5;
+    /*width: 220px;*
+}
+#reso-slider:hover:before{
+    border: solid;
+    border-color: #333 transparent;
+    border-width: 6px 6px 0 6px;
+    bottom: 20px;
+    content: "";
+    left: 50%;
+    position: absolute;
+    z-index: 99;
+}*/
+
+
+/***********
+*** text **/
+#filter {
+	line-height: 1.5em;
+}
+
+
+em {
+	font-style: italic;
+	color: $highlight-color;
+}
+
+
+/************
+*** fancy **/
+
+menu>div {
+	@include box-shadow(0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2));
+}
+
+/*#chart {
+	@include box-shadow(1px -1px 3px rgba(0,0,0,0.3));
+}*/
+
+
+/****************
+*** technical **/
+#bubble {
+	opacity: 0;
+}
+
+
+
+/********************
+*** final imports **/
+@import 'svg';

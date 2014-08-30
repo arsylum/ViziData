@@ -1,0 +1,21 @@
+/************
+** MIXINS **/
+@mixin border-radius($radius) {
+  -webkit-border-radius: $radius;
+     -moz-border-radius: $radius;
+      -ms-border-radius: $radius;
+          border-radius: $radius;
+}
+
+@mixin transition($v) {
+	-webkit-transition: $v;
+	   -moz-transition: $v;
+	     -o-transition: $v;
+	        transition: $v;
+}
+
+@mixin box-shadow($v...) {
+	-moz-box-shadow: $v;
+ -webkit-box-shadow: $v;
+		 box-shadow: $v;
+}

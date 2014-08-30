@@ -1,0 +1,392 @@
+/* Welcome to Compass.
+ * In this file you should write your main styles. (or centralize your imports)
+ * Import this file using the following HTML or equivalent:
+ * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
+/* line 17, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+
+/* line 22, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+html {
+  line-height: 1;
+}
+
+/* line 24, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+ol, ul {
+  list-style: none;
+}
+
+/* line 26, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* line 28, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+caption, th, td {
+  text-align: left;
+  font-weight: normal;
+  vertical-align: middle;
+}
+
+/* line 30, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+q, blockquote {
+  quotes: none;
+}
+/* line 103, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+q:before, q:after, blockquote:before, blockquote:after {
+  content: "";
+  content: none;
+}
+
+/* line 32, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+a img {
+  border: none;
+}
+
+/* line 116, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section, summary {
+  display: block;
+}
+
+/************
+** MIXINS **/
+/************
+** COLORS **/
+/************
+** Layout **/
+/*(100)-(2*($body-padding))-($header-height)-($filter-height);*/
+/***********
+** FANCY **/
+/* line 48, ../sass/screen.scss */
+html {
+  height: 100%;
+}
+
+/* line 52, ../sass/screen.scss */
+body {
+  padding: 1%;
+  height: 96%;
+}
+
+/* line 57, ../sass/screen.scss */
+h1 {
+  font-size: 2em;
+  /*margin: .4em;*/
+  font-weight: bold;
+  height: 4%;
+}
+
+/* line 64, ../sass/screen.scss */
+menu {
+  background: #e3e3e3;
+  padding: 5px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  border-radius: 8px;
+}
+/* line 68, ../sass/screen.scss */
+menu div {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  border-radius: 4px;
+}
+
+/* line 74, ../sass/screen.scss */
+menu#timefilter {
+  height: 25%;
+  min-height: 140px;
+  max-height: 280px;
+  /*margin-left: ($left-row-width)-($controls-padding);*/
+}
+
+/* line 81, ../sass/screen.scss */
+#sidebar {
+  height: 94%;
+  width: 250px;
+  float: left;
+}
+
+/* line 87, ../sass/screen.scss */
+#sidebar > menu {
+  /*height: $filter-height;*/
+  min-height: 280px;
+}
+/* line 91, ../sass/screen.scss */
+#sidebar > menu div {
+  /*height: 100-(2*($filter-padding));*/
+  background: #f9faff;
+  padding: 10px;
+  margin-bottom: 5px;
+}
+/* line 97, ../sass/screen.scss */
+#sidebar > menu div:last-child {
+  margin-bottom: 0;
+}
+
+/* line 102, ../sass/screen.scss */
+#sidebar > div {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  border-radius: 4px;
+  border: 1px solid #ECECEC;
+}
+
+/* line 107, ../sass/screen.scss */
+#filter {
+  /*height: 100-(2*($filter-padding));d*/
+  background: #f9faff;
+  padding: 10px;
+}
+
+/* line 113, ../sass/screen.scss */
+#chart {
+  /*height: $timeline-height;*/
+  /*min-height: $timeline-min-height;*/
+  height: 100%;
+  margin-left: 245px;
+}
+
+/* line 120, ../sass/screen.scss */
+#legend, #stuff {
+  width: 250px -10px;
+  /*height: $legend-height;*/
+  margin: 5px;
+  padding: 10px;
+  background: #f9faff;
+}
+
+/* line 128, ../sass/screen.scss */
+#stuff {
+  font-size: .8em;
+  line-height: 1em;
+}
+
+/* line 134, ../sass/screen.scss */
+#map {
+  height: 70.6%;
+  /*($filter-height)+($legend-height)-($timeline-height);*/
+  /*margin: $map-margin;*/
+  padding: 0.2%;
+  margin-left: 250px;
+  /*+$map-margin;*/
+}
+
+/* line 142, ../sass/screen.scss */
+#bubble {
+  position: absolute;
+  bottom: 1337px;
+  display: inline-block;
+  text-align: right;
+  min-width: 80px;
+  /*height: 100px;*/
+  background: rgba(225, 245, 255, 0.9);
+  border: 2px solid rgba(170, 85, 0, 0.1);
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-transition: all 0.6s;
+  -moz-transition: all 0.6s;
+  -o-transition: all 0.6s;
+  transition: all 0.6s;
+  padding: .3em;
+  pointer-events: none;
+}
+
+/* line 158, ../sass/screen.scss */
+#bubble > span,
+#legend > span,
+#stuff > span {
+  font-size: .7em;
+  color: rgba(0, 0, 0, 0.5);
+  font-family: sans-serif;
+}
+
+/************
+*** Forms **/
+/* line 166, ../sass/screen.scss */
+select, label {
+  display: block;
+}
+
+/* line 170, ../sass/screen.scss */
+#controls > label {
+  line-height: 1.5em;
+  margin: .5em 0;
+}
+/* line 174, ../sass/screen.scss */
+#controls > label input {
+  display: inline-block;
+  padding: 2%;
+  margin: 0;
+  border: none;
+  vertical-align: middle;
+  width: 74%;
+}
+/* line 183, ../sass/screen.scss */
+#controls > label input:last-child {
+  width: 14%;
+  margin-left: 2%;
+  text-align: center;
+}
+
+/* line 190, ../sass/screen.scss */
+#controls > label:after {
+  border-bottom: 1px solid black;
+  width: 100%;
+  height: 1px;
+  content: "";
+}
+
+/* line 197, ../sass/screen.scss */
+button {
+  width: 100%;
+  border: 1px solid #ACACAC;
+  background: #ECECEC;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -ms-border-radius: 2px;
+  border-radius: 2px;
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+  font-family: sans-serif;
+  padding: .3em;
+  -moz-box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
+}
+
+/* line 207, ../sass/screen.scss */
+button:hover {
+  color: #ffffff;
+  background: #BBBED1;
+  cursor: pointer;
+  /*@include box-shadow(0 -3px 3px -3px rgba(100, 0, 0, 0.8), 0 3px 3px -3px rgba(100, 0, 0, 0.8));*/
+}
+
+/* line 214, ../sass/screen.scss */
+button[disabled] {
+  background: #ECECEC;
+  cursor: default;
+  color: #CFCFCF;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+    /*#reso-slider{
+    display: inline;
+    position: relative;
+
+
+}
+/*#reso-slider:hover:after{
+    background: #333;
+    background: rgba(0,0,0,.8);
+    border-radius: 5px;
+    bottom: 26px;
+    color: #fff;
+    content: attr(data-tooltip);
+    left: 20%;
+    padding: 5px 15px;
+    position: absolute;
+    z-index: 5;
+    /*width: 220px;*
+}
+#reso-slider:hover:before{
+    border: solid;
+    border-color: #333 transparent;
+    border-width: 6px 6px 0 6px;
+    bottom: 20px;
+    content: "";
+    left: 50%;
+    position: absolute;
+    z-index: 99;
+}*/
+/***********
+*** text **/
+/* line 254, ../sass/screen.scss */
+#filter {
+  line-height: 1.5em;
+}
+
+/* line 259, ../sass/screen.scss */
+em {
+  font-style: italic;
+  color: #aa5500;
+}
+
+/************
+*** fancy **/
+/* line 268, ../sass/screen.scss */
+menu > div {
+  -moz-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
+}
+
+/*#chart {
+	@include box-shadow(1px -1px 3px rgba(0,0,0,0.3));
+}*/
+/****************
+*** technical **/
+/* line 279, ../sass/screen.scss */
+#bubble {
+  opacity: 0;
+}
+
+/********************
+*** final imports **/
+/* line 1, ../sass/svg.scss */
+svg {
+  /*#bubble {
+  	rect {
+  		fill: rgba(255,255,255,0.8);
+  	}
+  	text {
+  		stroke: black;
+  		font-size: .4em;
+  	}
+  }*/
+}
+/* line 2, ../sass/svg.scss */
+svg circle:hover {
+  fill: #aa5500;
+  /*stroke: $highlight-color;
+  /*stroke-width: 1%;*/
+}
+/* line 8, ../sass/svg.scss */
+svg circle {
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+/* line 12, ../sass/svg.scss */
+svg image {
+  opacity: 0.5;
+}
