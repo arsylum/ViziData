@@ -1,4 +1,4 @@
 ViziData
 ========
 
-Visualisiation for spacio-temporal data from Wikidata
+Visualization for spacio-temporal data from Wikidata
