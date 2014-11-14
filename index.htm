@@ -18,49 +18,56 @@
 </head>
 <body>
 
-<h1>ViziData <span style="font-size: .5em;">(Prototype)</span></h1>
+<!--<div style="float: right;"><img src="./octocat.png" alt="GitHub"></div>-->
+<div id="site_title">
+	<a id="github_link" href="https://github.com/gordelwig/ViziData" title="View on GitHub" target="_new">
+		<img src="./github_logo.png" alt="GitHub">
+		<img src="./octocat.png" alt="GitHub">
+	</a>
+	<h1>ViziData <span>(Prototype)</span></h1>
+</div>
 
-	<!--<menu>-->
-	<div id="sidebar">
-		<menu>
-			<div id="filter"></div>
-			<div id="controls">
-				<label id="ctrl-reso">
-					Grid resolution<br>
-					<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1.5" />
-					<input id="reso-display" type="text" readonly="readonly" size="2" value="1.5" />
-				</label>
-				<label id="ctrl-zoom">
-					Zoom<br>
-					<input id="zoom-slider" type="range" step="0.1" value="1" />
-					<input id="zoom-display" type="text" readonly size="3" value="1.0" />
-				</label>
-			</div>
-			<div>
-				<label id="freezer">
-					<input type="checkbox" />
-					prevent redrawing
-				</label>
-				<label id="colorizer">
-					<input type="checkbox" />
-					disable individual colors
-				</label>
-			</div>
-		</menu>
-		<div id="legend">
+<!--<menu>-->
+<div id="sidebar">
+	<menu>
+		<div id="filter"></div>
+		<div id="controls">
+			<label id="ctrl-reso">
+				Grid resolution<br>
+				<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1.5" />
+				<input id="reso-display" type="text" readonly="readonly" size="2" value="1.5" />
+			</label>
+			<label id="ctrl-zoom">
+				Zoom<br>
+				<input id="zoom-slider" type="range" step="0.1" value="1" />
+				<input id="zoom-display" type="text" readonly size="3" value="1.0" />
+			</label>
 		</div>
-		<div id="stuff">
-			<button id="export" disabled>Export Map SVG</button>
+		<div>
+			<label id="freezer">
+				<input type="checkbox" />
+				prevent redrawing
+			</label>
+			<label id="colorizer">
+				<input type="checkbox" />
+				disable individual colors
+			</label>
 		</div>
-	</div>
-
-	<menu id="timefilter">
-		<div id="chart"></div>
 	</menu>
-	<div id="map">
-		<svg version="1.1" id="mapcanvas" xmlns="http://www.w3.org/2000/svg"></svg>
+	<div id="legend">
 	</div>
-	<div id="bubble"></div>
+	<div id="stuff">
+		<button id="export" disabled>Export Map SVG</button>
+	</div>
+</div>
+
+<menu id="timefilter">
+	<div id="chart"></div>
+</menu>
+<div id="map">
+	<svg version="1.1" id="mapcanvas" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+<div id="bubble"></div>
 
 </body>
 </html>

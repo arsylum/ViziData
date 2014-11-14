@@ -79,23 +79,59 @@ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, 
 /* line 48, ../sass/screen.scss */
 html {
   height: 100%;
+  min-height: 570px;
+  position: relative;
 }
 
-/* line 52, ../sass/screen.scss */
+/* line 54, ../sass/screen.scss */
 body {
   padding: 1%;
   height: 96%;
 }
 
-/* line 57, ../sass/screen.scss */
-h1 {
-  font-size: 2em;
+/* line 59, ../sass/screen.scss */
+#site_title {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+}
+/* line 64, ../sass/screen.scss */
+#site_title h1 {
+  clear: both;
+  font-family: sans-serif;
+  font-size: 1.8em;
   /*margin: .4em;*/
   font-weight: bold;
   height: 4%;
 }
+/* line 72, ../sass/screen.scss */
+#site_title h1 span {
+  font-size: .5em;
+}
+/* line 77, ../sass/screen.scss */
+#site_title #github_link {
+  margin-bottom: .5em;
+  float: right;
+  width: 120px;
+}
+/* line 82, ../sass/screen.scss */
+#site_title #github_link img {
+  float: right;
+}
+/* line 86, ../sass/screen.scss */
+#site_title #github_link img[src*=logo] {
+  transition: .5s;
+  position: absolute;
+  right: 200px;
+  opacity: 0;
+}
+/* line 95, ../sass/screen.scss */
+#site_title #github_link:hover img[src*=logo] {
+  right: 38px;
+  opacity: 1;
+}
 
-/* line 64, ../sass/screen.scss */
+/* line 105, ../sass/screen.scss */
 menu {
   background: #e3e3e3;
   padding: 5px;
@@ -104,7 +140,7 @@ menu {
   -ms-border-radius: 8px;
   border-radius: 8px;
 }
-/* line 68, ../sass/screen.scss */
+/* line 109, ../sass/screen.scss */
 menu div {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -112,7 +148,7 @@ menu div {
   border-radius: 4px;
 }
 
-/* line 74, ../sass/screen.scss */
+/* line 115, ../sass/screen.scss */
 menu#timefilter {
   height: 25%;
   min-height: 140px;
@@ -120,31 +156,31 @@ menu#timefilter {
   /*margin-left: ($left-row-width)-($controls-padding);*/
 }
 
-/* line 81, ../sass/screen.scss */
+/* line 122, ../sass/screen.scss */
 #sidebar {
   height: 94%;
   width: 250px;
   float: left;
 }
 
-/* line 87, ../sass/screen.scss */
+/* line 128, ../sass/screen.scss */
 #sidebar > menu {
   /*height: $filter-height;*/
   min-height: 280px;
 }
-/* line 91, ../sass/screen.scss */
+/* line 132, ../sass/screen.scss */
 #sidebar > menu div {
   /*height: 100-(2*($filter-padding));*/
   background: #f9faff;
   padding: 10px;
   margin-bottom: 5px;
 }
-/* line 97, ../sass/screen.scss */
+/* line 138, ../sass/screen.scss */
 #sidebar > menu div:last-child {
   margin-bottom: 0;
 }
 
-/* line 102, ../sass/screen.scss */
+/* line 143, ../sass/screen.scss */
 #sidebar > div {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -153,14 +189,14 @@ menu#timefilter {
   border: 1px solid #ECECEC;
 }
 
-/* line 107, ../sass/screen.scss */
+/* line 148, ../sass/screen.scss */
 #filter {
   /*height: 100-(2*($filter-padding));d*/
   background: #f9faff;
   padding: 10px;
 }
 
-/* line 113, ../sass/screen.scss */
+/* line 154, ../sass/screen.scss */
 #chart {
   /*height: $timeline-height;*/
   /*min-height: $timeline-min-height;*/
@@ -168,7 +204,7 @@ menu#timefilter {
   margin-left: 245px;
 }
 
-/* line 120, ../sass/screen.scss */
+/* line 161, ../sass/screen.scss */
 #legend, #stuff {
   width: 250px -10px;
   /*height: $legend-height;*/
@@ -177,13 +213,13 @@ menu#timefilter {
   background: #f9faff;
 }
 
-/* line 128, ../sass/screen.scss */
+/* line 169, ../sass/screen.scss */
 #stuff {
   font-size: .8em;
   line-height: 1em;
 }
 
-/* line 134, ../sass/screen.scss */
+/* line 175, ../sass/screen.scss */
 #map {
   height: 70.6%;
   /*($filter-height)+($legend-height)-($timeline-height);*/
@@ -193,7 +229,7 @@ menu#timefilter {
   /*+$map-margin;*/
 }
 
-/* line 142, ../sass/screen.scss */
+/* line 183, ../sass/screen.scss */
 #bubble {
   position: absolute;
   bottom: 1337px;
@@ -215,7 +251,7 @@ menu#timefilter {
   pointer-events: none;
 }
 
-/* line 158, ../sass/screen.scss */
+/* line 199, ../sass/screen.scss */
 #bubble > span,
 #legend > span,
 #stuff > span {
@@ -226,17 +262,17 @@ menu#timefilter {
 
 /************
 *** Forms **/
-/* line 166, ../sass/screen.scss */
+/* line 207, ../sass/screen.scss */
 select, label {
   display: block;
 }
 
-/* line 170, ../sass/screen.scss */
+/* line 211, ../sass/screen.scss */
 #controls > label {
   line-height: 1.5em;
   margin: .5em 0;
 }
-/* line 174, ../sass/screen.scss */
+/* line 215, ../sass/screen.scss */
 #controls > label input {
   display: inline-block;
   padding: 2%;
@@ -245,14 +281,14 @@ select, label {
   vertical-align: middle;
   width: 74%;
 }
-/* line 183, ../sass/screen.scss */
+/* line 224, ../sass/screen.scss */
 #controls > label input:last-child {
   width: 14%;
   margin-left: 2%;
   text-align: center;
 }
 
-/* line 190, ../sass/screen.scss */
+/* line 231, ../sass/screen.scss */
 #controls > label:after {
   border-bottom: 1px solid black;
   width: 100%;
@@ -260,11 +296,12 @@ select, label {
   content: "";
 }
 
-/* line 197, ../sass/screen.scss */
+/* line 238, ../sass/screen.scss */
 button {
   width: 100%;
   border: 1px solid #ACACAC;
   background: #ECECEC;
+  color: #000;
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   -ms-border-radius: 2px;
@@ -280,7 +317,7 @@ button {
   box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
 }
 
-/* line 207, ../sass/screen.scss */
+/* line 249, ../sass/screen.scss */
 button:hover {
   color: #ffffff;
   background: #BBBED1;
@@ -288,7 +325,7 @@ button:hover {
   /*@include box-shadow(0 -3px 3px -3px rgba(100, 0, 0, 0.8), 0 3px 3px -3px rgba(100, 0, 0, 0.8));*/
 }
 
-/* line 214, ../sass/screen.scss */
+/* line 256, ../sass/screen.scss */
 button[disabled] {
   background: #ECECEC;
   cursor: default;
@@ -329,12 +366,12 @@ button[disabled] {
 }*/
 /***********
 *** text **/
-/* line 254, ../sass/screen.scss */
+/* line 296, ../sass/screen.scss */
 #filter {
   line-height: 1.5em;
 }
 
-/* line 259, ../sass/screen.scss */
+/* line 301, ../sass/screen.scss */
 em {
   font-style: italic;
   color: #aa5500;
@@ -342,7 +379,7 @@ em {
 
 /************
 *** fancy **/
-/* line 268, ../sass/screen.scss */
+/* line 310, ../sass/screen.scss */
 menu > div {
   -moz-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
   -webkit-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
@@ -354,39 +391,27 @@ menu > div {
 }*/
 /****************
 *** technical **/
-/* line 279, ../sass/screen.scss */
+/* line 321, ../sass/screen.scss */
 #bubble {
   opacity: 0;
 }
 
 /********************
 *** final imports **/
-/* line 1, ../sass/svg.scss */
-svg {
-  /*#bubble {
-  	rect {
-  		fill: rgba(255,255,255,0.8);
-  	}
-  	text {
-  		stroke: black;
-  		font-size: .4em;
-  	}
-  }*/
-}
-/* line 2, ../sass/svg.scss */
+/* line 3, ../sass/_svg.scss */
 svg circle:hover {
   fill: #aa5500;
   /*stroke: $highlight-color;
   /*stroke-width: 1%;*/
 }
-/* line 8, ../sass/svg.scss */
+/* line 9, ../sass/_svg.scss */
 svg circle {
   -webkit-transition: all 0.3s;
   -moz-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-/* line 12, ../sass/svg.scss */
+/* line 13, ../sass/_svg.scss */
 svg image {
   opacity: 0.5;
 }

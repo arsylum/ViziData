@@ -47,6 +47,8 @@ $outer-border-radius: 8px;
 
 html {
 	height: 100%;
+	min-height: 570px;
+	position: relative;
 }
 
 body {
@@ -54,12 +56,51 @@ body {
 	height: (100)-(4*($body-padding));
 }
 
-h1 {
-	font-size: 2em;
-	/*margin: .4em;*/
-	font-weight: bold;
-	height: $header-height;
+#site_title {
+	position: absolute; 
+	bottom: 5px; 
+	left: 5px;
+
+	h1 {
+		clear: both;
+		font-family: sans-serif;
+		font-size: 1.8em;
+		/*margin: .4em;*/
+		font-weight: bold;
+		height: $header-height;
+
+		span {
+			font-size: .5em;
+		}
+	}
+
+	#github_link {
+		margin-bottom: .5em;
+		float: right;
+		width: 120px;
+
+		img {
+			float: right;
+		}
+
+		img[src*=logo] {
+			transition: .5s;
+			position: absolute;
+			right: 200px;
+			opacity: 0;
+
+		}
+		
+		&:hover {
+			img[src*=logo] {
+				right: 38px;
+				opacity: 1;
+			}
+		};
+	}
 }
+
+
 
 menu {
 	background: $control-bg-color;
@@ -198,6 +239,7 @@ button {
 	width: 100%;
 	border: 1px solid #ACACAC;
 	background: #ECECEC;
+	color: #000;
 	@include border-radius($outer-border-radius/4);
 	@include transition(all 0.5s);
 	font-family: sans-serif;

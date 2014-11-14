@@ -1,11 +1,11 @@
 /*
 Syntax error: Undefined variable: "$highlight-color".
-        on line 3 of /home/glux/wdev/wdvis/sass/svg.scss
+        on line 4 of /var/www/dev/ViziData/sass/svg.scss
 
-1: /home/glux/wdev/wdvis/sass/svg.scss
+1: /var/www/dev/ViziData/sass/svg.scss
 
 Backtrace:
-/home/glux/wdev/wdvis/sass/svg.scss:3
+/var/www/dev/ViziData/sass/svg.scss:4
 /usr/lib/ruby/vendor_ruby/sass/script/variable.rb:49:in `_perform'
 /usr/lib/ruby/vendor_ruby/sass/script/node.rb:40:in `perform'
 /usr/lib/ruby/vendor_ruby/sass/tree/visitors/perform.rb:298:in `visit_prop'
@@ -84,4 +84,4 @@ Backtrace:
 body:before {
   white-space: pre;
   font-family: monospace;
-  content: "Syntax error: Undefined variable: \"$highlight-color\".\A         on line 3 of /home/glux/wdev/wdvis/sass/svg.scss\A \A 1: /home/glux/wdev/wdvis/sass/svg.scss"; }
+  content: "Syntax error: Undefined variable: \"$highlight-color\".\A         on line 4 of /var/www/dev/ViziData/sass/svg.scss\A \A 1: /var/www/dev/ViziData/sass/svg.scss"; }
