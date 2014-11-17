@@ -206,7 +206,7 @@ menu#timefilter {
 
 /* line 161, ../sass/screen.scss */
 #legend, #stuff {
-  width: 250px -10px;
+  width: 240px;
   /*height: $legend-height;*/
   margin: 5px;
   padding: 10px;
@@ -267,36 +267,36 @@ select, label {
   display: block;
 }
 
-/* line 211, ../sass/screen.scss */
+/* line 212, ../sass/screen.scss */
 #controls > label {
   line-height: 1.5em;
   margin: .5em 0;
+  display: inline-block;
+  width: 74%;
 }
-/* line 215, ../sass/screen.scss */
-#controls > label input {
+/* line 219, ../sass/screen.scss */
+#controls input {
   display: inline-block;
   padding: 2%;
   margin: 0;
   border: none;
   vertical-align: middle;
-  width: 74%;
+  width: 100%;
 }
-/* line 224, ../sass/screen.scss */
-#controls > label input:last-child {
+/* line 228, ../sass/screen.scss */
+#controls input[type=text][readonly] {
   width: 14%;
-  margin-left: 2%;
+  margin-left: 6%;
   text-align: center;
 }
 
-/* line 231, ../sass/screen.scss */
-#controls > label:after {
-  border-bottom: 1px solid black;
-  width: 100%;
-  height: 1px;
-  content: "";
-}
-
-/* line 238, ../sass/screen.scss */
+/*#controls>label:after {
+	border-bottom: 1px solid black;
+	width: 100%;
+	height: 1px;
+	content: "";
+}*/
+/* line 244, ../sass/screen.scss */
 button {
   width: 100%;
   border: 1px solid #ACACAC;
@@ -317,7 +317,7 @@ button {
   box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
 }
 
-/* line 249, ../sass/screen.scss */
+/* line 255, ../sass/screen.scss */
 button:hover {
   color: #ffffff;
   background: #BBBED1;
@@ -325,7 +325,7 @@ button:hover {
   /*@include box-shadow(0 -3px 3px -3px rgba(100, 0, 0, 0.8), 0 3px 3px -3px rgba(100, 0, 0, 0.8));*/
 }
 
-/* line 256, ../sass/screen.scss */
+/* line 262, ../sass/screen.scss */
 button[disabled] {
   background: #ECECEC;
   cursor: default;
@@ -366,12 +366,12 @@ button[disabled] {
 }*/
 /***********
 *** text **/
-/* line 296, ../sass/screen.scss */
+/* line 302, ../sass/screen.scss */
 #filter {
   line-height: 1.5em;
 }
 
-/* line 301, ../sass/screen.scss */
+/* line 307, ../sass/screen.scss */
 em {
   font-style: italic;
   color: #aa5500;
@@ -379,7 +379,7 @@ em {
 
 /************
 *** fancy **/
-/* line 310, ../sass/screen.scss */
+/* line 316, ../sass/screen.scss */
 menu > div {
   -moz-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
   -webkit-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
@@ -391,7 +391,7 @@ menu > div {
 }*/
 /****************
 *** technical **/
-/* line 321, ../sass/screen.scss */
+/* line 327, ../sass/screen.scss */
 #bubble {
   opacity: 0;
 }

@@ -159,7 +159,7 @@ menu#timefilter {
 }
 
 #legend {
-	width: ($left-row-width)-2*($controls-padding);
+	width: (($left-row-width)-($controls-padding)*2);
 	/*height: $legend-height;*/
 	margin: $controls-padding;
 	padding: $box-padding;
@@ -208,9 +208,13 @@ select, label{
 	display: block;
 }
 
-#controls>label {
-	line-height: 1.5em;
-	margin: .5em 0;
+#controls {
+	&>label {
+		line-height: 1.5em;
+		margin: .5em 0;
+		display: inline-block;
+		width: 74%;
+	}
 
 	input {
 		display: inline-block;
@@ -218,22 +222,24 @@ select, label{
 		margin: 0;
 		border: none;
 		vertical-align: middle;
-		width: 74%;
+		width: 100%;
 	}
 
-	input:last-child {
+	input[type=text][readonly] {
 		width: 14%;
-		margin-left: 2%;
+		margin-left: 6%;
 		text-align: center;
 	}
+
 }
 
-#controls>label:after {
+
+/*#controls>label:after {
 	border-bottom: 1px solid black;
 	width: 100%;
 	height: 1px;
 	content: "";
-}
+}*/
 
 button {
 	width: 100%;

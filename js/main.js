@@ -627,7 +627,7 @@ function zoom() {
 		
 		lastTransformState = d3.event;
 		
-		$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1));
+		$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
 		forceBounds();
 		genGrid();
@@ -757,7 +757,7 @@ function setupControlHandlers() {
 
 	$("#controls input[type=\"range\"]")
 		.on("input", function() {
-			$(this).next("input[type=\"text\"").val(parseFloat($(this).val()).toFixed(1));
+			$(this).parent().next("input[type=\"text\"").val(parseFloat($(this).val()).toFixed(1));
 		});
 	$("#zoom-slider").on("change", function() {
 		transitTo(getZoomTransform($(this).val()));
