@@ -159,7 +159,7 @@ menu#timefilter {
 }
 
 #legend {
-	width: (($left-row-width)-($controls-padding)*2);
+	width: (($left-row-width)-($controls-padding)*2-($box-padding)*2);
 	/*height: $legend-height;*/
 	margin: $controls-padding;
 	padding: $box-padding;
