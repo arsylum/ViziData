@@ -1,822 +1,705 @@
-/****************************************************
-**************** ViziData main.js *******************
-*													*
-* Application logic									*
-*													*
-* this application is still under development		*
-* hence the code is somewhat messy					*
-*****************************************************
-*													*
-* some TODOS...										*
-*	-design is inflexible for concurrency of		*
-*    multiple datagroups. but theres only 1 group	*
-*    so far anyway... (humans)						*
-*													*
-*	-concurrent dataset functionality				*
-*    manage data in memory							*
-*    multiple layers with opacity slider?			*
-*    manage active datasets somehow					*
-*    keep the timeline selection somehow			*
-*													*
-*	-delete all the datasets null vals on init!?	*
-*													*
-*	-the humans_p file is neither loaded nor used   *
-*	('-> filter and instance browse capabilities)	*
-*													*
-*	-map underlay! maybe leaflet integration		*
-*	&&/|| some kind of orientation indicator		*
-*													*
-*	-map repositioning should be more tolerant		*
-*	-[remove all the benchmarking console logs]		*
-*****************************************************/
-
-//"use strict"; // nazi linter
-
+////////////////////////
+/// data management ///
+//////////////////////
+/**
+* loads data
+* for dataset with given index */
+function setSetSel(a) {
+    //, callback){
+    if (current_datsel.datasets[a].data !== undefined) {
+        current_setsel = current_datsel.datasets[a];
+        genChart();
+        genGrid();
+    } else {
+        // loading feedback
+        var b = 0;
+        var c = setInterval(function() {
+            var a = [ "loading... &nbsp; &nbsp; ┬──┬", "loading... &nbsp; &nbsp; ┬──┬", "loading... (°o°） ┬──┬", "loading... &nbsp;(°o°）┬──┬", "loading... (╯°□°）╯ ┻━┻", "loading... (╯°□°）╯︵ ┻━┻", "loading... (╯°□°）╯︵ ︵ ┻━┻", "loading... (╯°□°）╯︵ ︵ ︵ ┻━┻", "loading... ︵ ︵ ︵ ┻━┻", "loading... ︵ ︵ ┻━┻", "loading... ︵ ┻━┻", "loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp; (ツ)", "loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp;(ツ)", "loading... &nbsp; &nbsp; ┻━┻ &nbsp; (ツ)", "loading... &nbsp; &nbsp; ┻━┻ &nbsp;(ツ)", "loading... &nbsp; &nbsp; ┬──┬ ¯\\_(ツ)", "loading... &nbsp; &nbsp; ┬──┬ (ツ)" ];
+            $("#legend").html(a[b]);
+            b = (b + 1) % 17;
+        }, 180);
+        var d = new Date();
+        console.log("~~ starting to load dataset " + current_datsel.datasets[a].strings.label + " ~~ ");
+        $.getJSON(DATA_DIR + gdata[0].datasets[a].file, function(b) {
+            console.log(" |BM| finished loading " + current_datsel.datasets[a].strings.label + " data (took " + (new Date() - d) + "ms)");
+            clearInterval(c);
+            current_datsel.datasets[a].data = b;
+            current_setsel = current_datsel.datasets[a];
+            genChart();
+            genGrid();
+        });
+    }
+}
 
 ////////////////////
 /// global scope ///
 ////////////////////
-
 ////////////////////
 /// pseudo constants
 //^^^^^^^^^^^^^^^^^^
 // coord parameters
-var C_WMIN = -180,
-	C_WMAX = 180,
-	C_HMIN = -90,
-	C_HMAX = 90,
-
-	C_W = C_WMAX-C_WMIN,
-	C_H = C_HMAX-C_HMIN;
+var C_WMIN = -180, C_WMAX = 180, C_HMIN = -90, C_HMAX = 90, C_W = C_WMAX - C_WMIN, C_H = C_HMAX - C_HMIN;
 
 // map parameters
-var M_BOUNDING_THRESHOLD = 10,	// grid clipping tolerance
-	M_ZOOM_RANGE = [1,8],		// zoom range (results in svg scale 2^(v-1))
-	M_BUBBLE_OFFSET = 5;		// distance of map tooltip from pointer
+var M_BOUNDING_THRESHOLD = 10, // grid clipping tolerance
+M_ZOOM_RANGE = [ 1, 8 ], // zoom range (results in svg scale 2^(v-1))
+M_BUBBLE_OFFSET = 5;
 
+// distance of map tooltip from pointer
 // DATA
-var DATA_DIR = "./data/",
-	META_FILES = [
-		"humans.json" 
-	];
-var DEFAULT_DATASET = 0;	// dataset to load up initially
+var DATA_DIR = "./data/", META_FILES = [ "humans.json" ];
 
-var	ARR_UNDEFINED = null,	// undefined value
-	ARR_M_LON = 0,			// longitude
-	ARR_M_LAT = 1,			// latitude
-	ARR_M_I = 2;			// ref to prop
+var DEFAULT_DATASET = 0;
+
+// dataset to load up initially
+var ARR_UNDEFINED = null, // undefined value
+ARR_M_LON = 0, // longitude
+ARR_M_LAT = 1, // latitude
+ARR_M_I = 2;
+
+// ref to prop
 ///_________________
 /// pseudo constants
 ////////////////////
-
 ///////////////
 /// global vars
 //^^^^^^^^^^^^^
-var chart,		// Timeline / dataLine
-	plotlayer,  // plot drawing layer (<g>)
-	bubble,		// popup bubble on map
-	zoombh;		// zoomBehavior
+var chart, // Timeline / dataLine
+plotlayer, // plot drawing layer (<g>)
+bubble, // popup bubble on map
+zoombh;
 
-var allow_redraw = true,
-	colorize = true,
-	redrawTimer, // genGrid
-	bubbleTimer, // hide map tooltip bubble
-	boundsTimer; // forceBounds
+// zoomBehavior
+var allow_redraw = true, colorize = true, redrawTimer, // genGrid
+bubbleTimer, // hide map tooltip bubble
+boundsTimer;
 
-var gdata = [],		// global rawdata
-	current_datsel,	// slected data group
-	current_setsel;	// selected dataset
-	
-var viewportH,
-	viewportW;
+// forceBounds
+var gdata = [], // global rawdata
+current_datsel, // slected data group
+current_setsel;
 
-var lastTransformState; // remember map scaling (only redraw on changes)
-//_____________
-/// global vars
-///////////////
+// selected dataset
+var viewportH, viewportW;
 
+var lastTransformState;
 
 ///////////////////
 /// entry point ///
 ///////////////////
-$(function(){
-	// init stuff
-	viewportW = $(window).width();
-	viewportH = $(window).height();
-
-	lastTransformState = {scale: 1, translate: [0,0]};
-
-	Highcharts.setOptions({
-		global: {
-			useUTC: false
-		}
-	});
-
-	$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);
-	$("#freezer>input").on("change", function() {
-		allow_redraw = !this.checked;
-		if(this.checked) { 
-			$("#legend").css("opacity",".5"); 
-		} else { 
-			$("#legend").css("opacity","1"); 
-			genGrid();
-		}
-		
-	});
-	$("#colorizer>input").on("change", function() {
-		colorize = !this.checked;
-		genGrid();
-	});
-
-	// setup svg
-	zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
-	d3.select("#mapcanvas").append("g").attr("id","maplayer");//experimental
-	plotlayer = d3.select("#mapcanvas")
-		.attr("viewBox", "-1 -1 "+(C_W+1)+" "+(C_H+1))
-			.call(zoombh)
-			.append("g")
-				.attr("id","heatlayer");
-
-
-	// Load default dataset once ready
-	$(document).on("meta_files_ready", function() {
-		current_datsel = gdata[0]; // TODO get from dom
-		$("#filter input")[DEFAULT_DATASET].click(); // select&load initial dataset
-	});
-
-	/// TODO
-	// load all the meta data meta files
-	var bmMETA = new Date();
-	console.log("~~ started loading the meta files (total of "+META_FILES.length+") ~~ ");
-	var mfc = 0; // meta file counter
-	for(var i = 0; i<META_FILES.length; i++) {
-		$.getJSON(DATA_DIR+META_FILES[i], function(data){
-			gdata[mfc] = data; // TODO
-			for(var j = 0; j<gdata[mfc].datasets.length; j++) {
-				gdata[mfc].datasets[j].parent = gdata[mfc];
-			}
-			mfc++;
-			if(mfc===META_FILES.length) {
-				console.log(" |BM| got all the meta files (took "+(new Date() -bmMETA)+"ms)");
-				setupControlHandlers();
-				$(document).trigger("meta_files_ready");
-			}
-		});
-	}
+$(function() {
+    // init stuff
+    viewportW = $(window).width();
+    viewportH = $(window).height();
+    lastTransformState = {
+        scale: 1,
+        translate: [ 0, 0 ]
+    };
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        }
+    });
+    $("#zoom-slider").attr("min", M_ZOOM_RANGE[0]).attr("max", M_ZOOM_RANGE[1]);
+    $("#freezer>input").on("change", function() {
+        allow_redraw = !this.checked;
+        if (this.checked) {
+            $("#legend").css("opacity", ".5");
+        } else {
+            $("#legend").css("opacity", "1");
+            genGrid();
+        }
+    });
+    $("#colorizer>input").on("change", function() {
+        colorize = !this.checked;
+        genGrid();
+    });
+    // setup svg
+    zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
+    d3.select("#mapcanvas").append("g").attr("id", "maplayer");
+    //experimental
+    plotlayer = d3.select("#mapcanvas").attr("viewBox", "-1 -1 " + (C_W + 1) + " " + (C_H + 1)).call(zoombh).append("g").attr("id", "heatlayer");
+    // Load default dataset once ready
+    $(document).on("meta_files_ready", function() {
+        current_datsel = gdata[0];
+        // TODO get from dom
+        $("#filter input")[DEFAULT_DATASET].click();
+    });
+    /// TODO
+    // load all the meta data meta files
+    var a = new Date();
+    console.log("~~ started loading the meta files (total of " + META_FILES.length + ") ~~ ");
+    var b = 0;
+    // meta file counter
+    for (var c = 0; c < META_FILES.length; c++) {
+        $.getJSON(DATA_DIR + META_FILES[c], function(c) {
+            gdata[b] = c;
+            // TODO
+            for (var d = 0; d < gdata[b].datasets.length; d++) {
+                gdata[b].datasets[d].parent = gdata[b];
+            }
+            b++;
+            if (b === META_FILES.length) {
+                console.log(" |BM| got all the meta files (took " + (new Date() - a) + "ms)");
+                setupControlHandlers();
+                $(document).trigger("meta_files_ready");
+            }
+        });
+    }
 });
 
-
-
-//////////////////////
-/// data processor ///
-//////////////////////
-function genChart(data){
-	if(data === undefined) { data = current_setsel; } // TODO
-
-	console.log("/~~ generating chart data ~~\\ ");
-
-	var benchmark_chart = new Date();
-
-	var dat_arr = [],
-		i,j,d,sum;
-
-	for(i=data.min; i<=data.max; i++) {
-		d = data.data[i];
-		if(d !== undefined) {
-			sum = 0;
-			for(j=0; j<d.length; j++) {
-				if(d[j] !== ARR_UNDEFINED) {
-					sum += d[j].length;
-				}
-			}
-			dat_arr.push([new Date(0,0).setFullYear(i),sum]);
-		}
-	}
-
-	console.log("  |BM| iterating and sorting finished (took "+(new Date()-benchmark_chart)+"ms)");
-
-	updateChart([{
-		data: dat_arr,
-		name: data.strings.label
-	}]);
-	console.log("  |BM| chart creation complete (total of "+(new Date()-benchmark_chart)+"ms");
-	console.log("\\~~ finished generating chart ~~/ ");
-}
-
-
+/////////////////////////
+/// general map logic ///
+/////////////////////////
 /**
 * timeout wrapper*/
-function genGrid(reso, mAE, data) {
-	clearTimeout(redrawTimer);
-	redrawTimer = setTimeout(function() {
-		generateGrid(reso, mAE, data);
-	}, 300);
+function genGrid(a, b, c) {
+    clearTimeout(redrawTimer);
+    redrawTimer = setTimeout(function() {
+        generateGrid(a, b, c);
+    }, 300);
 }
+
 /**
 * Generate data grid for the map
 * parameters optional */
-function generateGrid(reso, mAE, data) {
-
-	if(!allow_redraw) { return false; }
-	if(data === undefined) { data = current_setsel; } // todo dynamic from filter?
-	if( mAE === undefined) {  mAE = getBounds(); }
-	if(reso === undefined) { reso = calcReso(); }
-
-	$("#legend").html("<em>massive calculations...</em>");
-	setTimeout(function() { //timeout for dom redraw
-		console.log("/~~ generating new grid with resolution "+reso+" ~~\\");
-		var bms = new Date();
-		console.log("  ~ start iterating data");
-
-		var tile_mapping = {};
-		var count = 0;
-
-		/// calculate everything we can outside the loop for performance
-		// get axisExtremes
-		var cAE = chart.xAxis[0].getExtremes();
-		cAE.min = new Date(cAE.min).getFullYear();
-		cAE.max = new Date(cAE.max).getFullYear();
-
-		// boundary enforcement
-		if(mAE[0].min < C_WMIN) { mAE[0].min = C_WMIN; }
-		if(mAE[0].max > C_WMAX) { mAE[0].max = C_WMAX; }
-		if(mAE[1].min < C_HMIN) { mAE[1].min = C_HMIN; }
-		if(mAE[1].max > C_HMAX) { mAE[1].max = C_HMAX; }
-
-		var tMin = 0;
-		while(mAE[0].min > (C_WMIN+(tMin+1)*data.parent.tile_width)) {
-			tMin++;
-		}
-		var tMax = tMin;
-		while(mAE[0].max > (C_WMIN+(tMax+1)*data.parent.tile_width)) {
-			tMax++;
-		}
-		console.log("  # will iterate over tiles "+tMin+" to "+tMax);
-
-		for(var i = cAE.min; i<=cAE.max; i++) {
-			if(data.data[i] !== undefined) {
-				for(var j = tMin; j<=tMax; j++) {
-					if((data.data[i][j] !== ARR_UNDEFINED) && (data.data[i][j] !== undefined)) {
-						for(var k = 0; k<data.data[i][j].length; k++) {
-							if(section_filter(data.data[i][j][k],mAE)) {
-								tile_mapping = testing_aggregator(tile_mapping,data.data[i][j][k], reso);
-								// TODO remove function call for performance?
-								count++;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
-		drawPlot(tile_mapping, reso);
-		console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
-
-		$("#legend").html("<em>in this area</em><br>"+
-			//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
-			"we have registered a total of<br>"+
-			"<em>"+count+" "+data.parent.label+"</em><br>"+
-			"that <em>"+data.strings.term+"</em><br>"+
-			"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
-		$("#export").removeAttr("disabled");
-
-		console.log("\\~~ grid generation complete~~/ ");
-	},1);
+function generateGrid(a, b, c) {
+    if (!allow_redraw) {
+        return false;
+    }
+    if (c === undefined) {
+        c = current_setsel;
+    }
+    // todo dynamic from filter?
+    if (b === undefined) {
+        b = getBounds();
+    }
+    if (a === undefined) {
+        a = calcReso();
+    }
+    $("#legend").html("<em>massive calculations...</em>");
+    setTimeout(function() {
+        //timeout for dom redraw
+        console.log("/~~ generating new grid with resolution " + a + " ~~\\");
+        var d = new Date();
+        console.log("  ~ start iterating data");
+        var e = {};
+        var f = 0;
+        /// calculate everything we can outside the loop for performance
+        // get axisExtremes
+        var g = chart.xAxis[0].getExtremes();
+        g.min = new Date(g.min).getFullYear();
+        g.max = new Date(g.max).getFullYear();
+        // boundary enforcement
+        if (b[0].min < C_WMIN) {
+            b[0].min = C_WMIN;
+        }
+        if (b[0].max > C_WMAX) {
+            b[0].max = C_WMAX;
+        }
+        if (b[1].min < C_HMIN) {
+            b[1].min = C_HMIN;
+        }
+        if (b[1].max > C_HMAX) {
+            b[1].max = C_HMAX;
+        }
+        var h = 0;
+        while (b[0].min > C_WMIN + (h + 1) * c.parent.tile_width) {
+            h++;
+        }
+        var i = h;
+        while (b[0].max > C_WMIN + (i + 1) * c.parent.tile_width) {
+            i++;
+        }
+        console.log("  # will iterate over tiles " + h + " to " + i);
+        for (var j = g.min; j <= g.max; j++) {
+            if (c.data[j] !== undefined) {
+                for (var k = h; k <= i; k++) {
+                    if (c.data[j][k] !== ARR_UNDEFINED && c.data[j][k] !== undefined) {
+                        for (var l = 0; l < c.data[j][k].length; l++) {
+                            if (section_filter(c.data[j][k][l], b)) {
+                                e = testing_aggregator(e, c.data[j][k][l], a);
+                                // TODO remove function call for performance?
+                                f++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        console.log("  |BM| iteration complete (" + (new Date() - d) + "ms)");
+        drawPlot(e, a);
+        console.log("  |BM| finished genGrid (total of " + (new Date() - d) + "ms)");
+        $("#legend").html("<em>in this area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
+        "we have registered a total of<br>" + "<em>" + f + " " + c.parent.label + "</em><br>" + "that <em>" + c.strings.term + "</em><br>" + "between <em>" + g.min + "</em> and <em>" + g.max + "</em>");
+        $("#export").removeAttr("disabled");
+        console.log("\\~~ grid generation complete~~/ ");
+    }, 1);
 }
-
-
 
 ///////////////
 /// filters ///
 ///////////////
-
 // true if object geo lies within currently visible section
-function section_filter(obj,aE){
-		return (
-			(obj[ARR_M_LON] >= (aE[0].min)) && 
-			(obj[ARR_M_LON] <= (aE[0].max))
-		) && (
-			(obj[ARR_M_LAT] >= (aE[1].min)) &&
-			(obj[ARR_M_LAT] <= (aE[1].max))		
-		);
+function section_filter(a, b) {
+    return a[ARR_M_LON] >= b[0].min && a[ARR_M_LON] <= b[0].max && (a[ARR_M_LAT] >= b[1].min && a[ARR_M_LAT] <= b[1].max);
 }
-
 
 //////////////////
 /// aggregators //
 //////////////////
-function testing_aggregator(tmap,obj,reso) {
-	var ti = coord2index(obj[ARR_M_LON],obj[ARR_M_LAT],reso);
-	if(tmap[ti] === undefined) {
-		tmap[ti] = 1;
-	} else {
-		tmap[ti]++;
-	}
-	return tmap;
+function testing_aggregator(a, b, c) {
+    var d = coord2index(b[ARR_M_LON], b[ARR_M_LAT], c);
+    if (a[d] === undefined) {
+        a[d] = 1;
+    } else {
+        a[d]++;
+    }
+    return a;
 }
-
-
-///////////////////////////
-/// utilities & helpers ///
-///////////////////////////
 
 /**
-* loads data
-* for dataset with given index */
-function setSetSel(dsi) { //, callback){
-	if(current_datsel.datasets[dsi].data !== undefined) {
-		current_setsel = current_datsel.datasets[dsi];
-		genChart();
-		genGrid();
-	} else {
-		// loading feedback
-		var l = 0;
-		var lAnim = setInterval(function(){
-		var txt = [
-			"loading... &nbsp; &nbsp; ┬──┬﻿",
-			"loading... &nbsp; &nbsp; ┬──┬﻿",
-			"loading... (°o°） ┬──┬﻿",
-			"loading... &nbsp;(°o°）┬──┬﻿",
-			"loading... (╯°□°）╯ ┻━┻",
-			"loading... (╯°□°）╯︵ ┻━┻",
-			"loading... (╯°□°）╯︵ ︵ ┻━┻",
-			"loading... (╯°□°）╯︵ ︵ ︵ ┻━┻",
-			"loading... ︵ ︵ ︵ ┻━┻",
-			"loading... ︵ ︵ ┻━┻",
-			"loading... ︵ ┻━┻",
-			"loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp; (ツ)",
-			"loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp;(ツ)",
-			"loading... &nbsp; &nbsp; ┻━┻ &nbsp; (ツ)",
-			"loading... &nbsp; &nbsp; ┻━┻ &nbsp;(ツ)",
-			"loading... &nbsp; &nbsp; ┬──┬﻿ ¯\\_(ツ)",
-			"loading... &nbsp; &nbsp; ┬──┬﻿ (ツ)",
-			];
-		$("#legend").html(txt[l]);
-		l = (l+1)%17;
-		},180);
-
-		var lBM = new Date();
-		console.log("~~ starting to load dataset "+current_datsel.datasets[dsi].strings.label+" ~~ ");
-		$.getJSON(DATA_DIR+gdata[0].datasets[dsi].file, function(data){
-			console.log(" |BM| finished loading "+current_datsel.datasets[dsi].strings.label+" data (took "+(new Date()-lBM)+"ms)");
-			clearInterval(lAnim);
-			
-			current_datsel.datasets[dsi].data = data;
-
-			current_setsel = current_datsel.datasets[dsi];
-			genChart();
-			genGrid();
-
-		});
-	}
-}
-
-
-/**
-* updates/builds the chart
-* (addSeries is bugged so build the chart from the ground)*/
-function updateChart(seriez) {
-	if(chart !== undefined) { chart.destroy(); }
-
-	chart = new Highcharts.StockChart({
-		chart: {
-			type: 'spline',
-			renderTo: 'chart'
-		},
-		title: {
-			text: null
-		},
-		credits: {
-			enabled: false
-		},
-		rangeSelector: {
-			enabled: true,
-			buttons: [{
-				type: "year",
-				count: 10,
-				text: "10y"
-			},{
-				type: "year",
-				count: 100,
-				text: "100y"
-			},{
-				type: "year",
-				count: 1000,
-				text: "1000y"
-			},{
-				type: "all",
-				text: "all"
-			}],
-			buttonTheme: {
-				width: 80
-			}
-		},
-		legend: {
-			enabled: false
-		},
-		yAxis: {
-			floor: 0,
-			type: "logarithmic"
-		},
-		xAxis: {
-			type: "linear",
-			events: {
-				setExtremes: function() {
-					clearTimeout(redrawTimer);
-					redrawTimer = setTimeout(genGrid, 200); // (!)genGrid adds another timeout
-				}
-			}
-		},
-		navigator: {
-			margin: 5,
-			enabled: true,
-			xAxis: {
-				type: "linear"
-			}
-		},
-		plotOptions: {
-			series: {
-				dataGrouping: {
-					enabled: true
-				}
-			}
-		},//*/
-		tooltip: {
-			xDateFormat: "%Y"
-		},
-		series: seriez
-	});
-
-}
-
-function drawPlot(tm,reso) {
-	plotlayer.selectAll("circle").remove();
-
-	var uMBM = new Date();
-	var dataset = [];
-	var min = Infinity,
-		max = -Infinity;
-
-	$.each(tm, function(k,v) {
-		var c = index2canvasCoord(k, reso);
-
-		dataset.push([[c[0],c[1]],v]);
-		
-		// get extreme values
-		if(v<min) { min = v; }
-		if(v>max) { max = v; }
-	});
-	console.log("  ~ drawing "+dataset.length+" shapes");
-	console.log("  # data extreme values - min: "+min+", max: "+max);
-	console.log("  |BM| (dataset generation in "+(new Date()-uMBM)+"ms)");
-
-	// color defs
-	if(colorize) {
-		var rmax = current_setsel.colorScale.min[0],
-			rlog_factor = (rmax-current_setsel.colorScale.max[0])/Math.log(max),
-			gmax = current_setsel.colorScale.min[1],
-			glog_factor = (gmax-current_setsel.colorScale.max[1])/Math.log(max),
-			bmax = current_setsel.colorScale.min[2],
-			blog_factor = (bmax-current_setsel.colorScale.max[2])/Math.log(max);
-	} else {
-		var bmax = 255, //215,
-		blog_factor = bmax/max;//Math.log(max),
-		gmax = 235, //205,
-		glog_factor = gmax/Math.log(max),
-		rmax = 185,//14,
-		rlog_factor = rmax/Math.log(max);
-	}
-
-	
-	var plotBM = new Date();
-
-	/*var circles = plotlayer.selectAll("circle")
+* draw the map layer
+*/
+function drawPlot(a, b) {
+    plotlayer.selectAll("circle").remove();
+    var c = new Date();
+    var d = [];
+    var e = Infinity, f = -Infinity;
+    $.each(a, function(a, c) {
+        var g = index2canvasCoord(a, b);
+        d.push([ [ g[0], g[1] ], c ]);
+        // get extreme values
+        if (c < e) {
+            e = c;
+        }
+        if (c > f) {
+            f = c;
+        }
+    });
+    console.log("  ~ drawing " + d.length + " shapes");
+    console.log("  # data extreme values - min: " + e + ", max: " + f);
+    console.log("  |BM| (dataset generation in " + (new Date() - c) + "ms)");
+    // color defs
+    if (colorize) {
+        var g = current_setsel.colorScale.min[0], h = (g - current_setsel.colorScale.max[0]) / Math.log(f), i = current_setsel.colorScale.min[1], j = (i - current_setsel.colorScale.max[1]) / Math.log(f), k = current_setsel.colorScale.min[2], l = (k - current_setsel.colorScale.max[2]) / Math.log(f);
+    } else {
+        var k = 255, //215,
+        l = k / f;
+        //Math.log(max),
+        i = 235, //205,
+        j = i / Math.log(f), g = 185, //14,
+        h = g / Math.log(f);
+    }
+    var m = new Date();
+    /*var circles = plotlayer.selectAll("circle")
 			.data(dataset);
 	circles.exit().remove();
 	circles.enter().append("circle");*/
-
-	plotlayer.selectAll("circle")
-		.data(dataset)
-		.enter()
-		.append("circle")
-	//circles
-		.attr("cx", function(d) { return d[0][0]; })
-		.attr("cy", function(d) { return d[0][1]; })
-		.attr("r", function(d) { return reso/2; })//(((d[1]/max)*1.2)*(reso/2)+(reso/4)); })*/
-		.attr("fill", function(d) { 
-			//if(d[1]/max > 0.1) console.log("jo hey it's "+d[1]/max);
-			var r = Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor));
-			var g = Math.floor(gmax -Math.floor(Math.log(d[1])*glog_factor));
-			var b = Math.floor(bmax -Math.floor(d[1]*blog_factor));
-			return "rgb("+r+","+g+","+b+")"; //rgba(0,"+g+","+b+",1)";
-		})
-		//.attr("data-value", function(d) { return d[1]; })
-		.on("mouseover", function(d) { mouseOver(d); })
-		.on("mouseout", function() { mouseOut(); });
-
-	console.log("  |BM| (svg manipulation took "+(new Date()-plotBM)+"ms)");
-	console.log("  |BM| plot drawn in "+(new Date()-uMBM)+"ms");
+    plotlayer.selectAll("circle").data(d).enter().append("circle").attr("cx", function(a) {
+        return a[0][0];
+    }).attr("cy", function(a) {
+        return a[0][1];
+    }).attr("r", function(a) {
+        return b / 2;
+    }).attr("fill", function(a) {
+        //if(d[1]/max > 0.1) console.log("jo hey it's "+d[1]/max);
+        var b = Math.floor(g - Math.floor(Math.log(a[1]) * h));
+        var c = Math.floor(i - Math.floor(Math.log(a[1]) * j));
+        var d = Math.floor(k - Math.floor(a[1] * l));
+        return "rgb(" + b + "," + c + "," + d + ")";
+    }).on("mouseover", function(a) {
+        mouseOver(a);
+    }).on("mouseout", function() {
+        mouseOut();
+    });
+    console.log("  |BM| (svg manipulation took " + (new Date() - m) + "ms)");
+    console.log("  |BM| plot drawn in " + (new Date() - c) + "ms");
 }
 
-
-function mouseOver(d) {
-	clearTimeout(bubbleTimer);
-	$("div#bubble").css("opacity","1")
-		.css("bottom",((viewportH-d3.event.pageY)+M_BUBBLE_OFFSET)+"px")
-		.css("right",((viewportW-d3.event.pageX)+M_BUBBLE_OFFSET)+"px")
-		.html(d[1]+" <em>"+current_setsel.strings.label+"</em><br>"+
-			"<span>["+(d[0][0]-180).toFixed(2)+", "+(d[0][1]*(-1)+90).toFixed(2)+"]</span>");
+////////////////////
+/// mouse events ///
+////////////////////
+function mouseOver(a) {
+    clearTimeout(bubbleTimer);
+    $("div#bubble").css("opacity", "1").css("bottom", viewportH - d3.event.pageY + M_BUBBLE_OFFSET + "px").css("right", viewportW - d3.event.pageX + M_BUBBLE_OFFSET + "px").html(a[1] + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + (a[0][0] - 180).toFixed(2) + ", " + (a[0][1] * -1 + 90).toFixed(2) + "]</span>");
 }
 
 function mouseOut() {
-	clearTimeout(bubbleTimer);
-	bubbleTimer = setTimeout(function() {
-		$("div#bubble").css("opacity", "0");
-	},250);
+    clearTimeout(bubbleTimer);
+    bubbleTimer = setTimeout(function() {
+        $("div#bubble").css("opacity", "0");
+    }, 250);
 }
 
-
+/////////////////////
+/// map utilities ///
+/////////////////////
 /**
 * returns grid resolution*/
-function calcReso(t) {
-	if(t === undefined) { t = getTransform(); }
-	var rf = parseFloat($("#reso-slider").val());
-	return (1/t.scale)*rf;
+function calcReso(a) {
+    if (a === undefined) {
+        a = getTransform();
+    }
+    var b = parseFloat($("#reso-slider").val());
+    return 1 / a.scale * b;
 }
 
-function getBounds(t) {
-	if(t === undefined) { t = getTransform(); }
-
-	var xmin = (-t.translate[0])/t.scale+C_WMIN,
-		ymin = (-t.translate[1])/t.scale+C_HMIN,
-		bth = M_BOUNDING_THRESHOLD/(t.scale/2);
-
-	var bounds = [{
-		min: xmin - bth,
-		max: xmin+(C_WMAX-C_WMIN)/t.scale + bth
-	},{
-		min: -(ymin+(C_HMAX-C_HMIN)/t.scale) - bth,
-		max: -ymin + bth
-	}];
-
-	return bounds;
+function getBounds(a) {
+    if (a === undefined) {
+        a = getTransform();
+    }
+    var b = -a.translate[0] / a.scale + C_WMIN, c = -a.translate[1] / a.scale + C_HMIN, d = M_BOUNDING_THRESHOLD / (a.scale / 2);
+    var e = [ {
+        min: b - d,
+        max: b + (C_WMAX - C_WMIN) / a.scale + d
+    }, {
+        min: -(c + (C_HMAX - C_HMIN) / a.scale) - d,
+        max: -c + d
+    } ];
+    return e;
 }
 
 /**
 * returns the index value for the cell of a grid with given resolution
 * where the given coordinate pair lies in*/
-function coord2index(longi, lati, reso) {
-	if(longi === C_WMAX) longi -= reso;	// prevent 
-	if(lati  === C_HMAX) lati  -= reso; // out of bounds tiles
-
-	return (Math.floor(lati/reso)*((C_WMAX-C_WMIN)/reso) + Math.floor(longi/reso));
+function coord2index(a, b, c) {
+    if (a === C_WMAX) a -= c;
+    // prevent 
+    if (b === C_HMAX) b -= c;
+    // out of bounds tiles
+    return Math.floor(b / c) * ((C_WMAX - C_WMIN) / c) + Math.floor(a / c);
 }
 
-function index2canvasCoord(i, reso) {
-	var cpr = (C_WMAX-C_WMIN)/reso;
-
-	var rowpos = (i-cpr/2)%cpr;
-	if(rowpos<0) rowpos += cpr;
-	rowpos -= cpr/2;
-
-	var lbx = (rowpos*reso)+(-C_WMIN)+reso/2,
-		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)*(-1))+(-C_HMIN)+reso/2;
-	
-	return [lbx,lby];
-
-	/* // Hammer Projection testing
-	var lbx = (rowpos*reso),
-		lby = (Math.floor((+i+cpr/2)/cpr)*reso);
-
-	var pro = d3.geo.hammer()
-    .scale(80)
-    .translate([0, 0])
-    .precision(.1);
-    var ret = pro([lbx,lby]);
-    ret[0] += -C_WMIN;
-    ret[1] += -C_HMIN;
-
-	return ret; //[lbx,lby];*/
+function index2canvasCoord(a, b) {
+    var c = (C_WMAX - C_WMIN) / b;
+    var d = (a - c / 2) % c;
+    if (d < 0) d += c;
+    d -= c / 2;
+    var e = d * b + -C_WMIN + b / 2, f = Math.floor((+a + c / 2) / c) * b * -1 + -C_HMIN + b / 2;
+    return [ e, f ];
 }
 
 /**
 * returns the coordinate values for the center of the cell
 * with given index in the grid of given resolution*/
-function index2coord(i, reso) {
-	var cpr = 360/reso;
+function index2coord(a, b) {
+    var c = 360 / b;
+    var d = (a - c / 2) % c;
+    if (d < 0) d += c;
+    d -= c / 2;
+    var e = d * b + b / 2, f = Math.floor((+a + c / 2) / c) * b + b / 2;
+    return [ e, f ];
+}
 
-	var rowpos = (i-cpr/2)%cpr;
-	if(rowpos<0) rowpos += cpr;
-	rowpos -= cpr/2;
-
-	var lbx = rowpos*reso+reso/2,
-		lby = Math.floor((+i+cpr/2)/cpr)*reso+reso/2;
-
-	return [lbx,lby];
-}//*/
-
-
+//*/
 /**
 * zoom the svg */
 function zoom() {
-	if( d3.event.translate[0] !== lastTransformState.translate[0] ||
-		d3.event.translate[1] !== lastTransformState.translate[1] ||
-		d3.event.scale !== lastTransformState.scale) {
-		plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-		
-		lastTransformState = d3.event;
-		
-		$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
-
-		forceBounds();
-		genGrid();
-	}
+    if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
+        plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        lastTransformState = d3.event;
+        $("#ctrl-zoom>input").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
+        forceBounds();
+        genGrid();
+    }
 }
 
 function forceBounds() {
-	clearTimeout(boundsTimer);
-	boundsTimer = setTimeout(function() {
-		forceBoundsFkt();
-	},300);
+    clearTimeout(boundsTimer);
+    boundsTimer = setTimeout(function() {
+        forceBoundsFkt();
+    }, 300);
 }
 
 function forceBoundsFkt() {
-	var b;
-	if(b=giveBounds()) {
-		transitTo(b);
-	}
+    var a;
+    if (a = giveBounds()) {
+        transitTo(a);
+    }
 }
 
 /**
 * returns false if t is in map bounds
 * proper bounds otherwise 
 *(very anti-elegant function...)*/
-function giveBounds(t) {
-	if(t === undefined) { t = getTransform(); }
-	var b = {translate: []};
-	var flag = false;
-
-	if(t.translate[0] > 0) { b.translate[0] = 0; flag=true;}
-	if(t.translate[1] > 0) { b.translate[1] = 0; flag=true;} 
-	if(t.translate[0] < (t.scale-1)*C_W*(-1)) { b.translate[0] = (t.scale-1)*C_W*(-1); flag=true; }
-	if(t.translate[1] < (t.scale-1)*C_H*(-1)) { b.translate[1] = (t.scale-1)*C_H*(-1); flag=true; }
-
-	if(flag) {
-		if(b.translate[0] === undefined) { b.translate[0] = t.translate[0]; }
-		if(b.translate[1] === undefined) { b.translate[1] = t.translate[1]; }
-		b.scale = t.scale;
-		return b;
-	} else {
-		return false;
-	}
-}
-
-function transitTo(t) {
-	if(t === undefined) { console.error("transitTo: invalid fkt call, t undefined"); return 0; }
-
-	zoombh.scale(t.scale);
-	zoombh.translate(t.translate);
-
-	d3.select("#heatlayer")
-		.transition()
-		.duration(600)
-		.ease("cubic-in-out")
-		.attr("transform", "translate("+t.translate+")scale("+t.scale+")");
-	genGrid(calcReso(t), getBounds(t));
-
-}
-
-function getZoomTransform(zoom) {
-	//if(zoom === undefined) { return 0; }
-	var t = getTransform();
-
-	zoom = Math.pow(2,zoom-1); 
-	var dz = zoom/t.scale;
-
-	var centerfak  = (dz < 1) ? -(1-dz) : dz-1;
-
-	t.translate[0] = (parseFloat(t.translate[0])*dz)-C_W/2*centerfak;
-	t.translate[1] = (parseFloat(t.translate[1])*dz)-C_H/2*centerfak;
-
-	t.scale = zoom;
-
-	var h = giveBounds(t);
-	if(h) { t = h; }
-
-	return t;
-}
-
-
-function getTransform(el) {
-	if(el === undefined) { el = plotlayer; }
-	var t;
-	if(el.attr("transform") === null) {
-		t = {scale: 1, translate: [0,0]};
-	} else {
-		t = parseTransform(el.attr("transform"));
-	}
-	return t;
-}
-
-function parseTransform (s) {
-    var r = {};
-    for (var i in (s = s.match(/(\w+\((\-?\d+\.?\d*,?)+\))/g))) {
-        var m = s[i].match(/[\w\.\-]+/g);
-        r[m.shift()] = m;
+function giveBounds(a) {
+    if (a === undefined) {
+        a = getTransform();
     }
-    if(r.scale === undefined) { r.scale = 1; }
-    if(r.scale.length !== undefined) { r.scale = r.scale[0]; }
-    if(r.translate === undefined) { r.translate = [0,0]; }
-
-    return r;
+    var b = {
+        translate: []
+    };
+    var c = false;
+    if (a.translate[0] > 0) {
+        b.translate[0] = 0;
+        c = true;
+    }
+    if (a.translate[1] > 0) {
+        b.translate[1] = 0;
+        c = true;
+    }
+    if (a.translate[0] < (a.scale - 1) * C_W * -1) {
+        b.translate[0] = (a.scale - 1) * C_W * -1;
+        c = true;
+    }
+    if (a.translate[1] < (a.scale - 1) * C_H * -1) {
+        b.translate[1] = (a.scale - 1) * C_H * -1;
+        c = true;
+    }
+    if (c) {
+        if (b.translate[0] === undefined) {
+            b.translate[0] = a.translate[0];
+        }
+        if (b.translate[1] === undefined) {
+            b.translate[1] = a.translate[1];
+        }
+        b.scale = a.scale;
+        return b;
+    } else {
+        return false;
+    }
 }
 
+function transitTo(a) {
+    if (a === undefined) {
+        console.error("transitTo: invalid fkt call, t undefined");
+        return 0;
+    }
+    zoombh.scale(a.scale);
+    zoombh.translate(a.translate);
+    d3.select("#heatlayer").transition().duration(600).ease("cubic-in-out").attr("transform", "translate(" + a.translate + ")scale(" + a.scale + ")");
+    genGrid(calcReso(a), getBounds(a));
+}
 
+function getZoomTransform(a) {
+    //if(zoom === undefined) { return 0; }
+    var b = getTransform();
+    a = Math.pow(2, a - 1);
+    var c = a / b.scale;
+    var d = c < 1 ? -(1 - c) : c - 1;
+    b.translate[0] = parseFloat(b.translate[0]) * c - C_W / 2 * d;
+    b.translate[1] = parseFloat(b.translate[1]) * c - C_H / 2 * d;
+    b.scale = a;
+    var e = giveBounds(b);
+    if (e) {
+        b = e;
+    }
+    return b;
+}
 
-///
-// functionality
+function getTransform(a) {
+    if (a === undefined) {
+        a = plotlayer;
+    }
+    var b;
+    if (a.attr("transform") === null) {
+        b = {
+            scale: 1,
+            translate: [ 0, 0 ]
+        };
+    } else {
+        b = parseTransform(a.attr("transform"));
+    }
+    return b;
+}
 
+function parseTransform(a) {
+    var b = {};
+    for (var c in a = a.match(/(\w+\((\-?\d+\.?\d*,?)+\))/g)) {
+        var d = a[c].match(/[\w\.\-]+/g);
+        b[d.shift()] = d;
+    }
+    if (b.scale === undefined) {
+        b.scale = 1;
+    }
+    if (b.scale.length !== undefined) {
+        b.scale = b.scale[0];
+    }
+    if (b.translate === undefined) {
+        b.translate = [ 0, 0 ];
+    }
+    return b;
+}
+
+////////////////
+/// timeline ///
+////////////////
+function genChart(a) {
+    if (a === undefined) {
+        a = current_setsel;
+    }
+    // TODO
+    console.log("/~~ generating chart data ~~\\ ");
+    var b = new Date();
+    var c = [], d, e, f, g;
+    for (d = a.min; d <= a.max; d++) {
+        f = a.data[d];
+        if (f !== undefined) {
+            g = 0;
+            for (e = 0; e < f.length; e++) {
+                if (f[e] !== ARR_UNDEFINED) {
+                    g += f[e].length;
+                }
+            }
+            c.push([ new Date(0, 0).setFullYear(d), g ]);
+        }
+    }
+    console.log("  |BM| iterating and sorting finished (took " + (new Date() - b) + "ms)");
+    updateChart([ {
+        data: c,
+        name: a.strings.label
+    } ]);
+    console.log("  |BM| chart creation complete (total of " + (new Date() - b) + "ms");
+    console.log("\\~~ finished generating chart ~~/ ");
+}
+
+/**
+* updates/builds the chart
+* (addSeries is bugged so build the chart from the ground)*/
+function updateChart(a) {
+    if (chart !== undefined) {
+        chart.destroy();
+    }
+    chart = new Highcharts.StockChart({
+        chart: {
+            type: "spline",
+            renderTo: "chart"
+        },
+        title: {
+            text: null
+        },
+        credits: {
+            enabled: false
+        },
+        rangeSelector: {
+            enabled: true,
+            buttons: [ {
+                type: "year",
+                count: 10,
+                text: "10y"
+            }, {
+                type: "year",
+                count: 100,
+                text: "100y"
+            }, {
+                type: "year",
+                count: 1e3,
+                text: "1000y"
+            }, {
+                type: "all",
+                text: "all"
+            } ],
+            buttonTheme: {
+                width: 80
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        yAxis: {
+            floor: 0,
+            type: "logarithmic"
+        },
+        xAxis: {
+            type: "linear",
+            events: {
+                setExtremes: function() {
+                    clearTimeout(redrawTimer);
+                    redrawTimer = setTimeout(genGrid, 200);
+                }
+            }
+        },
+        navigator: {
+            margin: 5,
+            enabled: true,
+            xAxis: {
+                type: "linear"
+            }
+        },
+        plotOptions: {
+            series: {
+                dataGrouping: {
+                    enabled: true
+                }
+            }
+        },
+        //*/
+        tooltip: {
+            xDateFormat: "%Y"
+        },
+        series: a
+    });
+}
+
+/////////////////////////////
+/// Highcharts Extensions ///
+/////////////////////////////
+Highcharts.wrap(Highcharts.Chart.prototype, "pan", function(a) {
+    a.apply(this, Array.prototype.slice.call(arguments, 1));
+    genGrid();
+});
+
+//////////////////////
+/// user interface ///
+//////////////////////
+/**
+* bind control handlers */
 function setupControlHandlers() {
-
-	// build filter menu
-	var fn = function() { setSetSel(this.value); };
-	var filter = $("#filter");
-	for(var i = 0; i<gdata.length; i++) {
-		var fs = $("<fieldset>");
-		fs.append('<legend>'+gdata[i].title+'</legend>');
-		for(var j=0; j<gdata[i].datasets.length; j++) {
-			
-			var b = $('<input type="radio" name="radio" value="'+j+'" />')
-				.on("change", fn);
-
-			fs.append($('<label>'+gdata[i].datasets[j].strings.label+'</label>').prepend(b));
-		}
-		filter.append(fs);
-	}
-
-	$("#controls input[type=\"range\"]")
-		.on("input", function() {
-			$(this).parent().next("input[type=\"text\"").val(parseFloat($(this).val()).toFixed(1));
-		});
-	$("#zoom-slider").on("change", function() {
-		transitTo(getZoomTransform($(this).val()));
-	});
-	$("#reso-slider").on("change", function() {
-		genGrid();
-	});
-
-
-	$(window).resize(function() {
-		viewportW = $(this).width();
-		viewportH = $(this).height();
-	});
-
-	$("#export").click(function() {
-		$(this).attr("disabled","disabled");
-		exportSvg();
-	});
+    // build filter menu
+    var a = function() {
+        setSetSel(this.value);
+    };
+    var b = $("#filter");
+    for (var c = 0; c < gdata.length; c++) {
+        var d = $("<fieldset>");
+        d.append("<legend>" + gdata[c].title + "</legend>");
+        for (var e = 0; e < gdata[c].datasets.length; e++) {
+            var f = $('<input type="radio" name="radio" value="' + e + '" />').on("change", a);
+            d.append($("<label>" + gdata[c].datasets[e].strings.label + "</label>").prepend(f));
+        }
+        b.append(d);
+    }
+    $('#controls input[type="range"]').on("input", function() {
+        $(this).parent().next('input[type="text"').val(parseFloat($(this).val()).toFixed(1));
+    });
+    $("#zoom-slider").on("change", function() {
+        transitTo(getZoomTransform($(this).val()));
+    });
+    $("#reso-slider").on("change", function() {
+        genGrid();
+    });
+    $(window).resize(function() {
+        viewportW = $(this).width();
+        viewportH = $(this).height();
+    });
+    $("#export").click(function() {
+        $(this).attr("disabled", "disabled");
+        exportSvg();
+    });
 }
 
 /**
  * SVG export*/
 function exportSvg() {
-	$("#export").attr("disabled", "disabled");
-
-    var iframe = $('<iframe>',{css:{display:'none'}})
-		.appendTo('body');
-
-    var formHTML = '<form action="" method="post">'+
-        '<input type="hidden" name="filename" />'+
-        '<input type="hidden" name="content" />'+
-        '</form>';
-
-    var body = iframe.prop('contentDocument').body;
+    $("#export").attr("disabled", "disabled");
+    var a = $("<iframe>", {
+        css: {
+            display: "none"
+        }
+    }).appendTo("body");
+    var b = '<form action="" method="post">' + '<input type="hidden" name="filename" />' + '<input type="hidden" name="content" />' + "</form>";
+    var c = a.prop("contentDocument").body;
     /* don't care about IE
     (iframe.prop('contentDocument') !== undefined) ?
 		iframe.prop('contentDocument').body :
         iframe.prop('document').body;	// IE*/
-    $(body).html(formHTML);
-
-    var form = $(body).find('form');
-    form.attr('action',"export.php");
-    form.find('input[name=filename]').val("dataPlot.svg");
-    form.find('input[name=content]').val($("#map").html());
-
+    $(c).html(b);
+    var d = $(c).find("form");
+    d.attr("action", "export.php");
+    d.find("input[name=filename]").val("dataPlot.svg");
+    d.find("input[name=content]").val($("#map").html());
     // Submitting the form to export.php. This will
     // cause the file download dialog box to appear.
-    form.submit();
+    d.submit();
 }
-
-
-
-/////////////////////////////
-/// Highcharts Extensions ///
-/////////////////////////////
-
-Highcharts.wrap(Highcharts.Chart.prototype, 'pan', function (proceed) {
-
-  proceed.apply(this, Array.prototype.slice.call(arguments, 1));
-  genGrid();
-
-});

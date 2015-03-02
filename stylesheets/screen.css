@@ -2,7 +2,7 @@
  * In this file you should write your main styles. (or centralize your imports)
  * Import this file using the following HTML or equivalent:
  * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
-/* line 17, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 5, ../../../../../home/psilux/.rvm/gems/ruby-2.1.5/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -24,46 +24,46 @@ time, mark, audio, video {
   vertical-align: baseline;
 }
 
-/* line 22, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 22, ../../../../../home/psilux/.rvm/gems/ruby-2.1.5/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 html {
   line-height: 1;
 }
 
-/* line 24, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 24, ../../../../../home/psilux/.rvm/gems/ruby-2.1.5/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 ol, ul {
   list-style: none;
 }
 
-/* line 26, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 26, ../../../../../home/psilux/.rvm/gems/ruby-2.1.5/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 table {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-/* line 28, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 28, ../../../../../home/psilux/.rvm/gems/ruby-2.1.5/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 caption, th, td {
   text-align: left;
   font-weight: normal;
   vertical-align: middle;
 }
 
-/* line 30, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 30, ../../../../../home/psilux/.rvm/gems/ruby-2.1.5/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 q, blockquote {
   quotes: none;
 }
-/* line 103, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 103, ../../../../../home/psilux/.rvm/gems/ruby-2.1.5/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 q:before, q:after, blockquote:before, blockquote:after {
   content: "";
   content: none;
 }
 
-/* line 32, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+/* line 32, ../../../../../home/psilux/.rvm/gems/ruby-2.1.5/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
 a img {
   border: none;
 }
 
-/* line 116, ../../../../../usr/share/compass/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
-article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section, summary {
+/* line 116, ../../../../../home/psilux/.rvm/gems/ruby-2.1.5/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary {
   display: block;
 }
 
@@ -133,7 +133,7 @@ body {
 
 /* line 105, ../sass/screen.scss */
 menu {
-  background: #e3e3e3;
+  background: #E3E3E3;
   padding: 5px;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
@@ -171,7 +171,7 @@ menu#timefilter {
 /* line 132, ../sass/screen.scss */
 #sidebar > menu div {
   /*height: 100-(2*($filter-padding));*/
-  background: #f9faff;
+  background: #F9FAFF;
   padding: 10px;
   margin-bottom: 5px;
 }
@@ -192,7 +192,7 @@ menu#timefilter {
 /* line 148, ../sass/screen.scss */
 #filter {
   /*height: 100-(2*($filter-padding));d*/
-  background: #f9faff;
+  background: #F9FAFF;
   padding: 10px;
 }
 
@@ -210,7 +210,7 @@ menu#timefilter {
   /*height: $legend-height;*/
   margin: 5px;
   padding: 10px;
-  background: #f9faff;
+  background: #F9FAFF;
 }
 
 /* line 169, ../sass/screen.scss */
@@ -251,7 +251,7 @@ menu#timefilter {
   pointer-events: none;
 }
 
-/* line 199, ../sass/screen.scss */
+/* line 198, ../sass/screen.scss */
 #bubble > span,
 #legend > span,
 #stuff > span {
@@ -335,7 +335,7 @@ button[disabled] {
   box-shadow: none;
 }
 
-    /*#reso-slider{
+/*#reso-slider{
     display: inline;
     position: relative;
 
