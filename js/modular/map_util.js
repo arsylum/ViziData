@@ -20,10 +20,6 @@ function getBounds(t) {
 
 	//if(t === undefined) { t = getTransform(); }
 
-	console.log('########### last transform state:');
-	console.log('scale: '+lastTransformState.scale+', translate: '+lastTransformState.translate[0]+', '+lastTransformState.translate[1]);
-	console.log('########### gives:');
-
 	var tx = (-lastTransformState.translate[0]/canvasW)*360,
 		ty = (-lastTransformState.translate[1]/canvasH)*180;
 
@@ -38,7 +34,6 @@ function getBounds(t) {
 		min: -(ymin+(C_HMAX-C_HMIN)/lastTransformState.scale) - bth,
 		max: -ymin + bth
 	}];
-	console.log(bounds[0].min+', '+bounds[0].max+', '+bounds[1].min+', '+bounds[1].max);
 	return bounds;
 }
 
@@ -110,7 +105,7 @@ function zoom() {
 		
 		lastTransformState = d3.event;
 		
-		//$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
+		$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
 		drawPlot(undefined,undefined); // TODO function parameters
 		//forceBounds();

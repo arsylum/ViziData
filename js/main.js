@@ -436,9 +436,6 @@ function getBounds(a) {
     //return [{min: -180, max: 180},{min: -90, max: 90}];
     // TODO rmove dev mode dummy output
     //if(t === undefined) { t = getTransform(); }
-    console.log("########### last transform state:");
-    console.log("scale: " + lastTransformState.scale + ", translate: " + lastTransformState.translate[0] + ", " + lastTransformState.translate[1]);
-    console.log("########### gives:");
     var b = -lastTransformState.translate[0] / canvasW * 360, c = -lastTransformState.translate[1] / canvasH * 180;
     var d = b / lastTransformState.scale + C_WMIN, e = c / lastTransformState.scale + C_HMIN, f = M_BOUNDING_THRESHOLD / (lastTransformState.scale / 2);
     var g = [ {
@@ -448,7 +445,6 @@ function getBounds(a) {
         min: -(e + (C_HMAX - C_HMIN) / lastTransformState.scale) - f,
         max: -e + f
     } ];
-    console.log(g[0].min + ", " + g[0].max + ", " + g[1].min + ", " + g[1].max);
     return g;
 }
 
@@ -496,7 +492,7 @@ function zoom() {
     if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
         //plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
         lastTransformState = d3.event;
-        //$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
+        $("#ctrl-zoom>input").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
         drawPlot(undefined, undefined);
         // TODO function parameters
         //forceBounds();
