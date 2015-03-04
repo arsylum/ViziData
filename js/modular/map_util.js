@@ -100,11 +100,11 @@ function zoom() {
 		//plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 		
 		lastTransformState = d3.event;
-		console.log(lastTransformState);
 		
 		//$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
-		forceBounds();
+		drawPlot(undefined,1); // TODO function parameters
+		//forceBounds();
 		genGrid();
 	}
 }

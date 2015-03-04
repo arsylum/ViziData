@@ -65,7 +65,7 @@ ARR_M_I = 2;
 /// global vars
 //^^^^^^^^^^^^^
 var chart, // Timeline / dataLine
-plotlayer, // plot drawing layer (<g>)
+//plotlayer,  // plot drawing layer (<g>)
 bubble, // popup bubble on map
 zoombh;
 
@@ -78,9 +78,10 @@ resizeTimeout;
 // window resize handling
 var gdata = [], // global rawdata
 current_datsel, // slected data group
-current_setsel;
+current_setsel, // selected dataset
+tilemap;
 
-// selected dataset
+// latest generated tilemap;
 var viewportH, viewportW;
 
 var lastTransformState;
@@ -193,14 +194,7 @@ function genGrid(a, b, c) {
 * Generate data grid for the map
 * parameters optional */
 function generateGrid(a, b, c) {
-    ///
-    /// Testing dummy data
-    //reso = 1;
-    //tile_mapping = [2,,3,4,,,,56,6,,3,,,,,,,5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,,,,,,,7,,8,,,,,2,,,3,,,,7,,,3,,3,,,,,8,,,3,,,4,,5,,,,5,,,8,,,,,,,2,,46,78,,3,,,,,,,4,,,];
-    //drawPlot(tile_mapping, reso);
-    //console.log("dev mode on, using fake data, skipping iteration");
-    //return false;
-    //// TODO remove
+    /// TODO poperly use global tilemap 
     if (!allow_redraw) {
         return false;
     }
@@ -265,6 +259,7 @@ function generateGrid(a, b, c) {
             }
         }
         console.log("  |BM| iteration complete (" + (new Date() - d) + "ms)");
+        tilemap = e;
         drawPlot(e, a);
         console.log("  |BM| finished genGrid (total of " + (new Date() - d) + "ms)");
         $("#legend").html("<em>in this area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
@@ -299,14 +294,16 @@ function testing_aggregator(a, b, c) {
 * draw the map layer
 */
 function drawPlot(a, b) {
+    // TODO remove tilemap parameter?
     /// canvas test
+    ctx.save();
     ctx.clearRect(0, 0, canvasW, canvasH);
     //ctx.fillRect(10,10,200,200);
     //plotlayer.selectAll("circle").remove();
     var c = new Date();
     var d = [];
     var e = Infinity, f = -Infinity;
-    $.each(a, function(a, c) {
+    $.each(tilemap, function(a, c) {
         var g = index2canvasCoord(a, b);
         d.push([ [ g[0], g[1] ], c ]);
         // get extreme values
@@ -320,17 +317,19 @@ function drawPlot(a, b) {
     console.log("  ~ drawing " + d.length + " shapes");
     console.log("  # data extreme values - min: " + e + ", max: " + f);
     console.log("  |BM| (dataset generation in " + (new Date() - c) + "ms)");
+    ctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
+    ctx.scale(lastTransformState.scale, lastTransformState.scale);
     var g = -1, h = d.length, i, j, k;
     ctx.beginPath();
     while (++g < h) {
         i = d[g];
         j = i[0][0];
         k = i[0][1];
-        console.log("x: " + j + ", y: " + k);
         ctx.moveTo(j, k);
         ctx.arc(j, k, 2, 0, 2 * Math.PI);
     }
     ctx.fill();
+    ctx.restore();
     return false;
     /// TODO remove testing skip
     // color defs
@@ -467,9 +466,10 @@ function zoom() {
     if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
         //plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
         lastTransformState = d3.event;
-        console.log(lastTransformState);
         //$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
-        forceBounds();
+        drawPlot(undefined, 1);
+        // TODO function parameters
+        //forceBounds();
         genGrid();
     }
 }

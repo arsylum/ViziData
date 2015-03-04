@@ -38,7 +38,7 @@ var	ARR_UNDEFINED = null,	// undefined value
 /// global vars
 //^^^^^^^^^^^^^
 var chart,		// Timeline / dataLine
-	plotlayer,  // plot drawing layer (<g>)
+	//plotlayer,  // plot drawing layer (<g>)
 	bubble,		// popup bubble on map
 	zoombh;		// zoomBehavior
 
@@ -51,7 +51,8 @@ var allow_redraw = true,
 
 var gdata = [],		// global rawdata
 	current_datsel,	// slected data group
-	current_setsel;	// selected dataset
+	current_setsel,	// selected dataset
+	tilemap; // latest generated tilemap;
 	
 var viewportH,
 	viewportW;
