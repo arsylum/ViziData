@@ -3,33 +3,42 @@
 /////////////////////
 /**
 * returns grid resolution*/
+// TODO remove param?
 function calcReso(t) {
-	return 1;
+	//return 1;
 	// TODO remove dev mode dummy output
 
-	if(t === undefined) { t = getTransform(); }
+	//if(t === undefined) { t = getTransform(); }
 	var rf = parseFloat($("#reso-slider").val());
-	return (1/t.scale)*rf;
+	return (1/lastTransformState.scale)*rf;
 }
 
+// TODO remove param?
 function getBounds(t) {
-	return [{min: -180, max: 180},{min: -90, max: 90}];
+	//return [{min: -180, max: 180},{min: -90, max: 90}];
 	// TODO rmove dev mode dummy output
 
-	if(t === undefined) { t = getTransform(); }
+	//if(t === undefined) { t = getTransform(); }
 
-	var xmin = (-t.translate[0])/t.scale+C_WMIN,
-		ymin = (-t.translate[1])/t.scale+C_HMIN,
-		bth = M_BOUNDING_THRESHOLD/(t.scale/2);
+	console.log('########### last transform state:');
+	console.log('scale: '+lastTransformState.scale+', translate: '+lastTransformState.translate[0]+', '+lastTransformState.translate[1]);
+	console.log('########### gives:');
+
+	var tx = (-lastTransformState.translate[0]/canvasW)*360,
+		ty = (-lastTransformState.translate[1]/canvasH)*180;
+
+	var xmin = (tx)/lastTransformState.scale+C_WMIN,
+		ymin = (ty)/lastTransformState.scale+C_HMIN,
+		bth = M_BOUNDING_THRESHOLD/(lastTransformState.scale/2);
 
 	var bounds = [{
 		min: xmin - bth,
-		max: xmin+(C_WMAX-C_WMIN)/t.scale + bth
+		max: xmin+(C_WMAX-C_WMIN)/lastTransformState.scale + bth
 	},{
-		min: -(ymin+(C_HMAX-C_HMIN)/t.scale) - bth,
+		min: -(ymin+(C_HMAX-C_HMIN)/lastTransformState.scale) - bth,
 		max: -ymin + bth
 	}];
-
+	console.log(bounds[0].min+', '+bounds[0].max+', '+bounds[1].min+', '+bounds[1].max);
 	return bounds;
 }
 
@@ -103,7 +112,7 @@ function zoom() {
 		
 		//$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
-		drawPlot(undefined,1); // TODO function parameters
+		drawPlot(undefined,undefined); // TODO function parameters
 		//forceBounds();
 		genGrid();
 	}
@@ -182,7 +191,7 @@ function getZoomTransform(zoom) {
 	return t;
 }
 
-
+/*
 function getTransform(el) {
 	if(el === undefined) { el = plotlayer; }
 	var t;
@@ -205,4 +214,4 @@ function parseTransform (s) {
     if(r.translate === undefined) { r.translate = [0,0]; }
 
     return r;
-}
+}*/

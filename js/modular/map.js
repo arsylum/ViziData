@@ -69,8 +69,8 @@ function generateGrid(reso, mAE, data) {
 		}
 
 		console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
-		tilemap = tile_mapping;
-		drawPlot(tile_mapping, reso);
+		//tilemap = tile_mapping;
+		drawPlot({map: tile_mapping, reso: reso});
 		console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
 
 		$("#legend").html("<em>in this area</em><br>"+
@@ -120,9 +120,11 @@ function testing_aggregator(tmap,obj,reso) {
 /**
 * draw the map layer
 */
-function drawPlot(tm,reso) {
+function drawPlot(newmap) {
 
-	// TODO remove tilemap parameter?
+	// TODO remove tilemap parameter? and reso?
+
+	//reso = calcReso();
 	
 	/// canvas test
 	ctx.save();
@@ -135,37 +137,75 @@ function drawPlot(tm,reso) {
 	//plotlayer.selectAll("circle").remove();
 
 	var uMBM = new Date();
-	var dataset = [];
+	/*var dataset = [];
 	var min = Infinity,
-		max = -Infinity;
+		max = -Infinity;*/
 
-	$.each(tilemap, function(k,v) {
-		var c = index2canvasCoord(k, reso);
-
-		dataset.push([[c[0],c[1]],v]);
+	if(newmap !== undefined) { // calculate new darwing map
+		var draw = [],
+			min = Infinity,
+			max = -Infinity;
 		
-		// get extreme values
-		if(v<min) { min = v; }
-		if(v>max) { max = v; }
-	});
-	console.log("  ~ drawing "+dataset.length+" shapes");
-	console.log("  # data extreme values - min: "+min+", max: "+max);
+		$.each(newmap.map, function(k,v) {
+			var c = index2canvasCoord(k, newmap.reso);
+
+			draw.push([[c[0],c[1]],v]);
+
+			// get extreme values
+			if(v<min) { min = v; }
+			if(v>max) { max = v; }
+		});
+		drawdat = {draw: draw, min: min, max: max, reso: newmap.reso};
+	}
+	console.log("  ~ drawing "+drawdat.draw.length+" shapes");
+	console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);
 	console.log("  |BM| (dataset generation in "+(new Date()-uMBM)+"ms)");
+
+
+	// color defs
+	/// TODO color calculation i s buggy
+	var rmax, gmax, bmax, rlog_factorm, glog_factor, blog_factor;
+	if(colorize) {
+		rmax = current_setsel.colorScale.min[0];
+		rlog_factor = (rmax-current_setsel.colorScale.max[0])/Math.log(drawdat.max);
+		gmax = current_setsel.colorScale.min[1];
+		glog_factor = (gmax-current_setsel.colorScale.max[1])/Math.log(drawdat.max);
+		bmax = current_setsel.colorScale.min[2];
+		blog_factor = (bmax-current_setsel.colorScale.max[2])/Math.log(drawdat.max);
+	} else {
+		bmax = 255; //215;
+		blog_factor = bmax/drawdat.max;//Math.log(drawdat.max);
+		gmax = 235; //205;
+		glog_factor = gmax/Math.log(drawdat.max);
+		rmax = 185;//14;
+		rlog_factor = rmax/Math.log(drawdat.max);
+	}
+
+
+
 
   	ctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
   	ctx.scale(lastTransformState.scale, lastTransformState.scale);
 
-	var i= -1, n = dataset.length, d, cx, cy;
-	ctx.beginPath();
+  	var canvasRenderBM = new Date();
+	var i= -1, n = drawdat.draw.length, d, cx, cy, fs, r = drawdat.reso;
 	while(++i < n) {
-		d = dataset[i];
+		d = drawdat.draw[i];
 		cx = d[0][0];
 		cy = d[0][1];
-		ctx.moveTo(cx,cy);
-		ctx.arc(cx, cy, 2, 0, 2 * Math.PI);
+		fs = "rgb("+
+			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
+			Math.floor(gmax -Math.floor(Math.log(d[1])*glog_factor))+","+
+			Math.floor(bmax -Math.floor(d[1]*blog_factor))+")";
+		ctx.fillStyle = fs;
+		ctx.beginPath();
+		//ctx.moveTo(cx,cy);
+		ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+		//ctx.stroke();
+		ctx.fill();
 	}
-	ctx.fill();
 
+	console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");
 	ctx.restore();
 
 	return false;
@@ -174,22 +214,7 @@ function drawPlot(tm,reso) {
 
 
 
-	// color defs
-	if(colorize) {
-		var rmax = current_setsel.colorScale.min[0],
-			rlog_factor = (rmax-current_setsel.colorScale.max[0])/Math.log(max),
-			gmax = current_setsel.colorScale.min[1],
-			glog_factor = (gmax-current_setsel.colorScale.max[1])/Math.log(max),
-			bmax = current_setsel.colorScale.min[2],
-			blog_factor = (bmax-current_setsel.colorScale.max[2])/Math.log(max);
-	} else {
-		var bmax = 255, //215,
-		blog_factor = bmax/max;//Math.log(max),
-		gmax = 235, //205,
-		glog_factor = gmax/Math.log(max),
-		rmax = 185,//14,
-		rlog_factor = rmax/Math.log(max);
-	}
+	
 
 	
 	var plotBM = new Date();

@@ -90,7 +90,6 @@ function onResize() {
 	canvasW = Math.floor($("#map").width());
 	canvasH = Math.floor($("#map").height());
 	canvas.attr("width", canvasW).attr("height", canvasH);
-
 	ctx = canvas.node().getContext("2d");
-	//ctx.fillRect(600,100,200,200);
+	genGrid();
 }
