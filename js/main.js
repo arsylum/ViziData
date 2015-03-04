@@ -72,9 +72,10 @@ zoombh;
 // zoomBehavior
 var allow_redraw = true, colorize = true, redrawTimer, // genGrid
 bubbleTimer, // hide map tooltip bubble
-boundsTimer;
+boundsTimer, // forceBounds
+resizeTimeout;
 
-// forceBounds
+// window resize handling
 var gdata = [], // global rawdata
 current_datsel, // slected data group
 current_setsel;
@@ -83,6 +84,10 @@ current_setsel;
 var viewportH, viewportW;
 
 var lastTransformState;
+
+// remember map scaling (only redraw on changes)
+// canvas
+var canvas, ctx, canvasW, canvasH;
 
 ///////////////////
 /// entry point ///
@@ -119,12 +124,13 @@ $(function() {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(onResize, 400);
     });
+    // zoombehaviour
+    zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
     // setup canvas
-    canvas = d3.select("#map").append("canvas");
+    canvas = d3.select("#map").append("canvas").call(zoombh);
     onResize();
     // set canvas dimensions
     // setup svg
-    zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
     /*d3.select("#mapcanvas").append("g").attr("id","maplayer");//experimental
 	plotlayer = d3.select("#mapcanvas")
 		.attr("viewBox", "-1 -1 "+(C_W+1)+" "+(C_H+1))
@@ -169,7 +175,6 @@ function onResize() {
     canvasH = Math.floor($("#map").height());
     canvas.attr("width", canvasW).attr("height", canvasH);
     ctx = canvas.node().getContext("2d");
-    ctx.fillRect(600, 100, 200, 200);
 }
 
 /////////////////////////
@@ -188,6 +193,14 @@ function genGrid(a, b, c) {
 * Generate data grid for the map
 * parameters optional */
 function generateGrid(a, b, c) {
+    ///
+    /// Testing dummy data
+    //reso = 1;
+    //tile_mapping = [2,,3,4,,,,56,6,,3,,,,,,,5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,,,,,,,7,,8,,,,,2,,,3,,,,7,,,3,,3,,,,,8,,,3,,,4,,5,,,,5,,,8,,,,,,,2,,46,78,,3,,,,,,,4,,,];
+    //drawPlot(tile_mapping, reso);
+    //console.log("dev mode on, using fake data, skipping iteration");
+    //return false;
+    //// TODO remove
     if (!allow_redraw) {
         return false;
     }
@@ -286,7 +299,10 @@ function testing_aggregator(a, b, c) {
 * draw the map layer
 */
 function drawPlot(a, b) {
-    plotlayer.selectAll("circle").remove();
+    /// canvas test
+    ctx.clearRect(0, 0, canvasW, canvasH);
+    //ctx.fillRect(10,10,200,200);
+    //plotlayer.selectAll("circle").remove();
     var c = new Date();
     var d = [];
     var e = Infinity, f = -Infinity;
@@ -304,18 +320,31 @@ function drawPlot(a, b) {
     console.log("  ~ drawing " + d.length + " shapes");
     console.log("  # data extreme values - min: " + e + ", max: " + f);
     console.log("  |BM| (dataset generation in " + (new Date() - c) + "ms)");
+    var g = -1, h = d.length, i, j, k;
+    ctx.beginPath();
+    while (++g < h) {
+        i = d[g];
+        j = i[0][0];
+        k = i[0][1];
+        console.log("x: " + j + ", y: " + k);
+        ctx.moveTo(j, k);
+        ctx.arc(j, k, 2, 0, 2 * Math.PI);
+    }
+    ctx.fill();
+    return false;
+    /// TODO remove testing skip
     // color defs
     if (colorize) {
-        var g = current_setsel.colorScale.min[0], h = (g - current_setsel.colorScale.max[0]) / Math.log(f), i = current_setsel.colorScale.min[1], j = (i - current_setsel.colorScale.max[1]) / Math.log(f), k = current_setsel.colorScale.min[2], l = (k - current_setsel.colorScale.max[2]) / Math.log(f);
+        var l = current_setsel.colorScale.min[0], m = (l - current_setsel.colorScale.max[0]) / Math.log(f), n = current_setsel.colorScale.min[1], o = (n - current_setsel.colorScale.max[1]) / Math.log(f), p = current_setsel.colorScale.min[2], q = (p - current_setsel.colorScale.max[2]) / Math.log(f);
     } else {
-        var k = 255, //215,
-        l = k / f;
+        var p = 255, //215,
+        q = p / f;
         //Math.log(max),
-        i = 235, //205,
-        j = i / Math.log(f), g = 185, //14,
-        h = g / Math.log(f);
+        n = 235, //205,
+        o = n / Math.log(f), l = 185, //14,
+        m = l / Math.log(f);
     }
-    var m = new Date();
+    var r = new Date();
     /*var circles = plotlayer.selectAll("circle")
 			.data(dataset);
 	circles.exit().remove();
@@ -328,16 +357,16 @@ function drawPlot(a, b) {
         return b / 2;
     }).attr("fill", function(a) {
         //if(d[1]/max > 0.1) console.log("jo hey it's "+d[1]/max);
-        var b = Math.floor(g - Math.floor(Math.log(a[1]) * h));
-        var c = Math.floor(i - Math.floor(Math.log(a[1]) * j));
-        var d = Math.floor(k - Math.floor(a[1] * l));
+        var b = Math.floor(l - Math.floor(Math.log(a[1]) * m));
+        var c = Math.floor(n - Math.floor(Math.log(a[1]) * o));
+        var d = Math.floor(p - Math.floor(a[1] * q));
         return "rgb(" + b + "," + c + "," + d + ")";
     }).on("mouseover", function(a) {
         mouseOver(a);
     }).on("mouseout", function() {
         mouseOut();
     });
-    console.log("  |BM| (svg manipulation took " + (new Date() - m) + "ms)");
+    console.log("  |BM| (svg manipulation took " + (new Date() - r) + "ms)");
     console.log("  |BM| plot drawn in " + (new Date() - c) + "ms");
 }
 
@@ -362,6 +391,8 @@ function mouseOut() {
 /**
 * returns grid resolution*/
 function calcReso(a) {
+    return 1;
+    // TODO remove dev mode dummy output
     if (a === undefined) {
         a = getTransform();
     }
@@ -370,6 +401,14 @@ function calcReso(a) {
 }
 
 function getBounds(a) {
+    return [ {
+        min: -180,
+        max: 180
+    }, {
+        min: -90,
+        max: 90
+    } ];
+    // TODO rmove dev mode dummy output
     if (a === undefined) {
         a = getTransform();
     }
@@ -400,7 +439,12 @@ function index2canvasCoord(a, b) {
     var d = (a - c / 2) % c;
     if (d < 0) d += c;
     d -= c / 2;
-    var e = d * b + -C_WMIN + b / 2, f = Math.floor((+a + c / 2) / c) * b * -1 + -C_HMIN + b / 2;
+    var e = d * b + -C_WMIN, //+reso/2,
+    f = Math.floor((+a + c / 2) / c) * b * -1 + -C_HMIN;
+    //+reso/2;
+    // canvas normaization, TODO unify
+    e = e / 360 * canvasW;
+    f = f / 180 * canvasH;
     return [ e, f ];
 }
 
@@ -421,9 +465,10 @@ function index2coord(a, b) {
 * zoom the svg */
 function zoom() {
     if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
-        plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        //plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
         lastTransformState = d3.event;
-        $("#ctrl-zoom>input").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
+        console.log(lastTransformState);
+        //$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
         forceBounds();
         genGrid();
     }

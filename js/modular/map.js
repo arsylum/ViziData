@@ -14,6 +14,15 @@ function genGrid(reso, mAE, data) {
 * parameters optional */
 function generateGrid(reso, mAE, data) {
 
+	///
+	/// Testing dummy data
+	//reso = 1;
+	//tile_mapping = [2,,3,4,,,,56,6,,3,,,,,,,5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,,,,,,,7,,8,,,,,2,,,3,,,,7,,,3,,3,,,,,8,,,3,,,4,,5,,,,5,,,8,,,,,,,2,,46,78,,3,,,,,,,4,,,];
+	//drawPlot(tile_mapping, reso);
+	//console.log("dev mode on, using fake data, skipping iteration");
+	//return false;
+	//// TODO remove
+
 	if(!allow_redraw) { return false; }
 	if(data === undefined) { data = current_setsel; } // todo dynamic from filter?
 	if( mAE === undefined) {  mAE = getBounds(); }
@@ -118,7 +127,16 @@ function testing_aggregator(tmap,obj,reso) {
 * draw the map layer
 */
 function drawPlot(tm,reso) {
-	plotlayer.selectAll("circle").remove();
+
+
+	/// canvas test
+	ctx.clearRect(0,0,canvasW,canvasH);
+	//ctx.fillRect(10,10,200,200);
+
+
+
+
+	//plotlayer.selectAll("circle").remove();
 
 	var uMBM = new Date();
 	var dataset = [];
@@ -137,6 +155,24 @@ function drawPlot(tm,reso) {
 	console.log("  ~ drawing "+dataset.length+" shapes");
 	console.log("  # data extreme values - min: "+min+", max: "+max);
 	console.log("  |BM| (dataset generation in "+(new Date()-uMBM)+"ms)");
+
+	var i= -1, n = dataset.length, d, cx, cy;
+	ctx.beginPath();
+	while(++i < n) {
+		d = dataset[i];
+		cx = d[0][0];
+		cy = d[0][1];
+		console.log('x: '+cx+', y: '+cy);
+		ctx.moveTo(cx,cy);
+		ctx.arc(cx, cy, 2, 0, 2 * Math.PI);
+	}
+	ctx.fill();
+
+	return false;
+	/// TODO remove testing skip
+
+
+
 
 	// color defs
 	if(colorize) {

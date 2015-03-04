@@ -36,12 +36,16 @@ $(function(){
 		resizeTimeout = setTimeout(onResize, 400);
 	});
 
+
+	// zoombehaviour
+	zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
+
 	// setup canvas
-	canvas = d3.select("#map").append("canvas");
+	canvas = d3.select("#map").append("canvas").call(zoombh);
 	onResize(); // set canvas dimensions
 
 	// setup svg
-	zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
+	
 	/*d3.select("#mapcanvas").append("g").attr("id","maplayer");//experimental
 	plotlayer = d3.select("#mapcanvas")
 		.attr("viewBox", "-1 -1 "+(C_W+1)+" "+(C_H+1))
@@ -88,5 +92,5 @@ function onResize() {
 	canvas.attr("width", canvasW).attr("height", canvasH);
 
 	ctx = canvas.node().getContext("2d");
-	ctx.fillRect(600,100,200,200);
+	//ctx.fillRect(600,100,200,200);
 }

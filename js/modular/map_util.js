@@ -4,12 +4,18 @@
 /**
 * returns grid resolution*/
 function calcReso(t) {
+	return 1;
+	// TODO remove dev mode dummy output
+
 	if(t === undefined) { t = getTransform(); }
 	var rf = parseFloat($("#reso-slider").val());
 	return (1/t.scale)*rf;
 }
 
 function getBounds(t) {
+	return [{min: -180, max: 180},{min: -90, max: 90}];
+	// TODO rmove dev mode dummy output
+
 	if(t === undefined) { t = getTransform(); }
 
 	var xmin = (-t.translate[0])/t.scale+C_WMIN,
@@ -44,9 +50,13 @@ function index2canvasCoord(i, reso) {
 	if(rowpos<0) rowpos += cpr;
 	rowpos -= cpr/2;
 
-	var lbx = (rowpos*reso)+(-C_WMIN)+reso/2,
-		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)*(-1))+(-C_HMIN)+reso/2;
+	var lbx = (rowpos*reso)+(-C_WMIN), //+reso/2,
+		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)*(-1))+(-C_HMIN); //+reso/2;
 	
+	// canvas normaization, TODO unify
+	lbx = (lbx/360)*canvasW;
+	lby = (lby/180)*canvasH;
+
 	return [lbx,lby];
 
 	/* // Hammer Projection testing
@@ -87,11 +97,12 @@ function zoom() {
 	if( d3.event.translate[0] !== lastTransformState.translate[0] ||
 		d3.event.translate[1] !== lastTransformState.translate[1] ||
 		d3.event.scale !== lastTransformState.scale) {
-		plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+		//plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 		
 		lastTransformState = d3.event;
+		console.log(lastTransformState);
 		
-		$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
+		//$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
 		forceBounds();
 		genGrid();

@@ -46,7 +46,8 @@ var allow_redraw = true,
 	colorize = true,
 	redrawTimer, // genGrid
 	bubbleTimer, // hide map tooltip bubble
-	boundsTimer; // forceBounds
+	boundsTimer, // forceBounds
+	resizeTimeout; // window resize handling
 
 var gdata = [],		// global rawdata
 	current_datsel,	// slected data group
@@ -56,6 +57,12 @@ var viewportH,
 	viewportW;
 
 var lastTransformState; // remember map scaling (only redraw on changes)
+
+// canvas
+var canvas,
+	ctx,
+	canvasW,
+	canvasH;
 //_____________
 /// global vars
 ///////////////
