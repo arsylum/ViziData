@@ -5,6 +5,14 @@
 * loads data
 * for dataset with given index */
 function setSetSel(dsi) { //, callback){
+	// load properties if missing
+	if(current_datsel.props === undefined) {
+		// TODO ? more loading feedback
+		$.getJSON(DATA_DIR+current_datsel.properties, function(data) {
+			current_datsel.props = data;
+			console.log('~~ Member properties of "'+current_datsel.id+'" have been loaded');
+		});
+	}
 	if(current_datsel.datasets[dsi].data !== undefined) {
 		current_setsel = current_datsel.datasets[dsi];
 		genChart();

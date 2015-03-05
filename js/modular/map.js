@@ -69,7 +69,8 @@ function generateGrid(reso, mAE, data) {
 		}
 
 		console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
-		//tilemap = tile_mapping;
+		tilemap = tile_mapping;
+		//console.log(tile_mapping);
 		drawPlot({map: tile_mapping, reso: reso});
 		console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
 
@@ -109,9 +110,10 @@ function section_filter(obj,aE){
 function testing_aggregator(tmap,obj,reso) {
 	var ti = coord2index(obj[ARR_M_LON],obj[ARR_M_LAT],reso);
 	if(tmap[ti] === undefined) {
-		tmap[ti] = 1;
+		tmap[ti] = [];
+		tmap[ti].push(obj[2]);
 	} else {
-		tmap[ti]++;
+		tmap[ti].push(obj[2]);
 	}
 	return tmap;
 }
@@ -148,6 +150,7 @@ function drawPlot(newmap) {
 		
 		$.each(newmap.map, function(k,v) {
 			var c = index2canvasCoord(k, newmap.reso);
+			v = v.length;
 
 			draw.push([[c[0],c[1]],v]);
 
@@ -181,28 +184,50 @@ function drawPlot(newmap) {
 		rlog_factor = rmax/Math.log(drawdat.max);
 	}
 
+	var canvasRenderBM = new Date();
 
+	/*var ppdx = canvasW/(360/lastTransformState.scale),
+		ppdy = canvasH/(180/lastTransformState.scale);
 
+	var rx = (drawdat.reso*ppdx)/lastTransformState.scale,
+		ry = (drawdat.reso*ppdy)/lastTransformState.scale;*/
+
+	var wx = ((drawdat.reso*canvasW)/360)*3, // larger size
+		wy = ((drawdat.reso*canvasH)/180)*3, // for bleeding with gradients
+		rx = ((drawdat.reso*canvasW)/360/2)*3,
+		ry = ((drawdat.reso*canvasH)/180/2)*3;
+
+	var i= -1, n = drawdat.draw.length, d, cx, cy, fc, gradient;
 
   	ctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
   	ctx.scale(lastTransformState.scale, lastTransformState.scale);
-
-  	var canvasRenderBM = new Date();
-	var i= -1, n = drawdat.draw.length, d, cx, cy, fs, r = drawdat.reso;
 	while(++i < n) {
 		d = drawdat.draw[i];
 		cx = d[0][0];
 		cy = d[0][1];
-		fs = "rgb("+
+		//ctx.fillStyle = 
+		fc = "rgba("+
 			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
 			Math.floor(gmax -Math.floor(Math.log(d[1])*glog_factor))+","+
-			Math.floor(bmax -Math.floor(d[1]*blog_factor))+")";
-		ctx.fillStyle = fs;
+			Math.floor(bmax -Math.floor(d[1]*blog_factor))+",";//+
+			//"0.6)";//((d[1]/drawdat.max)/4+0.6)+")";
+
+		gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
+		gradient.addColorStop(0,fc+"0)");
+		gradient.addColorStop(0.6, fc+"0.4)");
+		gradient.addColorStop(0.7, fc+"1)");
+		gradient.addColorStop(1,fc+"1)");
+		ctx.fillStyle = gradient;
+
+
+		ctx.fillRect(cx-rx,cy-rx,wx,wy); /*
 		ctx.beginPath();
 		//ctx.moveTo(cx,cy);
-		ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+		//ctx.arc(cx, cy, rx, 0, 2 * Math.PI);
+		ctx.ellipse(cx, cy, rx, ry, 0, 0, 2*Math.PI);
 		//ctx.stroke();
 		ctx.fill();
+		//*/
 	}
 
 	console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");

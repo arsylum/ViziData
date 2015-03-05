@@ -6,6 +6,14 @@
 * for dataset with given index */
 function setSetSel(a) {
     //, callback){
+    // load properties if missing
+    if (current_datsel.props === undefined) {
+        // TODO ? more loading feedback
+        $.getJSON(DATA_DIR + current_datsel.properties, function(a) {
+            current_datsel.props = a;
+            console.log('~~ Member properties of "' + current_datsel.id + '" have been loaded');
+        });
+    }
     if (current_datsel.datasets[a].data !== undefined) {
         current_setsel = current_datsel.datasets[a];
         genChart();
@@ -79,7 +87,7 @@ resizeTimeout;
 var gdata = [], // global rawdata
 current_datsel, // slected data group
 current_setsel, // selected dataset
-//tilemap; // latest generated tilemap;
+tilemap, // latest generated tilemap;
 drawdat;
 
 // latest generated drawing dataset
@@ -261,7 +269,8 @@ function generateGrid(a, b, c) {
             }
         }
         console.log("  |BM| iteration complete (" + (new Date() - d) + "ms)");
-        //tilemap = tile_mapping;
+        tilemap = e;
+        //console.log(tile_mapping);
         drawPlot({
             map: e,
             reso: a
@@ -288,9 +297,10 @@ function section_filter(a, b) {
 function testing_aggregator(a, b, c) {
     var d = coord2index(b[ARR_M_LON], b[ARR_M_LAT], c);
     if (a[d] === undefined) {
-        a[d] = 1;
+        a[d] = [];
+        a[d].push(b[2]);
     } else {
-        a[d]++;
+        a[d].push(b[2]);
     }
     return a;
 }
@@ -315,6 +325,7 @@ function drawPlot(a) {
         var c = [], d = Infinity, e = -Infinity;
         $.each(a.map, function(b, f) {
             var g = index2canvasCoord(b, a.reso);
+            f = f.length;
             c.push([ [ g[0], g[1] ], f ]);
             // get extreme values
             if (f < d) {
@@ -356,27 +367,39 @@ function drawPlot(a) {
         //14;
         rlog_factor = f / Math.log(drawdat.max);
     }
+    var l = new Date();
+    /*var ppdx = canvasW/(360/lastTransformState.scale),
+		ppdy = canvasH/(180/lastTransformState.scale);
+
+	var rx = (drawdat.reso*ppdx)/lastTransformState.scale,
+		ry = (drawdat.reso*ppdy)/lastTransformState.scale;*/
+    var m = drawdat.reso * canvasW / 360 * 3, // larger size
+    n = drawdat.reso * canvasH / 180 * 3, // for bleeding with gradients
+    o = drawdat.reso * canvasW / 360 / 2 * 3, p = drawdat.reso * canvasH / 180 / 2 * 3;
+    var q = -1, r = drawdat.draw.length, s, t, u, v, w;
     ctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
     ctx.scale(lastTransformState.scale, lastTransformState.scale);
-    var l = new Date();
-    var m = -1, n = drawdat.draw.length, o, p, q, r, s = drawdat.reso;
-    while (++m < n) {
-        o = drawdat.draw[m];
-        p = o[0][0];
-        q = o[0][1];
-        r = "rgb(" + Math.floor(f - Math.floor(Math.log(o[1]) * rlog_factor)) + "," + Math.floor(g - Math.floor(Math.log(o[1]) * j)) + "," + Math.floor(h - Math.floor(o[1] * k)) + ")";
-        ctx.fillStyle = r;
-        ctx.beginPath();
-        //ctx.moveTo(cx,cy);
-        ctx.arc(p, q, s, 0, 2 * Math.PI);
-        //ctx.stroke();
-        ctx.fill();
+    while (++q < r) {
+        s = drawdat.draw[q];
+        t = s[0][0];
+        u = s[0][1];
+        //ctx.fillStyle = 
+        v = "rgba(" + Math.floor(f - Math.floor(Math.log(s[1]) * rlog_factor)) + "," + Math.floor(g - Math.floor(Math.log(s[1]) * j)) + "," + Math.floor(h - Math.floor(s[1] * k)) + ",";
+        //+
+        //"0.6)";//((d[1]/drawdat.max)/4+0.6)+")";
+        w = ctx.createRadialGradient(t, u, o, t, u, 0);
+        w.addColorStop(0, v + "0)");
+        w.addColorStop(.6, v + "0.4)");
+        w.addColorStop(.7, v + "1)");
+        w.addColorStop(1, v + "1)");
+        ctx.fillStyle = w;
+        ctx.fillRect(t - o, u - o, m, n);
     }
     console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - l) + "ms");
     ctx.restore();
     return false;
     /// TODO remove testing skip
-    var t = new Date();
+    var x = new Date();
     /*var circles = plotlayer.selectAll("circle")
 			.data(dataset);
 	circles.exit().remove();
@@ -398,7 +421,7 @@ function drawPlot(a) {
     }).on("mouseout", function() {
         mouseOut();
     });
-    console.log("  |BM| (svg manipulation took " + (new Date() - t) + "ms)");
+    console.log("  |BM| (svg manipulation took " + (new Date() - x) + "ms)");
     console.log("  |BM| plot drawn in " + (new Date() - b) + "ms");
 }
 
@@ -421,7 +444,7 @@ function mouseOut() {
 /// map utilities ///
 /////////////////////
 /**
-* returns grid resolution*/
+* returns current grid resolution*/
 // TODO remove param?
 function calcReso(a) {
     //return 1;
@@ -431,6 +454,9 @@ function calcReso(a) {
     return 1 / lastTransformState.scale * b;
 }
 
+/**
+* returns the current map bounds (rectangle of the currently visible map area)
+* as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
 // TODO remove param?
 function getBounds(a) {
     //return [{min: -180, max: 180},{min: -90, max: 90}];
@@ -450,7 +476,7 @@ function getBounds(a) {
 
 /**
 * returns the index value for the cell of a grid with given resolution
-* where the given coordinate pair lies in*/
+* where the given real coordinate pair lies in*/
 function coord2index(a, b, c) {
     if (a === C_WMAX) a -= c;
     // prevent 
@@ -459,6 +485,8 @@ function coord2index(a, b, c) {
     return Math.floor(b / c) * ((C_WMAX - C_WMIN) / c) + Math.floor(a / c);
 }
 
+/**
+* returns the canvas rendering coordinates for a given index */
 function index2canvasCoord(a, b) {
     var c = (C_WMAX - C_WMIN) / b;
     var d = (a - c / 2) % c;
@@ -474,18 +502,28 @@ function index2canvasCoord(a, b) {
 }
 
 /**
-* returns the coordinate values for the center of the cell
-* with given index in the grid of given resolution*/
-function index2coord(a, b) {
-    var c = 360 / b;
-    var d = (a - c / 2) % c;
-    if (d < 0) d += c;
-    d -= c / 2;
-    var e = d * b + b / 2, f = Math.floor((+a + c / 2) / c) * b + b / 2;
-    return [ e, f ];
+* returns the aggrid cell index for a given canvas coordinate pair */
+function canvasCoord2index(a, b, c) {
+    // TODO
+    return 6;
 }
 
-//*/
+/**
+* returns the coordinate values for the center of the cell
+* with given index in the grid of given resolution* 
+(is currently used nowhere)/
+function index2coord(i, reso) {
+	var cpr = 360/reso;
+
+	var rowpos = (i-cpr/2)%cpr;
+	if(rowpos<0) rowpos += cpr;
+	rowpos -= cpr/2;
+
+	var lbx = rowpos*reso+reso/2,
+		lby = Math.floor((+i+cpr/2)/cpr)*reso+reso/2;
+
+	return [lbx,lby];
+}//*/
 /**
 * zoom the svg */
 function zoom() {

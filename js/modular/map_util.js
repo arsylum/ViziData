@@ -2,7 +2,7 @@
 /// map utilities ///
 /////////////////////
 /**
-* returns grid resolution*/
+* returns current grid resolution*/
 // TODO remove param?
 function calcReso(t) {
 	//return 1;
@@ -13,6 +13,9 @@ function calcReso(t) {
 	return (1/lastTransformState.scale)*rf;
 }
 
+/**
+* returns the current map bounds (rectangle of the currently visible map area)
+* as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
 // TODO remove param?
 function getBounds(t) {
 	//return [{min: -180, max: 180},{min: -90, max: 90}];
@@ -39,14 +42,15 @@ function getBounds(t) {
 
 /**
 * returns the index value for the cell of a grid with given resolution
-* where the given coordinate pair lies in*/
+* where the given real coordinate pair lies in*/
 function coord2index(longi, lati, reso) {
 	if(longi === C_WMAX) longi -= reso;	// prevent 
 	if(lati  === C_HMAX) lati  -= reso; // out of bounds tiles
 
 	return (Math.floor(lati/reso)*((C_WMAX-C_WMIN)/reso) + Math.floor(longi/reso));
 }
-
+/**
+* returns the canvas rendering coordinates for a given index */
 function index2canvasCoord(i, reso) {
 	var cpr = (C_WMAX-C_WMIN)/reso;
 
@@ -77,10 +81,17 @@ function index2canvasCoord(i, reso) {
 
 	return ret; //[lbx,lby];*/
 }
+/**
+* returns the aggrid cell index for a given canvas coordinate pair */
+function canvasCoord2index(longi, lati, reso){
+	// TODO
+	return 6;
+}
 
 /**
 * returns the coordinate values for the center of the cell
-* with given index in the grid of given resolution*/
+* with given index in the grid of given resolution* 
+(is currently used nowhere)/
 function index2coord(i, reso) {
 	var cpr = 360/reso;
 
