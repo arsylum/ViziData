@@ -107,7 +107,7 @@ function index2coord(i, reso) {
 
 
 /**
-* zoom the svg */
+* zoom the map */
 function zoom() {
 	if( d3.event.translate[0] !== lastTransformState.translate[0] ||
 		d3.event.translate[1] !== lastTransformState.translate[1] ||

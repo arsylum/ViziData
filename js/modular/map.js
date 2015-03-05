@@ -4,6 +4,7 @@
 /**
 * timeout wrapper*/
 function genGrid(reso, mAE, data) {
+	if(chart === undefined) { return 0; } // depend on timeline
 	clearTimeout(redrawTimer);
 	redrawTimer = setTimeout(function() {
 		generateGrid(reso, mAE, data);

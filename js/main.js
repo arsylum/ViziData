@@ -194,6 +194,10 @@ function onResize() {
 /**
 * timeout wrapper*/
 function genGrid(a, b, c) {
+    if (chart === undefined) {
+        return 0;
+    }
+    // depend on timeline
     clearTimeout(redrawTimer);
     redrawTimer = setTimeout(function() {
         generateGrid(a, b, c);
@@ -525,7 +529,7 @@ function index2coord(i, reso) {
 	return [lbx,lby];
 }//*/
 /**
-* zoom the svg */
+* zoom the map */
 function zoom() {
     if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
         //plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
