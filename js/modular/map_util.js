@@ -83,7 +83,7 @@ function index2canvasCoord(i, reso) {
 }
 /**
 * returns the aggrid cell index for a given canvas coordinate pair */
-function canvasCoord2index(longi, lati, reso){
+function canvasCoord2index(x, y, reso){
 	// TODO
 	return 6;
 }
@@ -104,6 +104,18 @@ function index2coord(i, reso) {
 
 	return [lbx,lby];
 }//*/
+
+/**
+* map tooltip */
+function canvasMouseMove() {
+	if(drawdat === undefined) { return false; } // no drawing, no tooltip!
+
+	var x = event.pageX - canvasL;
+	var y = event.pageY - canvasT;
+	//console.log('Position in canvas: ('+x+','+y+')');
+	var i = canvasCoord2index(x,y,drawdat.reso);
+
+}
 
 
 /**

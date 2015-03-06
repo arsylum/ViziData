@@ -64,7 +64,9 @@ var lastTransformState; // remember map scaling (only redraw on changes)
 var canvas,
 	ctx,
 	canvasW,
-	canvasH;
+	canvasH,
+	canvasT,
+	canvasL;
 //_____________
 /// global vars
 ///////////////

@@ -97,15 +97,13 @@ var lastTransformState;
 
 // remember map scaling (only redraw on changes)
 // canvas
-var canvas, ctx, canvasW, canvasH;
+var canvas, ctx, canvasW, canvasH, canvasT, canvasL;
 
 ///////////////////
 /// entry point ///
 ///////////////////
 $(function() {
     // init stuff
-    viewportW = $(window).width();
-    viewportH = $(window).height();
     lastTransformState = {
         scale: 1,
         translate: [ 0, 0 ]
@@ -137,7 +135,7 @@ $(function() {
     // zoombehaviour
     zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
     // setup canvas
-    canvas = d3.select("#map").append("canvas").call(zoombh);
+    canvas = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove);
     onResize();
     // set canvas dimensions
     // setup svg
@@ -180,7 +178,13 @@ $(function() {
 /// on resize //
 ////////////////
 function onResize() {
+    // get viewport size
+    viewportW = $(window).width();
+    viewportH = $(window).height();
     // set canvas dimensions
+    var a = $(canvas.node()).position();
+    canvasT = Math.floor(a.top);
+    canvasL = Math.floor(a.left);
     canvasW = Math.floor($("#map").width());
     canvasH = Math.floor($("#map").height());
     canvas.attr("width", canvasW).attr("height", canvasH);
@@ -528,6 +532,19 @@ function index2coord(i, reso) {
 
 	return [lbx,lby];
 }//*/
+/**
+* map tooltip */
+function canvasMouseMove() {
+    if (drawdat === undefined) {
+        return false;
+    }
+    // no drawing, no tooltip!
+    var a = event.pageX - canvasL;
+    var b = event.pageY - canvasT;
+    //console.log('Position in canvas: ('+x+','+y+')');
+    var c = canvasCoord2index(a, b, drawdat.reso);
+}
+
 /**
 * zoom the map */
 function zoom() {
