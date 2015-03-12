@@ -6,6 +6,14 @@
 * for dataset with given index */
 function setSetSel(a) {
     //, callback){
+    // load properties if missing
+    if (current_datsel.props === undefined) {
+        // TODO ? more loading feedback
+        $.getJSON(DATA_DIR + current_datsel.properties, function(a) {
+            current_datsel.props = a;
+            console.log('~~ Member properties of "' + current_datsel.id + '" have been loaded');
+        });
+    }
     if (current_datsel.datasets[a].data !== undefined) {
         current_setsel = current_datsel.datasets[a];
         genChart();
@@ -65,32 +73,37 @@ ARR_M_I = 2;
 /// global vars
 //^^^^^^^^^^^^^
 var chart, // Timeline / dataLine
-plotlayer, // plot drawing layer (<g>)
+//plotlayer,  // plot drawing layer (<g>)
 bubble, // popup bubble on map
 zoombh;
 
 // zoomBehavior
 var allow_redraw = true, colorize = true, redrawTimer, // genGrid
 bubbleTimer, // hide map tooltip bubble
-boundsTimer;
+boundsTimer, // forceBounds
+resizeTimeout;
 
-// forceBounds
+// window resize handling
 var gdata = [], // global rawdata
 current_datsel, // slected data group
-current_setsel;
+current_setsel, // selected dataset
+tilemap, // latest generated tilemap;
+drawdat;
 
-// selected dataset
+// latest generated drawing dataset
 var viewportH, viewportW;
 
 var lastTransformState;
+
+// remember map scaling (only redraw on changes)
+// canvas
+var canvas, ctx, canvasW, canvasH, canvasT, canvasL;
 
 ///////////////////
 /// entry point ///
 ///////////////////
 $(function() {
     // init stuff
-    viewportW = $(window).width();
-    viewportH = $(window).height();
     lastTransformState = {
         scale: 1,
         translate: [ 0, 0 ]
@@ -114,11 +127,24 @@ $(function() {
         colorize = !this.checked;
         genGrid();
     });
-    // setup svg
+    // bind window resize handling
+    $(window).resize(function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(onResize, 400);
+    });
+    // zoombehaviour
     zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
-    d3.select("#mapcanvas").append("g").attr("id", "maplayer");
-    //experimental
-    plotlayer = d3.select("#mapcanvas").attr("viewBox", "-1 -1 " + (C_W + 1) + " " + (C_H + 1)).call(zoombh).append("g").attr("id", "heatlayer");
+    // setup canvas
+    canvas = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove);
+    onResize();
+    // set canvas dimensions
+    // setup svg
+    /*d3.select("#mapcanvas").append("g").attr("id","maplayer");//experimental
+	plotlayer = d3.select("#mapcanvas")
+		.attr("viewBox", "-1 -1 "+(C_W+1)+" "+(C_H+1))
+			.call(zoombh)
+			.append("g")
+				.attr("id","heatlayer");*/
     // Load default dataset once ready
     $(document).on("meta_files_ready", function() {
         current_datsel = gdata[0];
@@ -148,12 +174,34 @@ $(function() {
     }
 });
 
+////////////////
+/// on resize //
+////////////////
+function onResize() {
+    // get viewport size
+    viewportW = $(window).width();
+    viewportH = $(window).height();
+    // set canvas dimensions
+    var a = $(canvas.node()).position();
+    canvasT = Math.floor(a.top);
+    canvasL = Math.floor(a.left);
+    canvasW = Math.floor($("#map").width());
+    canvasH = Math.floor($("#map").height());
+    canvas.attr("width", canvasW).attr("height", canvasH);
+    ctx = canvas.node().getContext("2d");
+    genGrid();
+}
+
 /////////////////////////
 /// general map logic ///
 /////////////////////////
 /**
 * timeout wrapper*/
 function genGrid(a, b, c) {
+    if (chart === undefined) {
+        return 0;
+    }
+    // depend on timeline
     clearTimeout(redrawTimer);
     redrawTimer = setTimeout(function() {
         generateGrid(a, b, c);
@@ -164,6 +212,7 @@ function genGrid(a, b, c) {
 * Generate data grid for the map
 * parameters optional */
 function generateGrid(a, b, c) {
+    /// TODO poperly use global tilemap 
     if (!allow_redraw) {
         return false;
     }
@@ -228,7 +277,12 @@ function generateGrid(a, b, c) {
             }
         }
         console.log("  |BM| iteration complete (" + (new Date() - d) + "ms)");
-        drawPlot(e, a);
+        tilemap = e;
+        //console.log(tile_mapping);
+        drawPlot(true, {
+            map: e,
+            reso: a
+        });
         console.log("  |BM| finished genGrid (total of " + (new Date() - d) + "ms)");
         $("#legend").html("<em>in this area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
         "we have registered a total of<br>" + "<em>" + f + " " + c.parent.label + "</em><br>" + "that <em>" + c.strings.term + "</em><br>" + "between <em>" + g.min + "</em> and <em>" + g.max + "</em>");
@@ -251,118 +305,134 @@ function section_filter(a, b) {
 function testing_aggregator(a, b, c) {
     var d = coord2index(b[ARR_M_LON], b[ARR_M_LAT], c);
     if (a[d] === undefined) {
-        a[d] = 1;
+        a[d] = [];
+        a[d].push(b[2]);
     } else {
-        a[d]++;
+        a[d].push(b[2]);
     }
     return a;
 }
 
 /**
 * draw the map layer
+* [@param clear] if false, do not clear canvas before drawing
+* [@param newmap] new tile mapping to derive drawing data from
 */
 function drawPlot(a, b) {
-    plotlayer.selectAll("circle").remove();
+    if (a === undefined) {
+        a = true;
+    }
+    ctx.save();
+    if (a !== false) {
+        ctx.clearRect(0, 0, canvasW, canvasH);
+    }
     var c = new Date();
-    var d = [];
-    var e = Infinity, f = -Infinity;
-    $.each(a, function(a, c) {
-        var g = index2canvasCoord(a, b);
-        d.push([ [ g[0], g[1] ], c ]);
-        // get extreme values
-        if (c < e) {
-            e = c;
-        }
-        if (c > f) {
-            f = c;
-        }
-    });
-    console.log("  ~ drawing " + d.length + " shapes");
-    console.log("  # data extreme values - min: " + e + ", max: " + f);
+    if (b !== undefined) {
+        // calculate new drawing map
+        var d = [], e = Infinity, f = -Infinity;
+        $.each(b.map, function(a, c) {
+            var g = index2canvasCoord(a, b.reso);
+            c = c.length;
+            d.push([ [ g[0], g[1] ], c ]);
+            // get extreme values
+            if (c < e) {
+                e = c;
+            }
+            if (c > f) {
+                f = c;
+            }
+        });
+        drawdat = {
+            draw: d,
+            min: e,
+            max: f,
+            reso: b.reso
+        };
+    }
+    console.log("  ~ drawing " + drawdat.draw.length + " shapes");
+    console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
     console.log("  |BM| (dataset generation in " + (new Date() - c) + "ms)");
     // color defs
+    /// TODO color calculation is buggy
+    // (using hsl model might be good idea)
+    var g, h, i, j, k, l;
     if (colorize) {
-        var g = current_setsel.colorScale.min[0], h = (g - current_setsel.colorScale.max[0]) / Math.log(f), i = current_setsel.colorScale.min[1], j = (i - current_setsel.colorScale.max[1]) / Math.log(f), k = current_setsel.colorScale.min[2], l = (k - current_setsel.colorScale.max[2]) / Math.log(f);
+        g = current_setsel.colorScale.min[0];
+        rlog_factor = (g - current_setsel.colorScale.max[0]) / Math.log(drawdat.max);
+        h = current_setsel.colorScale.min[1];
+        k = (h - current_setsel.colorScale.max[1]) / Math.log(drawdat.max);
+        i = current_setsel.colorScale.min[2];
+        l = (i - current_setsel.colorScale.max[2]) / Math.log(drawdat.max);
     } else {
-        var k = 255, //215,
-        l = k / f;
-        //Math.log(max),
-        i = 235, //205,
-        j = i / Math.log(f), g = 185, //14,
-        h = g / Math.log(f);
+        i = 255;
+        //215;
+        l = i / drawdat.max;
+        //Math.log(drawdat.max);
+        h = 235;
+        //205;
+        k = h / Math.log(drawdat.max);
+        g = 185;
+        //14;
+        rlog_factor = g / Math.log(drawdat.max);
     }
     var m = new Date();
-    /*var circles = plotlayer.selectAll("circle")
-			.data(dataset);
-	circles.exit().remove();
-	circles.enter().append("circle");*/
-    plotlayer.selectAll("circle").data(d).enter().append("circle").attr("cx", function(a) {
-        return a[0][0];
-    }).attr("cy", function(a) {
-        return a[0][1];
-    }).attr("r", function(a) {
-        return b / 2;
-    }).attr("fill", function(a) {
-        //if(d[1]/max > 0.1) console.log("jo hey it's "+d[1]/max);
-        var b = Math.floor(g - Math.floor(Math.log(a[1]) * h));
-        var c = Math.floor(i - Math.floor(Math.log(a[1]) * j));
-        var d = Math.floor(k - Math.floor(a[1] * l));
-        return "rgb(" + b + "," + c + "," + d + ")";
-    }).on("mouseover", function(a) {
-        mouseOver(a);
-    }).on("mouseout", function() {
-        mouseOut();
-    });
-    console.log("  |BM| (svg manipulation took " + (new Date() - m) + "ms)");
-    console.log("  |BM| plot drawn in " + (new Date() - c) + "ms");
-}
-
-////////////////////
-/// mouse events ///
-////////////////////
-function mouseOver(a) {
-    clearTimeout(bubbleTimer);
-    $("div#bubble").css("opacity", "1").css("bottom", viewportH - d3.event.pageY + M_BUBBLE_OFFSET + "px").css("right", viewportW - d3.event.pageX + M_BUBBLE_OFFSET + "px").html(a[1] + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + (a[0][0] - 180).toFixed(2) + ", " + (a[0][1] * -1 + 90).toFixed(2) + "]</span>");
-}
-
-function mouseOut() {
-    clearTimeout(bubbleTimer);
-    bubbleTimer = setTimeout(function() {
-        $("div#bubble").css("opacity", "0");
-    }, 250);
+    // sizes and radii of primitiva
+    var n = 1.25;
+    // larger size for bleeding with alpha channel
+    var o = drawdat.reso * canvasW / 360 * n, p = drawdat.reso * canvasH / 180 * n, q = drawdat.reso * canvasW / 360 / 2 * n, r = drawdat.reso * canvasH / 180 / 2 * n;
+    var s = -1, t = drawdat.draw.length, u, v, w, x, y;
+    // TODO keep only what is used
+    ctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
+    ctx.scale(lastTransformState.scale, lastTransformState.scale);
+    while (++s < t) {
+        u = drawdat.draw[s];
+        v = u[0][0];
+        w = u[0][1];
+        ctx.fillStyle = //fc = 
+        "rgba(" + Math.floor(g - Math.floor(Math.log(u[1]) * rlog_factor)) + "," + Math.floor(h - Math.floor(Math.log(u[1]) * k)) + "," + Math.floor(i - Math.floor(u[1] * l)) + "," + ".75)";
+        //((d[1]/drawdat.max)/4+0.6)+")";
+        /*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
+		gradient.addColorStop(0,fc+"0)");
+		gradient.addColorStop(0.6, fc+"0.4)");
+		gradient.addColorStop(0.7, fc+"1)");
+		gradient.addColorStop(1,fc+"1)");*/
+        //ctx.fillStyle = gradient;
+        //ctx.fillRect(cx-rx,cy-rx,wx,wy);
+        ctx.fillRect(v, w - p, o, p);
+    }
+    console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - m) + "ms");
+    ctx.restore();
 }
 
 /////////////////////
 /// map utilities ///
 /////////////////////
 /**
-* returns grid resolution*/
-function calcReso(a) {
-    if (a === undefined) {
-        a = getTransform();
-    }
-    var b = parseFloat($("#reso-slider").val());
-    return 1 / a.scale * b;
+* returns current grid resolution*/
+function calcReso() {
+    var a = parseFloat($("#reso-slider").val());
+    return 1 / lastTransformState.scale * a;
 }
 
-function getBounds(a) {
-    if (a === undefined) {
-        a = getTransform();
-    }
-    var b = -a.translate[0] / a.scale + C_WMIN, c = -a.translate[1] / a.scale + C_HMIN, d = M_BOUNDING_THRESHOLD / (a.scale / 2);
-    var e = [ {
-        min: b - d,
-        max: b + (C_WMAX - C_WMIN) / a.scale + d
+/**
+* returns the current map bounds (rectangle of the currently visible map area)
+* as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
+function getBounds() {
+    var a = -lastTransformState.translate[0] / canvasW * 360, b = -lastTransformState.translate[1] / canvasH * 180;
+    var c = a / lastTransformState.scale + C_WMIN, d = b / lastTransformState.scale + C_HMIN, e = M_BOUNDING_THRESHOLD / (lastTransformState.scale / 2);
+    var f = [ {
+        min: c - e,
+        max: c + (C_WMAX - C_WMIN) / lastTransformState.scale + e
     }, {
-        min: -(c + (C_HMAX - C_HMIN) / a.scale) - d,
-        max: -c + d
+        min: -(d + (C_HMAX - C_HMIN) / lastTransformState.scale) - e,
+        max: -d + e
     } ];
-    return e;
+    return f;
 }
 
 /**
 * returns the index value for the cell of a grid with given resolution
-* where the given coordinate pair lies in*/
+* where the given real coordinate pair lies in*/
 function coord2index(a, b, c) {
     if (a === C_WMAX) a -= c;
     // prevent 
@@ -371,155 +441,75 @@ function coord2index(a, b, c) {
     return Math.floor(b / c) * ((C_WMAX - C_WMIN) / c) + Math.floor(a / c);
 }
 
+/**
+* returns the canvas rendering coordinates for a given index */
 function index2canvasCoord(a, b) {
     var c = (C_WMAX - C_WMIN) / b;
     var d = (a - c / 2) % c;
     if (d < 0) d += c;
     d -= c / 2;
-    var e = d * b + -C_WMIN + b / 2, f = Math.floor((+a + c / 2) / c) * b * -1 + -C_HMIN + b / 2;
+    var e = d * b + -C_WMIN, //+reso/2,
+    f = Math.floor((+a + c / 2) / c) * b * -1 + -C_HMIN;
+    //+reso/2;
+    // canvas normalization
+    e = e / 360 * canvasW;
+    f = f / 180 * canvasH;
     return [ e, f ];
 }
 
 /**
-* returns the coordinate values for the center of the cell
-* with given index in the grid of given resolution*/
-function index2coord(a, b) {
-    var c = 360 / b;
-    var d = (a - c / 2) % c;
-    if (d < 0) d += c;
-    d -= c / 2;
-    var e = d * b + b / 2, f = Math.floor((+a + c / 2) / c) * b + b / 2;
-    return [ e, f ];
-}
-
-//*/
-/**
-* zoom the svg */
-function zoom() {
-    if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
-        plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-        lastTransformState = d3.event;
-        $("#ctrl-zoom>input").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
-        forceBounds();
-        genGrid();
-    }
-}
-
-function forceBounds() {
-    clearTimeout(boundsTimer);
-    boundsTimer = setTimeout(function() {
-        forceBoundsFkt();
-    }, 300);
-}
-
-function forceBoundsFkt() {
-    var a;
-    if (a = giveBounds()) {
-        transitTo(a);
-    }
-}
-
-/**
-* returns false if t is in map bounds
-* proper bounds otherwise 
-*(very anti-elegant function...)*/
-function giveBounds(a) {
-    if (a === undefined) {
-        a = getTransform();
-    }
-    var b = {
-        translate: []
+* returns the aggrid cell index and real coords for a given canvas coordinate pair */
+function canvasCoord2geoCoord(a, b) {
+    var c = lastTransformState;
+    return {
+        x: -180 + (-c.translate[0] + a) / (canvasW * c.scale) * 360,
+        y: 90 - (-c.translate[1] + b) / (canvasH * c.scale) * 180
     };
-    var c = false;
-    if (a.translate[0] > 0) {
-        b.translate[0] = 0;
-        c = true;
-    }
-    if (a.translate[1] > 0) {
-        b.translate[1] = 0;
-        c = true;
-    }
-    if (a.translate[0] < (a.scale - 1) * C_W * -1) {
-        b.translate[0] = (a.scale - 1) * C_W * -1;
-        c = true;
-    }
-    if (a.translate[1] < (a.scale - 1) * C_H * -1) {
-        b.translate[1] = (a.scale - 1) * C_H * -1;
-        c = true;
-    }
-    if (c) {
-        if (b.translate[0] === undefined) {
-            b.translate[0] = a.translate[0];
-        }
-        if (b.translate[1] === undefined) {
-            b.translate[1] = a.translate[1];
-        }
-        b.scale = a.scale;
-        return b;
-    } else {
+}
+
+/**
+* map tooltip */
+function canvasMouseMove() {
+    if (drawdat === undefined) {
         return false;
     }
-}
-
-function transitTo(a) {
-    if (a === undefined) {
-        console.error("transitTo: invalid fkt call, t undefined");
-        return 0;
-    }
-    zoombh.scale(a.scale);
-    zoombh.translate(a.translate);
-    d3.select("#heatlayer").transition().duration(600).ease("cubic-in-out").attr("transform", "translate(" + a.translate + ")scale(" + a.scale + ")");
-    genGrid(calcReso(a), getBounds(a));
-}
-
-function getZoomTransform(a) {
-    //if(zoom === undefined) { return 0; }
-    var b = getTransform();
-    a = Math.pow(2, a - 1);
-    var c = a / b.scale;
-    var d = c < 1 ? -(1 - c) : c - 1;
-    b.translate[0] = parseFloat(b.translate[0]) * c - C_W / 2 * d;
-    b.translate[1] = parseFloat(b.translate[1]) * c - C_H / 2 * d;
-    b.scale = a;
-    var e = giveBounds(b);
-    if (e) {
-        b = e;
-    }
-    return b;
-}
-
-function getTransform(a) {
-    if (a === undefined) {
-        a = plotlayer;
-    }
-    var b;
-    if (a.attr("transform") === null) {
-        b = {
-            scale: 1,
-            translate: [ 0, 0 ]
-        };
+    // no drawing, no tooltip!
+    var a = event.pageX - canvasL;
+    var b = event.pageY - canvasT;
+    //console.log('Position in canvas: ('+x+','+y+')');
+    var c = canvasCoord2geoCoord(a, b);
+    var d = coord2index(c.x, c.y, drawdat.reso);
+    var e = tilemap[d];
+    if (e !== undefined) {
+        /*console.log(" ~~~~");
+		console.log("index: "+i);
+		console.log("we have "+tilemap[i].length+" events here: ");
+		console.log(tilemap[i]);
+		console.log(" ~~~~");*/
+        // display the info bubble
+        clearTimeout(bubbleTimer);
+        $("div#bubble").css("opacity", "1").css("bottom", viewportH - event.pageY + M_BUBBLE_OFFSET + "px").css("right", viewportW - event.pageX + M_BUBBLE_OFFSET + "px").html(e.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + c.x.toFixed(2) + ", " + c.y.toFixed(2) + "]</span>");
     } else {
-        b = parseTransform(a.attr("transform"));
+        // hide the info bubble
+        clearTimeout(bubbleTimer);
+        bubbleTimer = setTimeout(function() {
+            $("div#bubble").css("opacity", "0");
+        }, 250);
     }
-    return b;
 }
 
-function parseTransform(a) {
-    var b = {};
-    for (var c in a = a.match(/(\w+\((\-?\d+\.?\d*,?)+\))/g)) {
-        var d = a[c].match(/[\w\.\-]+/g);
-        b[d.shift()] = d;
+/**
+* zoom the map */
+function zoom() {
+    if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
+        //plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        lastTransformState = d3.event;
+        $("#ctrl-zoom>input").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
+        drawPlot(undefined, undefined);
+        // TODO function parameters
+        //forceBounds();
+        genGrid();
     }
-    if (b.scale === undefined) {
-        b.scale = 1;
-    }
-    if (b.scale.length !== undefined) {
-        b.scale = b.scale[0];
-    }
-    if (b.translate === undefined) {
-        b.translate = [ 0, 0 ];
-    }
-    return b;
 }
 
 ////////////////

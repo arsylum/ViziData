@@ -3,6 +3,11 @@
  * Import this file using the following HTML or equivalent:
  * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
 
+/*****
+*** TODO Needs majoir reworking, or cleaning at least..
+*****/
+
+
 @import "compass/reset";
 @import 'mixins';
 
@@ -173,7 +178,7 @@ menu#timefilter {
 }
 
 #map {
-	height: (100)-(2*($map-padding))-($header-height)-($timeline-height);/*($filter-height)+($legend-height)-($timeline-height);*/
+	height: (100) - (2*($map-padding)) - ($timeline-height);/*($filter-height)+($legend-height)-($timeline-height);*/
 	/*margin: $map-margin;*/
 	padding: $map-padding;
 	margin-left: ($left-row-width);/*+$map-margin;*/

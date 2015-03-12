@@ -38,7 +38,7 @@ var	ARR_UNDEFINED = null,	// undefined value
 /// global vars
 //^^^^^^^^^^^^^
 var chart,		// Timeline / dataLine
-	plotlayer,  // plot drawing layer (<g>)
+	//plotlayer,  // plot drawing layer (<g>)
 	bubble,		// popup bubble on map
 	zoombh;		// zoomBehavior
 
@@ -46,16 +46,27 @@ var allow_redraw = true,
 	colorize = true,
 	redrawTimer, // genGrid
 	bubbleTimer, // hide map tooltip bubble
-	boundsTimer; // forceBounds
+	boundsTimer, // forceBounds
+	resizeTimeout; // window resize handling
 
 var gdata = [],		// global rawdata
 	current_datsel,	// slected data group
-	current_setsel;	// selected dataset
+	current_setsel,	// selected dataset
+	tilemap, // latest generated tilemap;
+	drawdat; // latest generated drawing dataset
 	
 var viewportH,
 	viewportW;
 
 var lastTransformState; // remember map scaling (only redraw on changes)
+
+// canvas
+var canvas,
+	ctx,
+	canvasW,
+	canvasH,
+	canvasT,
+	canvasL;
 //_____________
 /// global vars
 ///////////////

@@ -2,41 +2,44 @@
 /// map utilities ///
 /////////////////////
 /**
-* returns grid resolution*/
-function calcReso(t) {
-	if(t === undefined) { t = getTransform(); }
+* returns current grid resolution*/
+function calcReso() {
 	var rf = parseFloat($("#reso-slider").val());
-	return (1/t.scale)*rf;
+	return (1/lastTransformState.scale)*rf;
 }
 
-function getBounds(t) {
-	if(t === undefined) { t = getTransform(); }
+/**
+* returns the current map bounds (rectangle of the currently visible map area)
+* as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
+function getBounds() {
+	var tx = (-lastTransformState.translate[0]/canvasW)*360,
+		ty = (-lastTransformState.translate[1]/canvasH)*180;
 
-	var xmin = (-t.translate[0])/t.scale+C_WMIN,
-		ymin = (-t.translate[1])/t.scale+C_HMIN,
-		bth = M_BOUNDING_THRESHOLD/(t.scale/2);
+	var xmin = (tx)/lastTransformState.scale+C_WMIN,
+		ymin = (ty)/lastTransformState.scale+C_HMIN,
+		bth = M_BOUNDING_THRESHOLD/(lastTransformState.scale/2);
 
 	var bounds = [{
 		min: xmin - bth,
-		max: xmin+(C_WMAX-C_WMIN)/t.scale + bth
+		max: xmin+(C_WMAX-C_WMIN)/lastTransformState.scale + bth
 	},{
-		min: -(ymin+(C_HMAX-C_HMIN)/t.scale) - bth,
+		min: -(ymin+(C_HMAX-C_HMIN)/lastTransformState.scale) - bth,
 		max: -ymin + bth
 	}];
-
 	return bounds;
 }
 
 /**
 * returns the index value for the cell of a grid with given resolution
-* where the given coordinate pair lies in*/
+* where the given real coordinate pair lies in*/
 function coord2index(longi, lati, reso) {
 	if(longi === C_WMAX) longi -= reso;	// prevent 
 	if(lati  === C_HMAX) lati  -= reso; // out of bounds tiles
 
 	return (Math.floor(lati/reso)*((C_WMAX-C_WMIN)/reso) + Math.floor(longi/reso));
 }
-
+/**
+* returns the canvas rendering coordinates for a given index */
 function index2canvasCoord(i, reso) {
 	var cpr = (C_WMAX-C_WMIN)/reso;
 
@@ -44,60 +47,86 @@ function index2canvasCoord(i, reso) {
 	if(rowpos<0) rowpos += cpr;
 	rowpos -= cpr/2;
 
-	var lbx = (rowpos*reso)+(-C_WMIN)+reso/2,
-		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)*(-1))+(-C_HMIN)+reso/2;
+	var lbx = (rowpos*reso)+(-C_WMIN), //+reso/2,
+		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)*(-1))+(-C_HMIN); //+reso/2;
 	
+	// canvas normalization
+	lbx = (lbx/360)*canvasW;
+	lby = (lby/180)*canvasH;
+
 	return [lbx,lby];
-
-	/* // Hammer Projection testing
-	var lbx = (rowpos*reso),
-		lby = (Math.floor((+i+cpr/2)/cpr)*reso);
-
-	var pro = d3.geo.hammer()
-    .scale(80)
-    .translate([0, 0])
-    .precision(.1);
-    var ret = pro([lbx,lby]);
-    ret[0] += -C_WMIN;
-    ret[1] += -C_HMIN;
-
-	return ret; //[lbx,lby];*/
 }
 
 /**
-* returns the coordinate values for the center of the cell
-* with given index in the grid of given resolution*/
-function index2coord(i, reso) {
-	var cpr = 360/reso;
+* returns the aggrid cell index and real coords for a given canvas coordinate pair */
+function canvasCoord2geoCoord(x, y){
+	var t = lastTransformState;
+	return { 
+		x: -180 + ((-t.translate[0] + x) / (canvasW * t.scale) * 360),
+		y:   90 - ((-t.translate[1] + y) / (canvasH * t.scale) * 180)
+	};
+}
 
-	var rowpos = (i-cpr/2)%cpr;
-	if(rowpos<0) rowpos += cpr;
-	rowpos -= cpr/2;
+/**
+* map tooltip */
+function canvasMouseMove() {
+	if(drawdat === undefined) { return false; } // no drawing, no tooltip!
 
-	var lbx = rowpos*reso+reso/2,
-		lby = Math.floor((+i+cpr/2)/cpr)*reso+reso/2;
+	var x = event.pageX - canvasL;
+	var y = event.pageY - canvasT;
+	//console.log('Position in canvas: ('+x+','+y+')');
+	var gc = canvasCoord2geoCoord(x,y);
+	var i = coord2index(gc.x, gc.y, drawdat.reso);
+	var tile = tilemap[i];
 
-	return [lbx,lby];
-}//*/
+	if(tile !== undefined) {
+		/*console.log(" ~~~~");
+		console.log("index: "+i);
+		console.log("we have "+tilemap[i].length+" events here: ");
+		console.log(tilemap[i]);
+		console.log(" ~~~~");*/
+
+		// display the info bubble
+		clearTimeout(bubbleTimer);
+		$("div#bubble").css("opacity","1")
+			.css("bottom", (viewportH - event.pageY + M_BUBBLE_OFFSET) + "px")
+			.css("right", (viewportW - event.pageX + M_BUBBLE_OFFSET) + "px")
+			.html(tile.length +" <em>"+current_setsel.strings.label+"</em><br>"+
+				"<span>["+(gc.x.toFixed(2))+", "+(gc.y.toFixed(2))+"]</span>");
+
+		//TODO we can show more information now!
+	} else {
+		// hide the info bubble
+		clearTimeout(bubbleTimer);
+		bubbleTimer = setTimeout(function() {
+			$("div#bubble").css("opacity", "0");
+		},250);
+	}
+}
 
 
 /**
-* zoom the svg */
+* zoom the map */
 function zoom() {
 	if( d3.event.translate[0] !== lastTransformState.translate[0] ||
 		d3.event.translate[1] !== lastTransformState.translate[1] ||
 		d3.event.scale !== lastTransformState.scale) {
-		plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+		//plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 		
 		lastTransformState = d3.event;
 		
 		$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
-		forceBounds();
+		drawPlot(undefined,undefined); // TODO function parameters
+		//forceBounds();
 		genGrid();
 	}
 }
 
+////
+/// TODO issue #1
+//
+/** 
 function forceBounds() {
 	clearTimeout(boundsTimer);
 	boundsTimer = setTimeout(function() {
@@ -106,16 +135,16 @@ function forceBounds() {
 }
 
 function forceBoundsFkt() {
-	var b;
-	if(b=giveBounds()) {
+	var b = giveBounds;
+	if(b) {
 		transitTo(b);
 	}
-}
+}*/
 
 /**
 * returns false if t is in map bounds
 * proper bounds otherwise 
-*(very anti-elegant function...)*/
+*(very anti-elegant function...)* /
 function giveBounds(t) {
 	if(t === undefined) { t = getTransform(); }
 	var b = {translate: []};
@@ -169,29 +198,4 @@ function getZoomTransform(zoom) {
 	if(h) { t = h; }
 
 	return t;
-}
-
-
-function getTransform(el) {
-	if(el === undefined) { el = plotlayer; }
-	var t;
-	if(el.attr("transform") === null) {
-		t = {scale: 1, translate: [0,0]};
-	} else {
-		t = parseTransform(el.attr("transform"));
-	}
-	return t;
-}
-
-function parseTransform (s) {
-    var r = {};
-    for (var i in (s = s.match(/(\w+\((\-?\d+\.?\d*,?)+\))/g))) {
-        var m = s[i].match(/[\w\.\-]+/g);
-        r[m.shift()] = m;
-    }
-    if(r.scale === undefined) { r.scale = 1; }
-    if(r.scale.length !== undefined) { r.scale = r.scale[0]; }
-    if(r.translate === undefined) { r.translate = [0,0]; }
-
-    return r;
-}
+}*/
