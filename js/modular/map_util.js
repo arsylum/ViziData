@@ -82,10 +82,13 @@ function index2canvasCoord(i, reso) {
 	return ret; //[lbx,lby];*/
 }
 /**
-* returns the aggrid cell index for a given canvas coordinate pair */
-function canvasCoord2index(x, y, reso){
-	// TODO
-	return 6;
+* returns the aggrid cell index and real coords for a given canvas coordinate pair */
+function canvasCoord2geoCoord(x, y){
+	var t = lastTransformState;
+	return { 
+		x: -180 + ((-t.translate[0] + x) / (canvasW * t.scale) * 360),
+		y:   90 - ((-t.translate[1] + y) / (canvasH * t.scale) * 180)
+	};
 }
 
 /**
@@ -113,8 +116,33 @@ function canvasMouseMove() {
 	var x = event.pageX - canvasL;
 	var y = event.pageY - canvasT;
 	//console.log('Position in canvas: ('+x+','+y+')');
-	var i = canvasCoord2index(x,y,drawdat.reso);
+	var gc = canvasCoord2geoCoord(x,y);
+	var i = coord2index(gc.x, gc.y, drawdat.reso);
+	var tile = tilemap[i];
 
+	if(tile !== undefined) {
+		/*console.log(" ~~~~");
+		console.log("index: "+i);
+		console.log("we have "+tilemap[i].length+" events here: ");
+		console.log(tilemap[i]);
+		console.log(" ~~~~");*/
+
+		// display the info bubble
+		clearTimeout(bubbleTimer);
+		$("div#bubble").css("opacity","1")
+			.css("bottom", (viewportH - event.pageY + M_BUBBLE_OFFSET) + "px")
+			.css("right", (viewportW - event.pageX + M_BUBBLE_OFFSET) + "px")
+			.html(tile.length +" <em>"+current_setsel.strings.label+"</em><br>"+
+				"<span>["+(gc.x.toFixed(2))+", "+(gc.y.toFixed(2))+"]</span>");
+
+		//TODO we can show more information now!
+	} else {
+		// hide the info bubble
+		clearTimeout(bubbleTimer);
+		bubbleTimer = setTimeout(function() {
+			$("div#bubble").css("opacity", "0");
+		},250);
+	}
 }
 
 
@@ -144,8 +172,8 @@ function forceBounds() {
 }
 
 function forceBoundsFkt() {
-	var b;
-	if(b=giveBounds()) {
+	var b = giveBounds;
+	if(b) {
 		transitTo(b);
 	}
 }

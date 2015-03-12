@@ -381,9 +381,9 @@ function drawPlot(a) {
 
 	var rx = (drawdat.reso*ppdx)/lastTransformState.scale,
 		ry = (drawdat.reso*ppdy)/lastTransformState.scale;*/
-    var m = drawdat.reso * canvasW / 360 * 3, // larger size
-    n = drawdat.reso * canvasH / 180 * 3, // for bleeding with gradients
-    o = drawdat.reso * canvasW / 360 / 2 * 3, p = drawdat.reso * canvasH / 180 / 2 * 3;
+    var m = drawdat.reso * canvasW / 360 * 1.2, // larger size
+    n = drawdat.reso * canvasH / 180 * 1.2, // for bleeding with gradients
+    o = drawdat.reso * canvasW / 360 / 2 * 1.2, p = drawdat.reso * canvasH / 180 / 2 * 1.2;
     var q = -1, r = drawdat.draw.length, s, t, u, v, w;
     ctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
     ctx.scale(lastTransformState.scale, lastTransformState.scale);
@@ -391,17 +391,22 @@ function drawPlot(a) {
         s = drawdat.draw[q];
         t = s[0][0];
         u = s[0][1];
-        //ctx.fillStyle = 
-        v = "rgba(" + Math.floor(f - Math.floor(Math.log(s[1]) * rlog_factor)) + "," + Math.floor(g - Math.floor(Math.log(s[1]) * j)) + "," + Math.floor(h - Math.floor(s[1] * k)) + ",";
-        //+
-        //"0.6)";//((d[1]/drawdat.max)/4+0.6)+")";
-        w = ctx.createRadialGradient(t, u, o, t, u, 0);
-        w.addColorStop(0, v + "0)");
-        w.addColorStop(.6, v + "0.4)");
-        w.addColorStop(.7, v + "1)");
-        w.addColorStop(1, v + "1)");
-        ctx.fillStyle = w;
-        ctx.fillRect(t - o, u - o, m, n);
+        ctx.fillStyle = //fc = 
+        "rgba(" + Math.floor(f - Math.floor(Math.log(s[1]) * rlog_factor)) + "," + Math.floor(g - Math.floor(Math.log(s[1]) * j)) + "," + Math.floor(h - Math.floor(s[1] * k)) + "," + "0.8)";
+        //((d[1]/drawdat.max)/4+0.6)+")";
+        /*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
+		gradient.addColorStop(0,fc+"0)");
+		gradient.addColorStop(0.6, fc+"0.4)");
+		gradient.addColorStop(0.7, fc+"1)");
+		gradient.addColorStop(1,fc+"1)");*/
+        //ctx.fillStyle = gradient;
+        //ctx.fillRect(cx-rx,cy-rx,wx,wy); /*
+        ctx.beginPath();
+        //ctx.moveTo(cx,cy);
+        //ctx.arc(cx, cy, rx, 0, 2 * Math.PI);
+        ctx.ellipse(t, u, o, p, 0, 0, 2 * Math.PI);
+        //ctx.stroke();
+        ctx.fill();
     }
     console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - l) + "ms");
     ctx.restore();
@@ -431,21 +436,6 @@ function drawPlot(a) {
     });
     console.log("  |BM| (svg manipulation took " + (new Date() - x) + "ms)");
     console.log("  |BM| plot drawn in " + (new Date() - b) + "ms");
-}
-
-////////////////////
-/// mouse events ///
-////////////////////
-function mouseOver(a) {
-    clearTimeout(bubbleTimer);
-    $("div#bubble").css("opacity", "1").css("bottom", viewportH - d3.event.pageY + M_BUBBLE_OFFSET + "px").css("right", viewportW - d3.event.pageX + M_BUBBLE_OFFSET + "px").html(a[1] + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + (a[0][0] - 180).toFixed(2) + ", " + (a[0][1] * -1 + 90).toFixed(2) + "]</span>");
-}
-
-function mouseOut() {
-    clearTimeout(bubbleTimer);
-    bubbleTimer = setTimeout(function() {
-        $("div#bubble").css("opacity", "0");
-    }, 250);
 }
 
 /////////////////////
@@ -510,10 +500,13 @@ function index2canvasCoord(a, b) {
 }
 
 /**
-* returns the aggrid cell index for a given canvas coordinate pair */
-function canvasCoord2index(a, b, c) {
-    // TODO
-    return 6;
+* returns the aggrid cell index and real coords for a given canvas coordinate pair */
+function canvasCoord2geoCoord(a, b) {
+    var c = lastTransformState;
+    return {
+        x: -180 + (-c.translate[0] + a) / (canvasW * c.scale) * 360,
+        y: 90 - (-c.translate[1] + b) / (canvasH * c.scale) * 180
+    };
 }
 
 /**
@@ -542,7 +535,25 @@ function canvasMouseMove() {
     var a = event.pageX - canvasL;
     var b = event.pageY - canvasT;
     //console.log('Position in canvas: ('+x+','+y+')');
-    var c = canvasCoord2index(a, b, drawdat.reso);
+    var c = canvasCoord2geoCoord(a, b);
+    var d = coord2index(c.x, c.y, drawdat.reso);
+    var e = tilemap[d];
+    if (e !== undefined) {
+        /*console.log(" ~~~~");
+		console.log("index: "+i);
+		console.log("we have "+tilemap[i].length+" events here: ");
+		console.log(tilemap[i]);
+		console.log(" ~~~~");*/
+        // display the info bubble
+        clearTimeout(bubbleTimer);
+        $("div#bubble").css("opacity", "1").css("bottom", viewportH - event.pageY + M_BUBBLE_OFFSET + "px").css("right", viewportW - event.pageX + M_BUBBLE_OFFSET + "px").html(e.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + c.x.toFixed(2) + ", " + c.y.toFixed(2) + "]</span>");
+    } else {
+        // hide the info bubble
+        clearTimeout(bubbleTimer);
+        bubbleTimer = setTimeout(function() {
+            $("div#bubble").css("opacity", "0");
+        }, 250);
+    }
 }
 
 /**
@@ -567,8 +578,8 @@ function forceBounds() {
 }
 
 function forceBoundsFkt() {
-    var a;
-    if (a = giveBounds()) {
+    var a = giveBounds;
+    if (a) {
         transitTo(a);
     }
 }

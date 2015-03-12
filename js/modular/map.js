@@ -193,10 +193,10 @@ function drawPlot(newmap) {
 	var rx = (drawdat.reso*ppdx)/lastTransformState.scale,
 		ry = (drawdat.reso*ppdy)/lastTransformState.scale;*/
 
-	var wx = ((drawdat.reso*canvasW)/360)*3, // larger size
-		wy = ((drawdat.reso*canvasH)/180)*3, // for bleeding with gradients
-		rx = ((drawdat.reso*canvasW)/360/2)*3,
-		ry = ((drawdat.reso*canvasH)/180/2)*3;
+	var wx = ((drawdat.reso*canvasW)/360)*1.2, // larger size
+		wy = ((drawdat.reso*canvasH)/180)*1.2, // for bleeding with gradients
+		rx = ((drawdat.reso*canvasW)/360/2)*1.2,
+		ry = ((drawdat.reso*canvasH)/180/2)*1.2;
 
 	var i= -1, n = drawdat.draw.length, d, cx, cy, fc, gradient;
 
@@ -206,22 +206,22 @@ function drawPlot(newmap) {
 		d = drawdat.draw[i];
 		cx = d[0][0];
 		cy = d[0][1];
-		//ctx.fillStyle = 
-		fc = "rgba("+
+		ctx.fillStyle = 
+		//fc = 
+		"rgba("+
 			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
 			Math.floor(gmax -Math.floor(Math.log(d[1])*glog_factor))+","+
-			Math.floor(bmax -Math.floor(d[1]*blog_factor))+",";//+
-			//"0.6)";//((d[1]/drawdat.max)/4+0.6)+")";
+			Math.floor(bmax -Math.floor(d[1]*blog_factor))+","+
+			"0.8)";//((d[1]/drawdat.max)/4+0.6)+")";
 
-		gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
+		/*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
 		gradient.addColorStop(0,fc+"0)");
 		gradient.addColorStop(0.6, fc+"0.4)");
 		gradient.addColorStop(0.7, fc+"1)");
-		gradient.addColorStop(1,fc+"1)");
-		ctx.fillStyle = gradient;
+		gradient.addColorStop(1,fc+"1)");*/
+		//ctx.fillStyle = gradient;
 
-
-		ctx.fillRect(cx-rx,cy-rx,wx,wy); /*
+		//ctx.fillRect(cx-rx,cy-rx,wx,wy); /*
 		ctx.beginPath();
 		//ctx.moveTo(cx,cy);
 		//ctx.arc(cx, cy, rx, 0, 2 * Math.PI);
@@ -278,7 +278,7 @@ function drawPlot(newmap) {
 ////////////////////
 /// mouse events ///
 ////////////////////
-function mouseOver(d) {
+/*function mouseOver(d) {
 	clearTimeout(bubbleTimer);
 	$("div#bubble").css("opacity","1")
 		.css("bottom",((viewportH-d3.event.pageY)+M_BUBBLE_OFFSET)+"px")
@@ -292,4 +292,4 @@ function mouseOut() {
 	bubbleTimer = setTimeout(function() {
 		$("div#bubble").css("opacity", "0");
 	},250);
-}
+}*/
