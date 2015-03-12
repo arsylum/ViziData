@@ -3,29 +3,5 @@
 *													*
 * Application logic									*
 *													*
-* this application is still under development		*
-* hence the code is somewhat messy					*
-*****************************************************
-*													*
-* some TODOS...										*
-*	-design is inflexible for concurrency of		*
-*    multiple datagroups. but theres only 1 group	*
-*    so far anyway... (humans)						*
-*													*
-*	-concurrent dataset functionality				*
-*    manage data in memory							*
-*    multiple layers with opacity slider?			*
-*    manage active datasets somehow					*
-*    keep the timeline selection somehow			*
-*													*
-*	-delete all the datasets null vals on init!?	*
-*													*
-*	-the humans_p file is neither loaded nor used   *
-*	('-> filter and instance browse capabilities)	*
-*													*
-*	-map underlay! maybe leaflet integration		*
-*	&&/|| some kind of orientation indicator		*
-*													*
-*	-map repositioning should be more tolerant		*
-*	-[remove all the benchmarking console logs]		*
+* old svg based rendering, kept for reference		*
 ****************************************************/
