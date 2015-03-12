@@ -87,7 +87,7 @@ resizeTimeout;
 var gdata = [], // global rawdata
 current_datsel, // slected data group
 current_setsel, // selected dataset
-tilemap, // latest generated tilemap;
+cellmap, // latest generated tilemap;
 drawdat;
 
 // latest generated drawing dataset
@@ -277,8 +277,8 @@ function generateGrid(a, b, c) {
             }
         }
         console.log("  |BM| iteration complete (" + (new Date() - d) + "ms)");
-        tilemap = e;
-        //console.log(tile_mapping);
+        cellmap = e;
+        //console.log(cell_mapping);
         drawPlot(true, {
             map: e,
             reso: a
@@ -316,7 +316,7 @@ function testing_aggregator(a, b, c) {
 /**
 * draw the map layer
 * [@param clear] if false, do not clear canvas before drawing
-* [@param newmap] new tile mapping to derive drawing data from
+* [@param newmap] new cell mapping to derive drawing data from
 */
 function drawPlot(a, b) {
     if (a === undefined) {
@@ -437,7 +437,7 @@ function coord2index(a, b, c) {
     if (a === C_WMAX) a -= c;
     // prevent 
     if (b === C_HMAX) b -= c;
-    // out of bounds tiles
+    // out of bounds cells
     return Math.floor(b / c) * ((C_WMAX - C_WMIN) / c) + Math.floor(a / c);
 }
 
@@ -479,12 +479,12 @@ function canvasMouseMove() {
     //console.log('Position in canvas: ('+x+','+y+')');
     var c = canvasCoord2geoCoord(a, b);
     var d = coord2index(c.x, c.y, drawdat.reso);
-    var e = tilemap[d];
+    var e = cellmap[d];
     if (e !== undefined) {
         /*console.log(" ~~~~");
 		console.log("index: "+i);
-		console.log("we have "+tilemap[i].length+" events here: ");
-		console.log(tilemap[i]);
+		console.log("we have "+cellmap[i].length+" events here: ");
+		console.log(cellmap[i]);
 		console.log(" ~~~~");*/
         // display the info bubble
         clearTimeout(bubbleTimer);

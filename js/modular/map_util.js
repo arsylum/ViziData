@@ -34,7 +34,7 @@ function getBounds() {
 * where the given real coordinate pair lies in*/
 function coord2index(longi, lati, reso) {
 	if(longi === C_WMAX) longi -= reso;	// prevent 
-	if(lati  === C_HMAX) lati  -= reso; // out of bounds tiles
+	if(lati  === C_HMAX) lati  -= reso; // out of bounds cells
 
 	return (Math.floor(lati/reso)*((C_WMAX-C_WMIN)/reso) + Math.floor(longi/reso));
 }
@@ -77,13 +77,13 @@ function canvasMouseMove() {
 	//console.log('Position in canvas: ('+x+','+y+')');
 	var gc = canvasCoord2geoCoord(x,y);
 	var i = coord2index(gc.x, gc.y, drawdat.reso);
-	var tile = tilemap[i];
+	var cell = cellmap[i];
 
-	if(tile !== undefined) {
+	if(cell !== undefined) {
 		/*console.log(" ~~~~");
 		console.log("index: "+i);
-		console.log("we have "+tilemap[i].length+" events here: ");
-		console.log(tilemap[i]);
+		console.log("we have "+cellmap[i].length+" events here: ");
+		console.log(cellmap[i]);
 		console.log(" ~~~~");*/
 
 		// display the info bubble
@@ -91,7 +91,7 @@ function canvasMouseMove() {
 		$("div#bubble").css("opacity","1")
 			.css("bottom", (viewportH - event.pageY + M_BUBBLE_OFFSET) + "px")
 			.css("right", (viewportW - event.pageX + M_BUBBLE_OFFSET) + "px")
-			.html(tile.length +" <em>"+current_setsel.strings.label+"</em><br>"+
+			.html(cell.length +" <em>"+current_setsel.strings.label+"</em><br>"+
 				"<span>["+(gc.x.toFixed(2))+", "+(gc.y.toFixed(2))+"]</span>");
 
 		//TODO we can show more information now!

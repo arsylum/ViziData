@@ -29,7 +29,7 @@ function generateGrid(reso, mAE, data) {
 		var bms = new Date();
 		console.log("  ~ start iterating data");
 
-		var tile_mapping = {};
+		var cell_mapping = {};
 		var count = 0;
 
 		/// calculate everything we can outside the loop for performance
@@ -60,7 +60,7 @@ function generateGrid(reso, mAE, data) {
 					if((data.data[i][j] !== ARR_UNDEFINED) && (data.data[i][j] !== undefined)) {
 						for(var k = 0; k<data.data[i][j].length; k++) {
 							if(section_filter(data.data[i][j][k],mAE)) {
-								tile_mapping = testing_aggregator(tile_mapping,data.data[i][j][k], reso);
+								cell_mapping = testing_aggregator(cell_mapping,data.data[i][j][k], reso);
 								// TODO remove function call for performance?
 								count++;
 							}
@@ -71,9 +71,9 @@ function generateGrid(reso, mAE, data) {
 		}
 
 		console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
-		tilemap = tile_mapping;
-		//console.log(tile_mapping);
-		drawPlot(true, {map: tile_mapping, reso: reso});
+		cellmap = cell_mapping;
+		//console.log(cell_mapping);
+		drawPlot(true, {map: cell_mapping, reso: reso});
 		console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
 
 		$("#legend").html("<em>in this area</em><br>"+
@@ -124,7 +124,7 @@ function testing_aggregator(tmap,obj,reso) {
 /**
 * draw the map layer
 * [@param clear] if false, do not clear canvas before drawing
-* [@param newmap] new tile mapping to derive drawing data from
+* [@param newmap] new cell mapping to derive drawing data from
 */
 function drawPlot(clear, newmap) {
 	if(clear === undefined) { clear = true; }

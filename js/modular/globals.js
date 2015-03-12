@@ -52,7 +52,7 @@ var allow_redraw = true,
 var gdata = [],		// global rawdata
 	current_datsel,	// slected data group
 	current_setsel,	// selected dataset
-	tilemap, // latest generated tilemap;
+	cellmap, // latest generated tilemap;
 	drawdat; // latest generated drawing dataset
 	
 var viewportH,
