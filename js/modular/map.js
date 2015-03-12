@@ -210,7 +210,8 @@ function drawPlot(clear, newmap) {
 		gradient.addColorStop(1,fc+"1)");*/
 		//ctx.fillStyle = gradient;
 
-		ctx.fillRect(cx-rx,cy-rx,wx,wy);/*
+		//ctx.fillRect(cx-rx,cy-rx,wx,wy);
+		ctx.fillRect(cx,cy-wy,wx,wy);/*
 		ctx.beginPath();
 		//ctx.moveTo(cx,cy);
 		//ctx.arc(cx, cy, rx, 0, 2 * Math.PI);
@@ -223,24 +224,3 @@ function drawPlot(clear, newmap) {
 	console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");
 	ctx.restore();
 }
-
-
-
-////////////////////
-/// mouse events ///
-////////////////////
-/*function mouseOver(d) {
-	clearTimeout(bubbleTimer);
-	$("div#bubble").css("opacity","1")
-		.css("bottom",((viewportH-d3.event.pageY)+M_BUBBLE_OFFSET)+"px")
-		.css("right",((viewportW-d3.event.pageX)+M_BUBBLE_OFFSET)+"px")
-		.html(d[1]+" <em>"+current_setsel.strings.label+"</em><br>"+
-			"<span>["+(d[0][0]-180).toFixed(2)+", "+(d[0][1]*(-1)+90).toFixed(2)+"]</span>");
-}
-
-function mouseOut() {
-	clearTimeout(bubbleTimer);
-	bubbleTimer = setTimeout(function() {
-		$("div#bubble").css("opacity", "0");
-	},250);
-}*/

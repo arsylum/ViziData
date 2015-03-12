@@ -397,7 +397,8 @@ function drawPlot(a, b) {
 		gradient.addColorStop(0.7, fc+"1)");
 		gradient.addColorStop(1,fc+"1)");*/
         //ctx.fillStyle = gradient;
-        ctx.fillRect(v - q, w - q, o, p);
+        //ctx.fillRect(cx-rx,cy-rx,wx,wy);
+        ctx.fillRect(v, w - p, o, p);
     }
     console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - m) + "ms");
     ctx.restore();
@@ -408,33 +409,25 @@ function drawPlot(a, b) {
 /////////////////////
 /**
 * returns current grid resolution*/
-// TODO remove param?
-function calcReso(a) {
-    //return 1;
-    // TODO remove dev mode dummy output
-    //if(t === undefined) { t = getTransform(); }
-    var b = parseFloat($("#reso-slider").val());
-    return 1 / lastTransformState.scale * b;
+function calcReso() {
+    var a = parseFloat($("#reso-slider").val());
+    return 1 / lastTransformState.scale * a;
 }
 
 /**
 * returns the current map bounds (rectangle of the currently visible map area)
 * as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
-// TODO remove param?
-function getBounds(a) {
-    //return [{min: -180, max: 180},{min: -90, max: 90}];
-    // TODO rmove dev mode dummy output
-    //if(t === undefined) { t = getTransform(); }
-    var b = -lastTransformState.translate[0] / canvasW * 360, c = -lastTransformState.translate[1] / canvasH * 180;
-    var d = b / lastTransformState.scale + C_WMIN, e = c / lastTransformState.scale + C_HMIN, f = M_BOUNDING_THRESHOLD / (lastTransformState.scale / 2);
-    var g = [ {
-        min: d - f,
-        max: d + (C_WMAX - C_WMIN) / lastTransformState.scale + f
+function getBounds() {
+    var a = -lastTransformState.translate[0] / canvasW * 360, b = -lastTransformState.translate[1] / canvasH * 180;
+    var c = a / lastTransformState.scale + C_WMIN, d = b / lastTransformState.scale + C_HMIN, e = M_BOUNDING_THRESHOLD / (lastTransformState.scale / 2);
+    var f = [ {
+        min: c - e,
+        max: c + (C_WMAX - C_WMIN) / lastTransformState.scale + e
     }, {
-        min: -(e + (C_HMAX - C_HMIN) / lastTransformState.scale) - f,
-        max: -e + f
+        min: -(d + (C_HMAX - C_HMIN) / lastTransformState.scale) - e,
+        max: -d + e
     } ];
-    return g;
+    return f;
 }
 
 /**
@@ -458,7 +451,7 @@ function index2canvasCoord(a, b) {
     var e = d * b + -C_WMIN, //+reso/2,
     f = Math.floor((+a + c / 2) / c) * b * -1 + -C_HMIN;
     //+reso/2;
-    // canvas normaization, TODO unify
+    // canvas normalization
     e = e / 360 * canvasW;
     f = f / 180 * canvasH;
     return [ e, f ];
@@ -474,22 +467,6 @@ function canvasCoord2geoCoord(a, b) {
     };
 }
 
-/**
-* returns the coordinate values for the center of the cell
-* with given index in the grid of given resolution* 
-(is currently used nowhere)/
-function index2coord(i, reso) {
-	var cpr = 360/reso;
-
-	var rowpos = (i-cpr/2)%cpr;
-	if(rowpos<0) rowpos += cpr;
-	rowpos -= cpr/2;
-
-	var lbx = rowpos*reso+reso/2,
-		lby = Math.floor((+i+cpr/2)/cpr)*reso+reso/2;
-
-	return [lbx,lby];
-}//*/
 /**
 * map tooltip */
 function canvasMouseMove() {
@@ -533,89 +510,6 @@ function zoom() {
         //forceBounds();
         genGrid();
     }
-}
-
-function forceBounds() {
-    clearTimeout(boundsTimer);
-    boundsTimer = setTimeout(function() {
-        forceBoundsFkt();
-    }, 300);
-}
-
-function forceBoundsFkt() {
-    var a = giveBounds;
-    if (a) {
-        transitTo(a);
-    }
-}
-
-/**
-* returns false if t is in map bounds
-* proper bounds otherwise 
-*(very anti-elegant function...)*/
-function giveBounds(a) {
-    if (a === undefined) {
-        a = getTransform();
-    }
-    var b = {
-        translate: []
-    };
-    var c = false;
-    if (a.translate[0] > 0) {
-        b.translate[0] = 0;
-        c = true;
-    }
-    if (a.translate[1] > 0) {
-        b.translate[1] = 0;
-        c = true;
-    }
-    if (a.translate[0] < (a.scale - 1) * C_W * -1) {
-        b.translate[0] = (a.scale - 1) * C_W * -1;
-        c = true;
-    }
-    if (a.translate[1] < (a.scale - 1) * C_H * -1) {
-        b.translate[1] = (a.scale - 1) * C_H * -1;
-        c = true;
-    }
-    if (c) {
-        if (b.translate[0] === undefined) {
-            b.translate[0] = a.translate[0];
-        }
-        if (b.translate[1] === undefined) {
-            b.translate[1] = a.translate[1];
-        }
-        b.scale = a.scale;
-        return b;
-    } else {
-        return false;
-    }
-}
-
-function transitTo(a) {
-    if (a === undefined) {
-        console.error("transitTo: invalid fkt call, t undefined");
-        return 0;
-    }
-    zoombh.scale(a.scale);
-    zoombh.translate(a.translate);
-    d3.select("#heatlayer").transition().duration(600).ease("cubic-in-out").attr("transform", "translate(" + a.translate + ")scale(" + a.scale + ")");
-    genGrid(calcReso(a), getBounds(a));
-}
-
-function getZoomTransform(a) {
-    //if(zoom === undefined) { return 0; }
-    var b = getTransform();
-    a = Math.pow(2, a - 1);
-    var c = a / b.scale;
-    var d = c < 1 ? -(1 - c) : c - 1;
-    b.translate[0] = parseFloat(b.translate[0]) * c - C_W / 2 * d;
-    b.translate[1] = parseFloat(b.translate[1]) * c - C_H / 2 * d;
-    b.scale = a;
-    var e = giveBounds(b);
-    if (e) {
-        b = e;
-    }
-    return b;
 }
 
 ////////////////

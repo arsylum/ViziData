@@ -3,12 +3,7 @@
 /////////////////////
 /**
 * returns current grid resolution*/
-// TODO remove param?
-function calcReso(t) {
-	//return 1;
-	// TODO remove dev mode dummy output
-
-	//if(t === undefined) { t = getTransform(); }
+function calcReso() {
 	var rf = parseFloat($("#reso-slider").val());
 	return (1/lastTransformState.scale)*rf;
 }
@@ -16,13 +11,7 @@ function calcReso(t) {
 /**
 * returns the current map bounds (rectangle of the currently visible map area)
 * as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
-// TODO remove param?
-function getBounds(t) {
-	//return [{min: -180, max: 180},{min: -90, max: 90}];
-	// TODO rmove dev mode dummy output
-
-	//if(t === undefined) { t = getTransform(); }
-
+function getBounds() {
 	var tx = (-lastTransformState.translate[0]/canvasW)*360,
 		ty = (-lastTransformState.translate[1]/canvasH)*180;
 
@@ -61,26 +50,13 @@ function index2canvasCoord(i, reso) {
 	var lbx = (rowpos*reso)+(-C_WMIN), //+reso/2,
 		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)*(-1))+(-C_HMIN); //+reso/2;
 	
-	// canvas normaization, TODO unify
+	// canvas normalization
 	lbx = (lbx/360)*canvasW;
 	lby = (lby/180)*canvasH;
 
 	return [lbx,lby];
-
-	/* // Hammer Projection testing
-	var lbx = (rowpos*reso),
-		lby = (Math.floor((+i+cpr/2)/cpr)*reso);
-
-	var pro = d3.geo.hammer()
-    .scale(80)
-    .translate([0, 0])
-    .precision(.1);
-    var ret = pro([lbx,lby]);
-    ret[0] += -C_WMIN;
-    ret[1] += -C_HMIN;
-
-	return ret; //[lbx,lby];*/
 }
+
 /**
 * returns the aggrid cell index and real coords for a given canvas coordinate pair */
 function canvasCoord2geoCoord(x, y){
@@ -90,23 +66,6 @@ function canvasCoord2geoCoord(x, y){
 		y:   90 - ((-t.translate[1] + y) / (canvasH * t.scale) * 180)
 	};
 }
-
-/**
-* returns the coordinate values for the center of the cell
-* with given index in the grid of given resolution* 
-(is currently used nowhere)/
-function index2coord(i, reso) {
-	var cpr = 360/reso;
-
-	var rowpos = (i-cpr/2)%cpr;
-	if(rowpos<0) rowpos += cpr;
-	rowpos -= cpr/2;
-
-	var lbx = rowpos*reso+reso/2,
-		lby = Math.floor((+i+cpr/2)/cpr)*reso+reso/2;
-
-	return [lbx,lby];
-}//*/
 
 /**
 * map tooltip */
@@ -164,6 +123,10 @@ function zoom() {
 	}
 }
 
+////
+/// TODO issue #1
+//
+/** 
 function forceBounds() {
 	clearTimeout(boundsTimer);
 	boundsTimer = setTimeout(function() {
@@ -176,12 +139,12 @@ function forceBoundsFkt() {
 	if(b) {
 		transitTo(b);
 	}
-}
+}*/
 
 /**
 * returns false if t is in map bounds
 * proper bounds otherwise 
-*(very anti-elegant function...)*/
+*(very anti-elegant function...)* /
 function giveBounds(t) {
 	if(t === undefined) { t = getTransform(); }
 	var b = {translate: []};
@@ -235,29 +198,4 @@ function getZoomTransform(zoom) {
 	if(h) { t = h; }
 
 	return t;
-}
-
-/*
-function getTransform(el) {
-	if(el === undefined) { el = plotlayer; }
-	var t;
-	if(el.attr("transform") === null) {
-		t = {scale: 1, translate: [0,0]};
-	} else {
-		t = parseTransform(el.attr("transform"));
-	}
-	return t;
-}
-
-function parseTransform (s) {
-    var r = {};
-    for (var i in (s = s.match(/(\w+\((\-?\d+\.?\d*,?)+\))/g))) {
-        var m = s[i].match(/[\w\.\-]+/g);
-        r[m.shift()] = m;
-    }
-    if(r.scale === undefined) { r.scale = 1; }
-    if(r.scale.length !== undefined) { r.scale = r.scale[0]; }
-    if(r.translate === undefined) { r.translate = [0,0]; }
-
-    return r;
 }*/
