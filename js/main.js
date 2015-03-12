@@ -279,7 +279,7 @@ function generateGrid(a, b, c) {
         console.log("  |BM| iteration complete (" + (new Date() - d) + "ms)");
         tilemap = e;
         //console.log(tile_mapping);
-        drawPlot({
+        drawPlot(true, {
             map: e,
             reso: a
         });
@@ -315,84 +315,81 @@ function testing_aggregator(a, b, c) {
 
 /**
 * draw the map layer
+* [@param clear] if false, do not clear canvas before drawing
+* [@param newmap] new tile mapping to derive drawing data from
 */
-function drawPlot(a) {
-    // TODO remove tilemap parameter? and reso?
-    //reso = calcReso();
-    /// canvas test
+function drawPlot(a, b) {
+    if (a === undefined) {
+        a = true;
+    }
     ctx.save();
-    ctx.clearRect(0, 0, canvasW, canvasH);
-    //ctx.fillRect(10,10,200,200);
-    //plotlayer.selectAll("circle").remove();
-    var b = new Date();
-    /*var dataset = [];
-	var min = Infinity,
-		max = -Infinity;*/
-    if (a !== undefined) {
-        // calculate new darwing map
-        var c = [], d = Infinity, e = -Infinity;
-        $.each(a.map, function(b, f) {
-            var g = index2canvasCoord(b, a.reso);
-            f = f.length;
-            c.push([ [ g[0], g[1] ], f ]);
+    if (a !== false) {
+        ctx.clearRect(0, 0, canvasW, canvasH);
+    }
+    var c = new Date();
+    if (b !== undefined) {
+        // calculate new drawing map
+        var d = [], e = Infinity, f = -Infinity;
+        $.each(b.map, function(a, c) {
+            var g = index2canvasCoord(a, b.reso);
+            c = c.length;
+            d.push([ [ g[0], g[1] ], c ]);
             // get extreme values
-            if (f < d) {
-                d = f;
+            if (c < e) {
+                e = c;
             }
-            if (f > e) {
-                e = f;
+            if (c > f) {
+                f = c;
             }
         });
         drawdat = {
-            draw: c,
-            min: d,
-            max: e,
-            reso: a.reso
+            draw: d,
+            min: e,
+            max: f,
+            reso: b.reso
         };
     }
     console.log("  ~ drawing " + drawdat.draw.length + " shapes");
     console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
-    console.log("  |BM| (dataset generation in " + (new Date() - b) + "ms)");
+    console.log("  |BM| (dataset generation in " + (new Date() - c) + "ms)");
     // color defs
-    /// TODO color calculation i s buggy
-    var f, g, h, i, j, k;
+    /// TODO color calculation is buggy
+    // (using hsl model might be good idea)
+    var g, h, i, j, k, l;
     if (colorize) {
-        f = current_setsel.colorScale.min[0];
-        rlog_factor = (f - current_setsel.colorScale.max[0]) / Math.log(drawdat.max);
-        g = current_setsel.colorScale.min[1];
-        j = (g - current_setsel.colorScale.max[1]) / Math.log(drawdat.max);
-        h = current_setsel.colorScale.min[2];
-        k = (h - current_setsel.colorScale.max[2]) / Math.log(drawdat.max);
+        g = current_setsel.colorScale.min[0];
+        rlog_factor = (g - current_setsel.colorScale.max[0]) / Math.log(drawdat.max);
+        h = current_setsel.colorScale.min[1];
+        k = (h - current_setsel.colorScale.max[1]) / Math.log(drawdat.max);
+        i = current_setsel.colorScale.min[2];
+        l = (i - current_setsel.colorScale.max[2]) / Math.log(drawdat.max);
     } else {
-        h = 255;
+        i = 255;
         //215;
-        k = h / drawdat.max;
+        l = i / drawdat.max;
         //Math.log(drawdat.max);
-        g = 235;
+        h = 235;
         //205;
-        j = g / Math.log(drawdat.max);
-        f = 185;
+        k = h / Math.log(drawdat.max);
+        g = 185;
         //14;
-        rlog_factor = f / Math.log(drawdat.max);
+        rlog_factor = g / Math.log(drawdat.max);
     }
-    var l = new Date();
-    /*var ppdx = canvasW/(360/lastTransformState.scale),
-		ppdy = canvasH/(180/lastTransformState.scale);
-
-	var rx = (drawdat.reso*ppdx)/lastTransformState.scale,
-		ry = (drawdat.reso*ppdy)/lastTransformState.scale;*/
-    var m = drawdat.reso * canvasW / 360 * 1.2, // larger size
-    n = drawdat.reso * canvasH / 180 * 1.2, // for bleeding with gradients
-    o = drawdat.reso * canvasW / 360 / 2 * 1.2, p = drawdat.reso * canvasH / 180 / 2 * 1.2;
-    var q = -1, r = drawdat.draw.length, s, t, u, v, w;
+    var m = new Date();
+    // sizes and radii of primitiva
+    var n = 1.25;
+    // larger size for bleeding with alpha channel
+    var o = drawdat.reso * canvasW / 360 * n, p = drawdat.reso * canvasH / 180 * n, q = drawdat.reso * canvasW / 360 / 2 * n, r = drawdat.reso * canvasH / 180 / 2 * n;
+    var s = -1, t = drawdat.draw.length, u, v, w, x, y;
+    // TODO keep only what is used
     ctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
     ctx.scale(lastTransformState.scale, lastTransformState.scale);
-    while (++q < r) {
-        s = drawdat.draw[q];
-        t = s[0][0];
-        u = s[0][1];
+    while (++s < t) {
+        u = drawdat.draw[s];
+        v = u[0][0];
+        w = u[0][1];
         ctx.fillStyle = //fc = 
-        "rgba(" + Math.floor(f - Math.floor(Math.log(s[1]) * rlog_factor)) + "," + Math.floor(g - Math.floor(Math.log(s[1]) * j)) + "," + Math.floor(h - Math.floor(s[1] * k)) + "," + "0.8)";
+        "rgba(" + Math.floor(g - Math.floor(Math.log(u[1]) * rlog_factor)) + "," + Math.floor(h - Math.floor(Math.log(u[1]) * k)) + "," + Math.floor(i - Math.floor(u[1] * l)) + "," + ".75)";
         //((d[1]/drawdat.max)/4+0.6)+")";
         /*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
 		gradient.addColorStop(0,fc+"0)");
@@ -400,42 +397,10 @@ function drawPlot(a) {
 		gradient.addColorStop(0.7, fc+"1)");
 		gradient.addColorStop(1,fc+"1)");*/
         //ctx.fillStyle = gradient;
-        //ctx.fillRect(cx-rx,cy-rx,wx,wy); /*
-        ctx.beginPath();
-        //ctx.moveTo(cx,cy);
-        //ctx.arc(cx, cy, rx, 0, 2 * Math.PI);
-        ctx.ellipse(t, u, o, p, 0, 0, 2 * Math.PI);
-        //ctx.stroke();
-        ctx.fill();
+        ctx.fillRect(v - q, w - q, o, p);
     }
-    console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - l) + "ms");
+    console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - m) + "ms");
     ctx.restore();
-    return false;
-    /// TODO remove testing skip
-    var x = new Date();
-    /*var circles = plotlayer.selectAll("circle")
-			.data(dataset);
-	circles.exit().remove();
-	circles.enter().append("circle");*/
-    plotlayer.selectAll("circle").data(dataset).enter().append("circle").attr("cx", function(a) {
-        return a[0][0];
-    }).attr("cy", function(a) {
-        return a[0][1];
-    }).attr("r", function(a) {
-        return reso / 2;
-    }).attr("fill", function(a) {
-        //if(d[1]/max > 0.1) console.log("jo hey it's "+d[1]/max);
-        var b = Math.floor(f - Math.floor(Math.log(a[1]) * rlog_factor));
-        var c = Math.floor(g - Math.floor(Math.log(a[1]) * j));
-        var d = Math.floor(h - Math.floor(a[1] * k));
-        return "rgb(" + b + "," + c + "," + d + ")";
-    }).on("mouseover", function(a) {
-        mouseOver(a);
-    }).on("mouseout", function() {
-        mouseOut();
-    });
-    console.log("  |BM| (svg manipulation took " + (new Date() - x) + "ms)");
-    console.log("  |BM| plot drawn in " + (new Date() - b) + "ms");
 }
 
 /////////////////////

@@ -10,6 +10,7 @@ function genGrid(reso, mAE, data) {
 		generateGrid(reso, mAE, data);
 	}, 300);
 }
+
 /**
 * Generate data grid for the map
 * parameters optional */
@@ -72,7 +73,7 @@ function generateGrid(reso, mAE, data) {
 		console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
 		tilemap = tile_mapping;
 		//console.log(tile_mapping);
-		drawPlot({map: tile_mapping, reso: reso});
+		drawPlot(true, {map: tile_mapping, reso: reso});
 		console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
 
 		$("#legend").html("<em>in this area</em><br>"+
@@ -122,29 +123,20 @@ function testing_aggregator(tmap,obj,reso) {
 
 /**
 * draw the map layer
+* [@param clear] if false, do not clear canvas before drawing
+* [@param newmap] new tile mapping to derive drawing data from
 */
-function drawPlot(newmap) {
+function drawPlot(clear, newmap) {
+	if(clear === undefined) { clear = true; }
 
-	// TODO remove tilemap parameter? and reso?
-
-	//reso = calcReso();
-	
-	/// canvas test
 	ctx.save();
-	ctx.clearRect(0,0,canvasW,canvasH);
-	//ctx.fillRect(10,10,200,200);
-
-
-
-
-	//plotlayer.selectAll("circle").remove();
+	if(clear !== false) {
+		ctx.clearRect(0,0,canvasW,canvasH);
+	}
 
 	var uMBM = new Date();
-	/*var dataset = [];
-	var min = Infinity,
-		max = -Infinity;*/
 
-	if(newmap !== undefined) { // calculate new darwing map
+	if(newmap !== undefined) { // calculate new drawing map
 		var draw = [],
 			min = Infinity,
 			max = -Infinity;
@@ -165,9 +157,9 @@ function drawPlot(newmap) {
 	console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);
 	console.log("  |BM| (dataset generation in "+(new Date()-uMBM)+"ms)");
 
-
 	// color defs
-	/// TODO color calculation i s buggy
+	/// TODO color calculation is buggy
+		// (using hsl model might be good idea)
 	var rmax, gmax, bmax, rlog_factorm, glog_factor, blog_factor;
 	if(colorize) {
 		rmax = current_setsel.colorScale.min[0];
@@ -187,21 +179,18 @@ function drawPlot(newmap) {
 
 	var canvasRenderBM = new Date();
 
-	/*var ppdx = canvasW/(360/lastTransformState.scale),
-		ppdy = canvasH/(180/lastTransformState.scale);
+	// sizes and radii of primitiva
+	var bleed = 1.25; // larger size for bleeding with alpha channel
+	var wx = ((drawdat.reso*canvasW)/360) * bleed,
+		wy = ((drawdat.reso*canvasH)/180) * bleed, 
+		rx = ((drawdat.reso*canvasW)/360/2) * bleed,
+		ry = ((drawdat.reso*canvasH)/180/2) * bleed;
 
-	var rx = (drawdat.reso*ppdx)/lastTransformState.scale,
-		ry = (drawdat.reso*ppdy)/lastTransformState.scale;*/
-
-	var wx = ((drawdat.reso*canvasW)/360)*1.2, // larger size
-		wy = ((drawdat.reso*canvasH)/180)*1.2, // for bleeding with gradients
-		rx = ((drawdat.reso*canvasW)/360/2)*1.2,
-		ry = ((drawdat.reso*canvasH)/180/2)*1.2;
-
-	var i= -1, n = drawdat.draw.length, d, cx, cy, fc, gradient;
+	var i= -1, n = drawdat.draw.length, d, cx, cy, fc, gradient; // TODO keep only what is used
 
   	ctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
   	ctx.scale(lastTransformState.scale, lastTransformState.scale);
+
 	while(++i < n) {
 		d = drawdat.draw[i];
 		cx = d[0][0];
@@ -212,7 +201,7 @@ function drawPlot(newmap) {
 			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
 			Math.floor(gmax -Math.floor(Math.log(d[1])*glog_factor))+","+
 			Math.floor(bmax -Math.floor(d[1]*blog_factor))+","+
-			"0.8)";//((d[1]/drawdat.max)/4+0.6)+")";
+			".75)";//((d[1]/drawdat.max)/4+0.6)+")";
 
 		/*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
 		gradient.addColorStop(0,fc+"0)");
@@ -221,7 +210,7 @@ function drawPlot(newmap) {
 		gradient.addColorStop(1,fc+"1)");*/
 		//ctx.fillStyle = gradient;
 
-		//ctx.fillRect(cx-rx,cy-rx,wx,wy); /*
+		ctx.fillRect(cx-rx,cy-rx,wx,wy);/*
 		ctx.beginPath();
 		//ctx.moveTo(cx,cy);
 		//ctx.arc(cx, cy, rx, 0, 2 * Math.PI);
@@ -233,44 +222,6 @@ function drawPlot(newmap) {
 
 	console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");
 	ctx.restore();
-
-	return false;
-	/// TODO remove testing skip
-
-
-
-
-	
-
-	
-	var plotBM = new Date();
-
-	/*var circles = plotlayer.selectAll("circle")
-			.data(dataset);
-	circles.exit().remove();
-	circles.enter().append("circle");*/
-
-	plotlayer.selectAll("circle")
-		.data(dataset)
-		.enter()
-		.append("circle")
-	//circles
-		.attr("cx", function(d) { return d[0][0]; })
-		.attr("cy", function(d) { return d[0][1]; })
-		.attr("r", function(d) { return reso/2; })//(((d[1]/max)*1.2)*(reso/2)+(reso/4)); })*/
-		.attr("fill", function(d) { 
-			//if(d[1]/max > 0.1) console.log("jo hey it's "+d[1]/max);
-			var r = Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor));
-			var g = Math.floor(gmax -Math.floor(Math.log(d[1])*glog_factor));
-			var b = Math.floor(bmax -Math.floor(d[1]*blog_factor));
-			return "rgb("+r+","+g+","+b+")"; //rgba(0,"+g+","+b+",1)";
-		})
-		//.attr("data-value", function(d) { return d[1]; })
-		.on("mouseover", function(d) { mouseOver(d); })
-		.on("mouseout", function() { mouseOut(); });
-
-	console.log("  |BM| (svg manipulation took "+(new Date()-plotBM)+"ms)");
-	console.log("  |BM| plot drawn in "+(new Date()-uMBM)+"ms");
 }
 
 
