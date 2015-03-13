@@ -8,7 +8,7 @@ function genGrid(reso, mAE, data) {
 	clearTimeout(redrawTimer);
 	redrawTimer = setTimeout(function() {
 		generateGrid(reso, mAE, data);
-	}, 300);
+	}, 200);
 }
 
 /**
@@ -29,8 +29,8 @@ function generateGrid(reso, mAE, data) {
 		var bms = new Date();
 		console.log("  ~ start iterating data");
 
-		var cell_mapping = {};
 		var count = 0;
+		cellmap = {}; // reset cellmap
 
 		/// calculate everything we can outside the loop for performance
 		// get axisExtremes
@@ -54,54 +54,52 @@ function generateGrid(reso, mAE, data) {
 		}
 		console.log("  # will iterate over tiles "+tMin+" to "+tMax);
 
-		var l, o;
-		for(var i = tMin; i <= tMax; i++) {							// for each map tile in visible area
-			for(var j = cAE.min; j <= cAE.max; j++) { 					// go over each key in range
-				if(data.data[i][j] !== undefined) {							// if it is defined
-					l = data.data[i][j].length;
-					for(var k = 0; k < l; k++) {								// go over each array in key and
-						o = data.data[i][j][k];
-						if(section_filter(o,mAE)) {									// if it actually lies within map bounds
-							cell_mapping = testing_aggregator(cell_mapping,o, reso); 	// aggregate it on the grid
-							// TODO remove function call for performance?
-							count++;
-						}
-					}
-				}
-			}
-		}
+		var finish = function() {
+			console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
+			drawPlot(true, cellmap, reso);
+			console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
 
-		/*for(var i = cAE.min; i<=cAE.max; i++) {
-			if(data.data[i] !== undefined) {
-				for(var j = tMin; j<=tMax; j++) {
-					if((data.data[i][j] !== ARR_UNDEFINED) && (data.data[i][j] !== undefined)) {
-						for(var k = 0; k<data.data[i][j].length; k++) {
-							if(section_filter(data.data[i][j][k],mAE)) {
-								cell_mapping = testing_aggregator(cell_mapping,data.data[i][j][k], reso);
+			$("#legend").html("<em>in this area</em><br>"+
+				//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
+				"we have registered a total of<br>"+
+				"<em>"+count+" "+data.parent.label+"</em><br>"+
+				"that <em>"+data.strings.term+"</em><br>"+
+				"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
+			$("#export").removeAttr("disabled");
+
+			console.log("\\~~ grid generation complete~~/ ");
+		};
+
+		var iterate = function(offset) {
+			var cellmapprog = {}, l, a;
+			var i = tMin + offset;
+			if(i <= tMax) {	// still work to do							// for each map tile in visible area
+				for(var j = cAE.min; j <= cAE.max; j++) { 					// go over each key in range
+					if(data.data[i][j] !== undefined) {							// if it is defined
+						l = data.data[i][j].length;
+						for(var k = 0; k < l; k++) {								// go over each event in key and
+							a = data.data[i][j][k];
+							if(section_filter(a,mAE)) {									// if it actually lies within map bounds
+								cellmapprog = testing_aggregator(cellmapprog, a, reso); 	// aggregate it on the grid
 								// TODO remove function call for performance?
 								count++;
 							}
 						}
 					}
 				}
+				// draw each tile after aggregating
+				drawPlot(false, cellmapprog, reso);
+				$.extend(cellmap, cellmapprog);
+				setTimeout(function() {
+					iterate(offset+1);
+				},1);
+
+			} else {
+				finish();
 			}
-		}*/
+		};
+		iterate(0);
 
-		console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
-		cellmap = cell_mapping;
-		//console.log(cell_mapping);
-		drawPlot(true, {map: cell_mapping, reso: reso});
-		console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
-
-		$("#legend").html("<em>in this area</em><br>"+
-			//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
-			"we have registered a total of<br>"+
-			"<em>"+count+" "+data.parent.label+"</em><br>"+
-			"that <em>"+data.strings.term+"</em><br>"+
-			"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
-		$("#export").removeAttr("disabled");
-
-		console.log("\\~~ grid generation complete~~/ ");
 	},1);
 }
 
@@ -114,11 +112,12 @@ function generateGrid(reso, mAE, data) {
 // true if object geo lies within currently visible section
 function section_filter(obj,aE){
 		return (
-			(obj[ARR_M_LON] >= (aE[0].min)) && 
-			(obj[ARR_M_LON] <= (aE[0].max))
-		) && (
 			(obj[ARR_M_LAT] >= (aE[1].min)) &&
-			(obj[ARR_M_LAT] <= (aE[1].max))		
+			(obj[ARR_M_LAT] <= (aE[1].max))	
+			
+		) && (
+			(obj[ARR_M_LON] >= (aE[0].min)) && 
+			(obj[ARR_M_LON] <= (aE[0].max))	
 		);
 }
 
@@ -142,9 +141,13 @@ function testing_aggregator(tmap,obj,reso) {
 * draw the map layer
 * [@param clear] if false, do not clear canvas before drawing
 * [@param newmap] new cell mapping to derive drawing data from
-*/
-function drawPlot(clear, newmap) {
+* [@param reso] required if newmap is given - resolution of new gridmap */
+function drawPlot(clear, newmap, reso) {
 	if(clear === undefined) { clear = true; }
+
+	if(newmap !== undefined && reso === undefined) { 
+		conslole.log('|WARNING| newmap given but no resolution. Using old drawing data.');
+	} 
 
 	ctx.save();
 	if(clear !== false) {
@@ -153,13 +156,13 @@ function drawPlot(clear, newmap) {
 
 	var uMBM = new Date();
 
-	if(newmap !== undefined) { // calculate new drawing map
+	if(newmap !== undefined && reso !== undefined) { // calculate new drawing map
 		var draw = [],
 			min = Infinity,
 			max = -Infinity;
 		
-		$.each(newmap.map, function(k,v) {
-			var c = index2canvasCoord(k, newmap.reso);
+		$.each(newmap, function(k,v) {
+			var c = index2canvasCoord(k, reso);
 			v = v.length;
 
 			draw.push([[c[0],c[1]],v]);
@@ -168,7 +171,7 @@ function drawPlot(clear, newmap) {
 			if(v<min) { min = v; }
 			if(v>max) { max = v; }
 		});
-		drawdat = {draw: draw, min: min, max: max, reso: newmap.reso};
+		drawdat = {draw: draw, min: min, max: max, reso: reso};
 	}
 	console.log("  ~ drawing "+drawdat.draw.length+" shapes");
 	console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);

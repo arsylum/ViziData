@@ -205,7 +205,7 @@ function genGrid(a, b, c) {
     clearTimeout(redrawTimer);
     redrawTimer = setTimeout(function() {
         generateGrid(a, b, c);
-    }, 300);
+    }, 200);
 }
 
 /**
@@ -232,13 +232,14 @@ function generateGrid(a, b, c) {
         console.log("/~~ generating new grid with resolution " + a + " ~~\\");
         var d = new Date();
         console.log("  ~ start iterating data");
-        var e = {};
-        var f = 0;
+        var e = 0;
+        cellmap = {};
+        // reset cellmap
         /// calculate everything we can outside the loop for performance
         // get axisExtremes
-        var g = chart.xAxis[0].getExtremes();
-        g.min = new Date(g.min).getFullYear();
-        g.max = new Date(g.max).getFullYear();
+        var f = chart.xAxis[0].getExtremes();
+        f.min = new Date(f.min).getFullYear();
+        f.max = new Date(f.max).getFullYear();
         // boundary enforcement
         if (b[0].min < C_WMIN) {
             b[0].min = C_WMIN;
@@ -252,64 +253,58 @@ function generateGrid(a, b, c) {
         if (b[1].max > C_HMAX) {
             b[1].max = C_HMAX;
         }
-        var h = 0;
-        while (b[0].min > C_WMIN + (h + 1) * c.parent.tile_width) {
+        var g = 0;
+        while (b[0].min > C_WMIN + (g + 1) * c.parent.tile_width) {
+            g++;
+        }
+        var h = g;
+        while (b[0].max > C_WMIN + (h + 1) * c.parent.tile_width) {
             h++;
         }
-        var i = h;
-        while (b[0].max > C_WMIN + (i + 1) * c.parent.tile_width) {
-            i++;
-        }
-        console.log("  # will iterate over tiles " + h + " to " + i);
-        var j, k;
-        for (var l = h; l <= i; l++) {
-            // for each map tile in visible area
-            for (var m = g.min; m <= g.max; m++) {
-                // go over each key in range
-                if (c.data[l][m] !== undefined) {
-                    // if it is defined
-                    j = c.data[l][m].length;
-                    for (var n = 0; n < j; n++) {
-                        // go over each array in key and
-                        k = c.data[l][m][n];
-                        if (section_filter(k, b)) {
-                            // if it actually lies within map bounds
-                            e = testing_aggregator(e, k, a);
-                            // aggregate it on the grid
-                            // TODO remove function call for performance?
-                            f++;
+        console.log("  # will iterate over tiles " + g + " to " + h);
+        var i = function() {
+            console.log("  |BM| iteration complete (" + (new Date() - d) + "ms)");
+            drawPlot(true, cellmap, a);
+            console.log("  |BM| finished genGrid (total of " + (new Date() - d) + "ms)");
+            $("#legend").html("<em>in this area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
+            "we have registered a total of<br>" + "<em>" + e + " " + c.parent.label + "</em><br>" + "that <em>" + c.strings.term + "</em><br>" + "between <em>" + f.min + "</em> and <em>" + f.max + "</em>");
+            $("#export").removeAttr("disabled");
+            console.log("\\~~ grid generation complete~~/ ");
+        };
+        var j = function(d) {
+            var k = {}, l, m;
+            var n = g + d;
+            if (n <= h) {
+                // still work to do							// for each map tile in visible area
+                for (var o = f.min; o <= f.max; o++) {
+                    // go over each key in range
+                    if (c.data[n][o] !== undefined) {
+                        // if it is defined
+                        l = c.data[n][o].length;
+                        for (var p = 0; p < l; p++) {
+                            // go over each event in key and
+                            m = c.data[n][o][p];
+                            if (section_filter(m, b)) {
+                                // if it actually lies within map bounds
+                                k = testing_aggregator(k, m, a);
+                                // aggregate it on the grid
+                                // TODO remove function call for performance?
+                                e++;
+                            }
                         }
                     }
                 }
+                // draw each tile after aggregating
+                drawPlot(false, k, a);
+                $.extend(cellmap, k);
+                setTimeout(function() {
+                    j(d + 1);
+                }, 1);
+            } else {
+                i();
             }
-        }
-        /*for(var i = cAE.min; i<=cAE.max; i++) {
-			if(data.data[i] !== undefined) {
-				for(var j = tMin; j<=tMax; j++) {
-					if((data.data[i][j] !== ARR_UNDEFINED) && (data.data[i][j] !== undefined)) {
-						for(var k = 0; k<data.data[i][j].length; k++) {
-							if(section_filter(data.data[i][j][k],mAE)) {
-								cell_mapping = testing_aggregator(cell_mapping,data.data[i][j][k], reso);
-								// TODO remove function call for performance?
-								count++;
-							}
-						}
-					}
-				}
-			}
-		}*/
-        console.log("  |BM| iteration complete (" + (new Date() - d) + "ms)");
-        cellmap = e;
-        //console.log(cell_mapping);
-        drawPlot(true, {
-            map: e,
-            reso: a
-        });
-        console.log("  |BM| finished genGrid (total of " + (new Date() - d) + "ms)");
-        $("#legend").html("<em>in this area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
-        "we have registered a total of<br>" + "<em>" + f + " " + c.parent.label + "</em><br>" + "that <em>" + c.strings.term + "</em><br>" + "between <em>" + g.min + "</em> and <em>" + g.max + "</em>");
-        $("#export").removeAttr("disabled");
-        console.log("\\~~ grid generation complete~~/ ");
+        };
+        j(0);
     }, 1);
 }
 
@@ -318,7 +313,7 @@ function generateGrid(a, b, c) {
 ///////////////
 // true if object geo lies within currently visible section
 function section_filter(a, b) {
-    return a[ARR_M_LON] >= b[0].min && a[ARR_M_LON] <= b[0].max && (a[ARR_M_LAT] >= b[1].min && a[ARR_M_LAT] <= b[1].max);
+    return a[ARR_M_LAT] >= b[1].min && a[ARR_M_LAT] <= b[1].max && (a[ARR_M_LON] >= b[0].min && a[ARR_M_LON] <= b[0].max);
 }
 
 //////////////////
@@ -339,79 +334,82 @@ function testing_aggregator(a, b, c) {
 * draw the map layer
 * [@param clear] if false, do not clear canvas before drawing
 * [@param newmap] new cell mapping to derive drawing data from
-*/
-function drawPlot(a, b) {
+* [@param reso] required if newmap is given - resolution of new gridmap */
+function drawPlot(a, b, c) {
     if (a === undefined) {
         a = true;
+    }
+    if (b !== undefined && c === undefined) {
+        conslole.log("|WARNING| newmap given but no resolution. Using old drawing data.");
     }
     ctx.save();
     if (a !== false) {
         ctx.clearRect(0, 0, canvasW, canvasH);
     }
-    var c = new Date();
-    if (b !== undefined) {
+    var d = new Date();
+    if (b !== undefined && c !== undefined) {
         // calculate new drawing map
-        var d = [], e = Infinity, f = -Infinity;
-        $.each(b.map, function(a, c) {
-            var g = index2canvasCoord(a, b.reso);
-            c = c.length;
-            d.push([ [ g[0], g[1] ], c ]);
+        var e = [], f = Infinity, g = -Infinity;
+        $.each(b, function(a, b) {
+            var d = index2canvasCoord(a, c);
+            b = b.length;
+            e.push([ [ d[0], d[1] ], b ]);
             // get extreme values
-            if (c < e) {
-                e = c;
+            if (b < f) {
+                f = b;
             }
-            if (c > f) {
-                f = c;
+            if (b > g) {
+                g = b;
             }
         });
         drawdat = {
-            draw: d,
-            min: e,
-            max: f,
-            reso: b.reso
+            draw: e,
+            min: f,
+            max: g,
+            reso: c
         };
     }
     console.log("  ~ drawing " + drawdat.draw.length + " shapes");
     console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
-    console.log("  |BM| (dataset generation in " + (new Date() - c) + "ms)");
+    console.log("  |BM| (dataset generation in " + (new Date() - d) + "ms)");
     // color defs
     /// TODO color calculation is buggy
     // (using hsl model might be good idea)
-    var g, h, i, j, k, l;
+    var h, i, j, k, l, m;
     if (colorize) {
-        g = current_setsel.colorScale.min[0];
-        rlog_factor = (g - current_setsel.colorScale.max[0]) / Math.log(drawdat.max);
-        h = current_setsel.colorScale.min[1];
-        k = (h - current_setsel.colorScale.max[1]) / Math.log(drawdat.max);
-        i = current_setsel.colorScale.min[2];
-        l = (i - current_setsel.colorScale.max[2]) / Math.log(drawdat.max);
+        h = current_setsel.colorScale.min[0];
+        rlog_factor = (h - current_setsel.colorScale.max[0]) / Math.log(drawdat.max);
+        i = current_setsel.colorScale.min[1];
+        l = (i - current_setsel.colorScale.max[1]) / Math.log(drawdat.max);
+        j = current_setsel.colorScale.min[2];
+        m = (j - current_setsel.colorScale.max[2]) / Math.log(drawdat.max);
     } else {
-        i = 255;
+        j = 255;
         //215;
-        l = i / drawdat.max;
+        m = j / drawdat.max;
         //Math.log(drawdat.max);
-        h = 235;
+        i = 235;
         //205;
-        k = h / Math.log(drawdat.max);
-        g = 185;
+        l = i / Math.log(drawdat.max);
+        h = 185;
         //14;
-        rlog_factor = g / Math.log(drawdat.max);
+        rlog_factor = h / Math.log(drawdat.max);
     }
-    var m = new Date();
+    var n = new Date();
     // sizes and radii of primitiva
-    var n = 1.25;
+    var o = 1.25;
     // larger size for bleeding with alpha channel
-    var o = drawdat.reso * canvasW / 360 * n, p = drawdat.reso * canvasH / 180 * n, q = drawdat.reso * canvasW / 360 / 2 * n, r = drawdat.reso * canvasH / 180 / 2 * n;
-    var s = -1, t = drawdat.draw.length, u, v, w, x, y;
+    var p = drawdat.reso * canvasW / 360 * o, q = drawdat.reso * canvasH / 180 * o, r = drawdat.reso * canvasW / 360 / 2 * o, s = drawdat.reso * canvasH / 180 / 2 * o;
+    var t = -1, u = drawdat.draw.length, v, w, x, y, z;
     // TODO keep only what is used
     ctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
     ctx.scale(lastTransformState.scale, lastTransformState.scale);
-    while (++s < t) {
-        u = drawdat.draw[s];
-        v = u[0][0];
-        w = u[0][1];
+    while (++t < u) {
+        v = drawdat.draw[t];
+        w = v[0][0];
+        x = v[0][1];
         ctx.fillStyle = //fc = 
-        "rgba(" + Math.floor(g - Math.floor(Math.log(u[1]) * rlog_factor)) + "," + Math.floor(h - Math.floor(Math.log(u[1]) * k)) + "," + Math.floor(i - Math.floor(u[1] * l)) + "," + ".75)";
+        "rgba(" + Math.floor(h - Math.floor(Math.log(v[1]) * rlog_factor)) + "," + Math.floor(i - Math.floor(Math.log(v[1]) * l)) + "," + Math.floor(j - Math.floor(v[1] * m)) + "," + ".75)";
         //((d[1]/drawdat.max)/4+0.6)+")";
         /*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
 		gradient.addColorStop(0,fc+"0)");
@@ -420,9 +418,9 @@ function drawPlot(a, b) {
 		gradient.addColorStop(1,fc+"1)");*/
         //ctx.fillStyle = gradient;
         //ctx.fillRect(cx-rx,cy-rx,wx,wy);
-        ctx.fillRect(v, w - p, o, p);
+        ctx.fillRect(w, x - q, p, q);
     }
-    console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - m) + "ms");
+    console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - n) + "ms");
     ctx.restore();
 }
 
