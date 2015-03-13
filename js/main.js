@@ -474,8 +474,8 @@ function canvasMouseMove() {
         return false;
     }
     // no drawing, no tooltip!
-    var a = event.pageX - canvasL;
-    var b = event.pageY - canvasT;
+    var a = d3.event.pageX - canvasL;
+    var b = d3.event.pageY - canvasT;
     //console.log('Position in canvas: ('+x+','+y+')');
     var c = canvasCoord2geoCoord(a, b);
     var d = coord2index(c.x, c.y, drawdat.reso);
@@ -488,7 +488,7 @@ function canvasMouseMove() {
 		console.log(" ~~~~");*/
         // display the info bubble
         clearTimeout(bubbleTimer);
-        $("div#bubble").css("opacity", "1").css("bottom", viewportH - event.pageY + M_BUBBLE_OFFSET + "px").css("right", viewportW - event.pageX + M_BUBBLE_OFFSET + "px").html(e.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + c.x.toFixed(2) + ", " + c.y.toFixed(2) + "]</span>");
+        $("div#bubble").css("opacity", "1").css("bottom", viewportH - d3.event.pageY + M_BUBBLE_OFFSET + "px").css("right", viewportW - d3.event.pageX + M_BUBBLE_OFFSET + "px").html(e.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + c.x.toFixed(2) + ", " + c.y.toFixed(2) + "]</span>");
     } else {
         // hide the info bubble
         clearTimeout(bubbleTimer);
@@ -650,8 +650,8 @@ function setupControlHandlers() {
         }
         b.append(d);
     }
-    $('#controls input[type="range"]').on("input", function() {
-        $(this).parent().next('input[type="text"').val(parseFloat($(this).val()).toFixed(1));
+    $("#controls input[type='range']").on("input", function() {
+        $(this).parent().next("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
     });
     $("#zoom-slider").on("change", function() {
         transitTo(getZoomTransform($(this).val()));

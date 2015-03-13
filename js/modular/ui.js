@@ -21,9 +21,9 @@ function setupControlHandlers() {
 		filter.append(fs);
 	}
 
-	$("#controls input[type=\"range\"]")
+	$("#controls input[type='range']")
 		.on("input", function() {
-			$(this).parent().next("input[type=\"text\"").val(parseFloat($(this).val()).toFixed(1));
+			$(this).parent().next("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
 		});
 	$("#zoom-slider").on("change", function() {
 		transitTo(getZoomTransform($(this).val()));

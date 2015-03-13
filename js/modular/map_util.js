@@ -72,8 +72,8 @@ function canvasCoord2geoCoord(x, y){
 function canvasMouseMove() {
 	if(drawdat === undefined) { return false; } // no drawing, no tooltip!
 
-	var x = event.pageX - canvasL;
-	var y = event.pageY - canvasT;
+	var x = d3.event.pageX - canvasL;
+	var y = d3.event.pageY - canvasT;
 	//console.log('Position in canvas: ('+x+','+y+')');
 	var gc = canvasCoord2geoCoord(x,y);
 	var i = coord2index(gc.x, gc.y, drawdat.reso);
@@ -89,8 +89,8 @@ function canvasMouseMove() {
 		// display the info bubble
 		clearTimeout(bubbleTimer);
 		$("div#bubble").css("opacity","1")
-			.css("bottom", (viewportH - event.pageY + M_BUBBLE_OFFSET) + "px")
-			.css("right", (viewportW - event.pageX + M_BUBBLE_OFFSET) + "px")
+			.css("bottom", (viewportH - d3.event.pageY + M_BUBBLE_OFFSET) + "px")
+			.css("right", (viewportW - d3.event.pageX + M_BUBBLE_OFFSET) + "px")
 			.html(cell.length +" <em>"+current_setsel.strings.label+"</em><br>"+
 				"<span>["+(gc.x.toFixed(2))+", "+(gc.y.toFixed(2))+"]</span>");
 
