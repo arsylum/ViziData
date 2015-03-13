@@ -8,19 +8,29 @@ function genChart(data){
 
 	var benchmark_chart = new Date();
 
-	var dat_arr = [],
+	////
+	/// tomporary hacky timeline fix for changed data structure
+	// TODO refurbish when upgrading timeline
+	var dat_arr = [], dat_obj = {},
 		i,j,d,sum;
-
-	for(i=data.min; i<=data.max; i++) {
-		d = data.data[i];
-		if(d !== undefined) {
-			sum = 0;
-			for(j=0; j<d.length; j++) {
-				if(d[j] !== ARR_UNDEFINED) {
-					sum += d[j].length;
+	
+	var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
+	for(i = 0; i < tilecount; i++) {
+		for(j=data.min; j<=data.max; j++) {
+			d = data.data[i][j];
+			if(d !== undefined) {
+				if(dat_obj[j] === undefined) {
+					dat_obj[j] = d.length;
+				} else {
+					dat_obj[j] += d.length;
 				}
 			}
-			dat_arr.push([new Date(0,0).setFullYear(i),sum]);
+		}
+	}
+
+	for(i=data.min; i<=data.max; i++) {
+		if(dat_obj[i] !== undefined) {
+			dat_arr.push([new Date(0,0).setFullYear(i),dat_obj[i]]);
 		}
 	}
 

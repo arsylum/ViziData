@@ -60,7 +60,7 @@ var DATA_DIR = "./data/", META_FILES = [ "humans.json" ];
 var DEFAULT_DATASET = 0;
 
 // dataset to load up initially
-var ARR_UNDEFINED = null, // undefined value
+var //ARR_UNDEFINED = null,	// undefined value
 ARR_M_LON = 0, // longitude
 ARR_M_LAT = 1, // latitude
 ARR_M_I = 2;
@@ -261,21 +261,43 @@ function generateGrid(a, b, c) {
             i++;
         }
         console.log("  # will iterate over tiles " + h + " to " + i);
-        for (var j = g.min; j <= g.max; j++) {
-            if (c.data[j] !== undefined) {
-                for (var k = h; k <= i; k++) {
-                    if (c.data[j][k] !== ARR_UNDEFINED && c.data[j][k] !== undefined) {
-                        for (var l = 0; l < c.data[j][k].length; l++) {
-                            if (section_filter(c.data[j][k][l], b)) {
-                                e = testing_aggregator(e, c.data[j][k][l], a);
-                                // TODO remove function call for performance?
-                                f++;
-                            }
+        var j, k;
+        for (var l = h; l <= i; l++) {
+            // for each map tile in visible area
+            for (var m = g.min; m <= g.max; m++) {
+                // go over each key in range
+                if (c.data[l][m] !== undefined) {
+                    // if it is defined
+                    j = c.data[l][m].length;
+                    for (var n = 0; n < j; n++) {
+                        // go over each array in key and
+                        k = c.data[l][m][n];
+                        if (section_filter(k, b)) {
+                            // if it actually lies within map bounds
+                            e = testing_aggregator(e, k, a);
+                            // aggregate it on the grid
+                            // TODO remove function call for performance?
+                            f++;
                         }
                     }
                 }
             }
         }
+        /*for(var i = cAE.min; i<=cAE.max; i++) {
+			if(data.data[i] !== undefined) {
+				for(var j = tMin; j<=tMax; j++) {
+					if((data.data[i][j] !== ARR_UNDEFINED) && (data.data[i][j] !== undefined)) {
+						for(var k = 0; k<data.data[i][j].length; k++) {
+							if(section_filter(data.data[i][j][k],mAE)) {
+								cell_mapping = testing_aggregator(cell_mapping,data.data[i][j][k], reso);
+								// TODO remove function call for performance?
+								count++;
+							}
+						}
+					}
+				}
+			}
+		}*/
         console.log("  |BM| iteration complete (" + (new Date() - d) + "ms)");
         cellmap = e;
         //console.log(cell_mapping);
@@ -522,17 +544,26 @@ function genChart(a) {
     // TODO
     console.log("/~~ generating chart data ~~\\ ");
     var b = new Date();
-    var c = [], d, e, f, g;
-    for (d = a.min; d <= a.max; d++) {
-        f = a.data[d];
-        if (f !== undefined) {
-            g = 0;
-            for (e = 0; e < f.length; e++) {
-                if (f[e] !== ARR_UNDEFINED) {
-                    g += f[e].length;
+    ////
+    /// tomporary hacky timeline fix for changed data structure
+    // TODO refurbish when upgrading timeline
+    var c = [], d = {}, e, f, g, h;
+    var i = (C_WMAX - C_WMIN) / a.parent.tile_width;
+    for (e = 0; e < i; e++) {
+        for (f = a.min; f <= a.max; f++) {
+            g = a.data[e][f];
+            if (g !== undefined) {
+                if (d[f] === undefined) {
+                    d[f] = g.length;
+                } else {
+                    d[f] += g.length;
                 }
             }
-            c.push([ new Date(0, 0).setFullYear(d), g ]);
+        }
+    }
+    for (e = a.min; e <= a.max; e++) {
+        if (d[e] !== undefined) {
+            c.push([ new Date(0, 0).setFullYear(e), d[e] ]);
         }
     }
     console.log("  |BM| iterating and sorting finished (took " + (new Date() - b) + "ms)");

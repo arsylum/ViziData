@@ -26,7 +26,7 @@ var DATA_DIR = "./data/",
 	];
 var DEFAULT_DATASET = 0;	// dataset to load up initially
 
-var	ARR_UNDEFINED = null,	// undefined value
+var	//ARR_UNDEFINED = null,	// undefined value
 	ARR_M_LON = 0,			// longitude
 	ARR_M_LAT = 1,			// latitude
 	ARR_M_I = 2;			// ref to prop

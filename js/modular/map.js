@@ -54,7 +54,24 @@ function generateGrid(reso, mAE, data) {
 		}
 		console.log("  # will iterate over tiles "+tMin+" to "+tMax);
 
-		for(var i = cAE.min; i<=cAE.max; i++) {
+		var l, o;
+		for(var i = tMin; i <= tMax; i++) {							// for each map tile in visible area
+			for(var j = cAE.min; j <= cAE.max; j++) { 					// go over each key in range
+				if(data.data[i][j] !== undefined) {							// if it is defined
+					l = data.data[i][j].length;
+					for(var k = 0; k < l; k++) {								// go over each array in key and
+						o = data.data[i][j][k];
+						if(section_filter(o,mAE)) {									// if it actually lies within map bounds
+							cell_mapping = testing_aggregator(cell_mapping,o, reso); 	// aggregate it on the grid
+							// TODO remove function call for performance?
+							count++;
+						}
+					}
+				}
+			}
+		}
+
+		/*for(var i = cAE.min; i<=cAE.max; i++) {
 			if(data.data[i] !== undefined) {
 				for(var j = tMin; j<=tMax; j++) {
 					if((data.data[i][j] !== ARR_UNDEFINED) && (data.data[i][j] !== undefined)) {
@@ -68,7 +85,7 @@ function generateGrid(reso, mAE, data) {
 					}
 				}
 			}
-		}
+		}*/
 
 		console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
 		cellmap = cell_mapping;
