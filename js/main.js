@@ -78,7 +78,8 @@ bubble, // popup bubble on map
 zoombh;
 
 // zoomBehavior
-var allow_redraw = true, colorize = true, redrawTimer, // genGrid
+var allow_redraw = true, colorize = true, currentGenGrid = 0, // genGrid cancelation with newer calls
+redrawTimer, // genGrid
 bubbleTimer, // hide map tooltip bubble
 boundsTimer, // forceBounds
 resizeTimeout;
@@ -226,20 +227,22 @@ function generateGrid(a, b, c) {
     if (a === undefined) {
         a = calcReso();
     }
+    currentGenGrid++;
+    var d = currentGenGrid;
     $("#legend").html("<em>massive calculations...</em>");
     setTimeout(function() {
         //timeout for dom redraw
         console.log("/~~ generating new grid with resolution " + a + " ~~\\");
-        var d = new Date();
+        var e = new Date();
         console.log("  ~ start iterating data");
-        var e = 0;
+        var f = 0;
         cellmap = {};
         // reset cellmap
         /// calculate everything we can outside the loop for performance
         // get axisExtremes
-        var f = chart.xAxis[0].getExtremes();
-        f.min = new Date(f.min).getFullYear();
-        f.max = new Date(f.max).getFullYear();
+        var g = chart.xAxis[0].getExtremes();
+        g.min = new Date(g.min).getFullYear();
+        g.max = new Date(g.max).getFullYear();
         // boundary enforcement
         if (b[0].min < C_WMIN) {
             b[0].min = C_WMIN;
@@ -253,58 +256,65 @@ function generateGrid(a, b, c) {
         if (b[1].max > C_HMAX) {
             b[1].max = C_HMAX;
         }
-        var g = 0;
-        while (b[0].min > C_WMIN + (g + 1) * c.parent.tile_width) {
-            g++;
-        }
-        var h = g;
-        while (b[0].max > C_WMIN + (h + 1) * c.parent.tile_width) {
+        var h = 0;
+        while (b[0].min > C_WMIN + (h + 1) * c.parent.tile_width) {
             h++;
         }
-        console.log("  # will iterate over tiles " + g + " to " + h);
-        var i = function() {
-            console.log("  |BM| iteration complete (" + (new Date() - d) + "ms)");
+        var i = h;
+        while (b[0].max > C_WMIN + (i + 1) * c.parent.tile_width) {
+            i++;
+        }
+        console.log("  # will iterate over tiles " + h + " to " + i);
+        var j = function() {
+            console.log("  |BM| iteration complete (" + (new Date() - e) + "ms)");
             drawPlot(true, cellmap, a);
-            console.log("  |BM| finished genGrid (total of " + (new Date() - d) + "ms)");
+            console.log("  |BM| finished genGrid (total of " + (new Date() - e) + "ms)");
             $("#legend").html("<em>in this area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
-            "we have registered a total of<br>" + "<em>" + e + " " + c.parent.label + "</em><br>" + "that <em>" + c.strings.term + "</em><br>" + "between <em>" + f.min + "</em> and <em>" + f.max + "</em>");
+            "we have registered a total of<br>" + "<em>" + f + " " + c.parent.label + "</em><br>" + "that <em>" + c.strings.term + "</em><br>" + "between <em>" + g.min + "</em> and <em>" + g.max + "</em>");
             $("#export").removeAttr("disabled");
             console.log("\\~~ grid generation complete~~/ ");
         };
-        var j = function(d) {
-            var k = {}, l, m;
-            var n = g + d;
-            if (n <= h) {
+        var k = function(e) {
+            if (d < currentGenGrid) {
+                return 0;
+            }
+            // cancel if newer genGrid is running
+            var l = {}, m, n, o;
+            var p = h + e;
+            if (p <= i) {
                 // still work to do							// for each map tile in visible area
-                for (var o = f.min; o <= f.max; o++) {
+                for (var q = g.min; q <= g.max; q++) {
                     // go over each key in range
-                    if (c.data[n][o] !== undefined) {
+                    if (c.data[p][q] !== undefined) {
                         // if it is defined
-                        l = c.data[n][o].length;
-                        for (var p = 0; p < l; p++) {
+                        m = c.data[p][q].length;
+                        for (var r = 0; r < m; r++) {
                             // go over each event in key and
-                            m = c.data[n][o][p];
-                            if (section_filter(m, b)) {
+                            n = c.data[p][q][r];
+                            if (section_filter(n, b)) {
                                 // if it actually lies within map bounds
-                                k = testing_aggregator(k, m, a);
+                                o = coord2index(n[ARR_M_LON], n[ARR_M_LAT], a);
+                                if (cellmap[o] === undefined) {
+                                    cellmap[o] = [];
+                                }
                                 // aggregate it on the grid
-                                // TODO remove function call for performance?
-                                e++;
+                                cellmap[o].push(n[ARR_M_I]);
+                                l[o] = cellmap[o];
+                                f++;
                             }
                         }
                     }
                 }
                 // draw each tile after aggregating
-                drawPlot(false, k, a);
-                $.extend(cellmap, k);
+                drawPlot(false, l, a);
                 setTimeout(function() {
-                    j(d + 1);
+                    k(e + 1);
                 }, 1);
             } else {
-                i();
+                j();
             }
         };
-        j(0);
+        k(0);
     }, 1);
 }
 
@@ -318,18 +328,18 @@ function section_filter(a, b) {
 
 //////////////////
 /// aggregators //
-//////////////////
-function testing_aggregator(a, b, c) {
-    var d = coord2index(b[ARR_M_LON], b[ARR_M_LAT], c);
-    if (a[d] === undefined) {
-        a[d] = [];
-        a[d].push(b[2]);
-    } else {
-        a[d].push(b[2]);
-    }
-    return a;
+/*/////////////////
+function testing_aggregator(tmap,obj,reso) {
+	var ti = coord2index(obj[ARR_M_LON],obj[ARR_M_LAT],reso);
+	if(tmap[ti] === undefined) {
+		tmap[ti] = [];
+		tmap[ti].push(obj[2]);
+	} else {
+		tmap[ti].push(obj[2]);
+	}
+	return tmap;
 }
-
+*/
 /**
 * draw the map layer
 * [@param clear] if false, do not clear canvas before drawing

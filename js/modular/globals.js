@@ -44,6 +44,7 @@ var chart,		// Timeline / dataLine
 
 var allow_redraw = true,
 	colorize = true,
+	currentGenGrid = 0, // genGrid cancelation with newer calls
 	redrawTimer, // genGrid
 	bubbleTimer, // hide map tooltip bubble
 	boundsTimer, // forceBounds

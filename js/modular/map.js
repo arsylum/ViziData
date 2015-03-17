@@ -23,6 +23,10 @@ function generateGrid(reso, mAE, data) {
 	if( mAE === undefined) {  mAE = getBounds(); }
 	if(reso === undefined) { reso = calcReso(); }
 
+
+	currentGenGrid++;
+	var thisGenGrid = currentGenGrid;
+
 	$("#legend").html("<em>massive calculations...</em>");
 	setTimeout(function() { //timeout for dom redraw
 		console.log("/~~ generating new grid with resolution "+reso+" ~~\\");
@@ -71,7 +75,8 @@ function generateGrid(reso, mAE, data) {
 		};
 
 		var iterate = function(offset) {
-			var cellmapprog = {}, l, a;
+			if(thisGenGrid < currentGenGrid) { return 0; } // cancel if newer genGrid is running
+			var cellmapprog = {}, l, a, ti;
 			var i = tMin + offset;
 			if(i <= tMax) {	// still work to do							// for each map tile in visible area
 				for(var j = cAE.min; j <= cAE.max; j++) { 					// go over each key in range
@@ -80,8 +85,11 @@ function generateGrid(reso, mAE, data) {
 						for(var k = 0; k < l; k++) {								// go over each event in key and
 							a = data.data[i][j][k];
 							if(section_filter(a,mAE)) {									// if it actually lies within map bounds
-								cellmapprog = testing_aggregator(cellmapprog, a, reso); 	// aggregate it on the grid
-								// TODO remove function call for performance?
+								ti = coord2index(a[ARR_M_LON],a[ARR_M_LAT],reso);
+								if(cellmap[ti] === undefined) {	cellmap[ti] = []; }			// aggregate it on the grid
+								cellmap[ti].push(a[ARR_M_I]);
+								cellmapprog[ti] = cellmap[ti];
+
 								count++;
 							}
 						}
@@ -89,7 +97,6 @@ function generateGrid(reso, mAE, data) {
 				}
 				// draw each tile after aggregating
 				drawPlot(false, cellmapprog, reso);
-				$.extend(cellmap, cellmapprog);
 				setTimeout(function() {
 					iterate(offset+1);
 				},1);
@@ -124,7 +131,7 @@ function section_filter(obj,aE){
 
 //////////////////
 /// aggregators //
-//////////////////
+/*/////////////////
 function testing_aggregator(tmap,obj,reso) {
 	var ti = coord2index(obj[ARR_M_LON],obj[ARR_M_LAT],reso);
 	if(tmap[ti] === undefined) {
@@ -135,7 +142,7 @@ function testing_aggregator(tmap,obj,reso) {
 	}
 	return tmap;
 }
-
+*/
 
 /**
 * draw the map layer
