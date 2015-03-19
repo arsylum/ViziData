@@ -116,7 +116,7 @@ function canvasMouseClick() {
 	var cell = cellmap[i];
 
 	if(cell !== undefined) {
-		drawPlot(true, undefined, undefined, i);
+		drawPlot(true, undefined, undefined, i); // highlight cell
 	}
 }
 

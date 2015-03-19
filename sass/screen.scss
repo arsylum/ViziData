@@ -36,7 +36,7 @@ $timeline-height: 25%;
 $timeline-min-height: 140px;
 $timelline-max-height: 280px;
 
-$sidebar-height: (100)-(2*($body-padding))-($header-height);
+$sidebar-height: 100%; //(100)-(2*($body-padding))-($header-height);
 $filter-height: 60%;
 $legend-height: (100)-($filter-height); /*(100)-(2*($body-padding))-($header-height)-($filter-height);*/
 
@@ -49,6 +49,9 @@ $map-padding: 0.2%;
 ** FANCY **/
 $outer-border-radius: 8px;
 
+* {
+	box-sizing: border-box;
+}
 
 html {
 	height: 100%;
@@ -57,54 +60,11 @@ html {
 }
 
 body {
-	padding: $body-padding;
-	height: (100)-(4*($body-padding));
+	//padding: $body-padding;
+	//height: (100)-(4*($body-padding));
+	padding: 0;
+	height: 100%;
 }
-
-#site_title {
-	position: absolute; 
-	bottom: 5px; 
-	left: 5px;
-
-	h1 {
-		clear: both;
-		font-family: sans-serif;
-		font-size: 1.8em;
-		/*margin: .4em;*/
-		font-weight: bold;
-		height: $header-height;
-
-		span {
-			font-size: .5em;
-		}
-	}
-
-	#github_link {
-		margin-bottom: .5em;
-		float: right;
-		width: 120px;
-
-		img {
-			float: right;
-		}
-
-		img[src*=logo] {
-			transition: .5s;
-			position: absolute;
-			right: 200px;
-			opacity: 0;
-
-		}
-		
-		&:hover {
-			img[src*=logo] {
-				right: 38px;
-				opacity: 1;
-			}
-		};
-	}
-}
-
 
 
 menu {
@@ -128,6 +88,13 @@ menu#timefilter {
 	height: $sidebar-height;
 	width: $left-row-width;
 	float: left;
+	display: flex;
+	flex-flow: column;
+
+	&>div, &>header {
+		flex: 0 1 auto;
+		overflow: auto;
+	}
 }
 
 #sidebar>menu{
@@ -164,11 +131,16 @@ menu#timefilter {
 }
 
 #legend {
-	width: (($left-row-width)-($controls-padding)*2-($box-padding)*2);
+	//width: (($left-row-width)-($controls-padding)*2-($box-padding)*2);
 	/*height: $legend-height;*/
 	margin: $controls-padding;
 	padding: $box-padding;
 	background: $control-mbg-color;
+}
+
+#cellinfo {
+	@extend #legend;
+	flex: 1 1 auto !important;
 }
 
 #stuff {
@@ -206,6 +178,45 @@ menu#timefilter {
 		color: rgba(0,0,0,.5);
 		font-family: sans-serif;
 	}
+
+
+#sidebar header {
+	h1 {
+		clear: both;
+		font-family: sans-serif;
+		font-size: 1.6em;
+		margin: 15px 15px 5px;
+		font-weight: bold;
+
+		span {
+			font-size: .5em;
+		}
+	}
+
+	#github_link {
+		position: relative;
+		float: left;
+		width: 120px;
+		margin: 0 15px;
+
+		img {
+			float: left;
+		}
+
+		img[src*=logo] {
+			transition: .5s;
+			position: absolute;
+			left: 100px;
+			opacity: 0;
+
+		}
+	}
+
+	&:hover #github_link img[src*=logo] {
+		left: 38px;
+		opacity: 1;
+	}
+}
 
 /************
 *** Forms **/
