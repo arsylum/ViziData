@@ -45,7 +45,7 @@ var chart,		// Timeline / dataLine
 	zoombh;		// zoomBehavior
 
 var allow_redraw = true,
-	colorize = true,
+	colorize = false, //true,
 	currentGenGrid = 0, // genGrid cancelation with newer calls
 	redrawTimer, // genGrid
 	bubbleTimer, // hide map tooltip bubble

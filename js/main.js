@@ -80,7 +80,8 @@ bubble, // popup bubble on map
 zoombh;
 
 // zoomBehavior
-var allow_redraw = true, colorize = true, currentGenGrid = 0, // genGrid cancelation with newer calls
+var allow_redraw = true, colorize = false, //true,
+currentGenGrid = 0, // genGrid cancelation with newer calls
 redrawTimer, // genGrid
 bubbleTimer, // hide map tooltip bubble
 boundsTimer, // forceBounds
@@ -422,7 +423,7 @@ function drawPlot(a, b, c, d) {
         x = w[0][0];
         y = w[0][1];
         ctx.fillStyle = //fc = 
-        "rgba(" + Math.floor(i - Math.floor(Math.log(w[1]) * rlog_factor)) + "," + Math.floor(j - Math.floor(Math.log(w[1]) * m)) + "," + Math.floor(k - Math.floor(w[1] * n)) + "," + ".75)";
+        "rgba(" + Math.floor(i - Math.floor(Math.log(w[1]) * rlog_factor)) + "," + Math.floor(j - Math.floor(Math.log(w[1]) * m)) + "," + Math.floor(k - Math.floor(w[1] * n)) + "," + ".85)";
         //((d[1]/drawdat.max)/4+0.6)+")";
         /*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
 		gradient.addColorStop(0,fc+"0)");
