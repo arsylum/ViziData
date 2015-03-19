@@ -63,7 +63,7 @@ function generateGrid(reso, mAE, data) {
 			drawPlot(true, cellmap, reso);
 			console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
 
-			$("#legend").html("<em>in this area</em><br>"+
+			$("#legend").html("<em>inside the visible area</em><br>"+
 				//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
 				"we have registered a total of<br>"+
 				"<em>"+count+" "+data.parent.label+"</em><br>"+
@@ -148,8 +148,9 @@ function testing_aggregator(tmap,obj,reso) {
 * draw the map layer
 * [@param clear] if false, do not clear canvas before drawing
 * [@param newmap] new cell mapping to derive drawing data from
-* [@param reso] required if newmap is given - resolution of new gridmap */
-function drawPlot(clear, newmap, reso) {
+* [@param reso] required if newmap is given - resolution of new gridmap 
+* [@param highlight] index of cell to highlight */
+function drawPlot(clear, newmap, reso, highlight) {
 	if(clear === undefined) { clear = true; }
 
 	if(newmap !== undefined && reso === undefined) { 
@@ -207,7 +208,7 @@ function drawPlot(clear, newmap, reso) {
 	var canvasRenderBM = new Date();
 
 	// sizes and radii of primitiva
-	var bleed = 1.25; // larger size for bleeding with alpha channel
+	var bleed = 1 + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
 	var wx = ((drawdat.reso*canvasW)/360) * bleed,
 		wy = ((drawdat.reso*canvasH)/180) * bleed, 
 		rx = ((drawdat.reso*canvasW)/360/2) * bleed,
@@ -246,6 +247,19 @@ function drawPlot(clear, newmap, reso) {
 		//ctx.stroke();
 		ctx.fill();
 		//*/
+	}
+	if(highlight !== undefined) {
+		if(reso === undefined) { reso = drawdat.reso; }
+		var c = index2canvasCoord(highlight, reso);
+
+		/*ctx.fillStyle = "rgba(150,250,150,0.3)";
+		ctx.beginPath();
+		ctx.arc(c[0]+rx,c[1]-ry,rx*2,0,TPI);
+		ctx.fill();*/
+
+		ctx.lineWidth = 2/lastTransformState.scale;
+		ctx.strokeStyle = "rgba(255,127,0,0.75)"; //orange";
+		ctx.strokeRect(c[0],c[1]-wy,wx,wy);
 	}
 
 	console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");

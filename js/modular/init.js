@@ -37,7 +37,7 @@ $(function(){
 	zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
 
 	// setup canvas
-	canvas = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove);
+	canvas = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
 	onResize(); // set canvas dimensions
 
 	// setup svg

@@ -66,6 +66,8 @@ ARR_M_LAT = 1, // latitude
 ARR_M_I = 2;
 
 // ref to prop
+var TPI = Math.PI * 2;
+
 ///_________________
 /// pseudo constants
 ////////////////////
@@ -136,7 +138,7 @@ $(function() {
     // zoombehaviour
     zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
     // setup canvas
-    canvas = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove);
+    canvas = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
     onResize();
     // set canvas dimensions
     // setup svg
@@ -269,7 +271,7 @@ function generateGrid(a, b, c) {
             console.log("  |BM| iteration complete (" + (new Date() - e) + "ms)");
             drawPlot(true, cellmap, a);
             console.log("  |BM| finished genGrid (total of " + (new Date() - e) + "ms)");
-            $("#legend").html("<em>in this area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
+            $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
             "we have registered a total of<br>" + "<em>" + f + " " + c.parent.label + "</em><br>" + "that <em>" + c.strings.term + "</em><br>" + "between <em>" + g.min + "</em> and <em>" + g.max + "</em>");
             $("#export").removeAttr("disabled");
             console.log("\\~~ grid generation complete~~/ ");
@@ -344,8 +346,9 @@ function testing_aggregator(tmap,obj,reso) {
 * draw the map layer
 * [@param clear] if false, do not clear canvas before drawing
 * [@param newmap] new cell mapping to derive drawing data from
-* [@param reso] required if newmap is given - resolution of new gridmap */
-function drawPlot(a, b, c) {
+* [@param reso] required if newmap is given - resolution of new gridmap 
+* [@param highlight] index of cell to highlight */
+function drawPlot(a, b, c, d) {
     if (a === undefined) {
         a = true;
     }
@@ -356,70 +359,70 @@ function drawPlot(a, b, c) {
     if (a !== false) {
         ctx.clearRect(0, 0, canvasW, canvasH);
     }
-    var d = new Date();
+    var e = new Date();
     if (b !== undefined && c !== undefined) {
         // calculate new drawing map
-        var e = [], f = Infinity, g = -Infinity;
+        var f = [], g = Infinity, h = -Infinity;
         $.each(b, function(a, b) {
             var d = index2canvasCoord(a, c);
             b = b.length;
-            e.push([ [ d[0], d[1] ], b ]);
+            f.push([ [ d[0], d[1] ], b ]);
             // get extreme values
-            if (b < f) {
-                f = b;
-            }
-            if (b > g) {
+            if (b < g) {
                 g = b;
+            }
+            if (b > h) {
+                h = b;
             }
         });
         drawdat = {
-            draw: e,
-            min: f,
-            max: g,
+            draw: f,
+            min: g,
+            max: h,
             reso: c
         };
     }
     console.log("  ~ drawing " + drawdat.draw.length + " shapes");
     console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
-    console.log("  |BM| (dataset generation in " + (new Date() - d) + "ms)");
+    console.log("  |BM| (dataset generation in " + (new Date() - e) + "ms)");
     // color defs
     /// TODO color calculation is buggy
     // (using hsl model might be good idea)
-    var h, i, j, k, l, m;
+    var i, j, k, l, m, n;
     if (colorize) {
-        h = current_setsel.colorScale.min[0];
-        rlog_factor = (h - current_setsel.colorScale.max[0]) / Math.log(drawdat.max);
-        i = current_setsel.colorScale.min[1];
-        l = (i - current_setsel.colorScale.max[1]) / Math.log(drawdat.max);
-        j = current_setsel.colorScale.min[2];
-        m = (j - current_setsel.colorScale.max[2]) / Math.log(drawdat.max);
+        i = current_setsel.colorScale.min[0];
+        rlog_factor = (i - current_setsel.colorScale.max[0]) / Math.log(drawdat.max);
+        j = current_setsel.colorScale.min[1];
+        m = (j - current_setsel.colorScale.max[1]) / Math.log(drawdat.max);
+        k = current_setsel.colorScale.min[2];
+        n = (k - current_setsel.colorScale.max[2]) / Math.log(drawdat.max);
     } else {
-        j = 255;
+        k = 255;
         //215;
-        m = j / drawdat.max;
+        n = k / drawdat.max;
         //Math.log(drawdat.max);
-        i = 235;
+        j = 235;
         //205;
-        l = i / Math.log(drawdat.max);
-        h = 185;
+        m = j / Math.log(drawdat.max);
+        i = 185;
         //14;
-        rlog_factor = h / Math.log(drawdat.max);
+        rlog_factor = i / Math.log(drawdat.max);
     }
-    var n = new Date();
+    var o = new Date();
     // sizes and radii of primitiva
-    var o = 1.25;
-    // larger size for bleeding with alpha channel
-    var p = drawdat.reso * canvasW / 360 * o, q = drawdat.reso * canvasH / 180 * o, r = drawdat.reso * canvasW / 360 / 2 * o, s = drawdat.reso * canvasH / 180 / 2 * o;
-    var t = -1, u = drawdat.draw.length, v, w, x, y, z;
+    var p = 1 + 1 / lastTransformState.scale * .25;
+    // 1.25; // larger size for bleeding with alpha channel
+    var q = drawdat.reso * canvasW / 360 * p, r = drawdat.reso * canvasH / 180 * p, s = drawdat.reso * canvasW / 360 / 2 * p, t = drawdat.reso * canvasH / 180 / 2 * p;
+    var u = -1, v = drawdat.draw.length, w, x, y, z, A;
     // TODO keep only what is used
     ctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
     ctx.scale(lastTransformState.scale, lastTransformState.scale);
-    while (++t < u) {
-        v = drawdat.draw[t];
-        w = v[0][0];
-        x = v[0][1];
+    while (++u < v) {
+        w = drawdat.draw[u];
+        x = w[0][0];
+        y = w[0][1];
         ctx.fillStyle = //fc = 
-        "rgba(" + Math.floor(h - Math.floor(Math.log(v[1]) * rlog_factor)) + "," + Math.floor(i - Math.floor(Math.log(v[1]) * l)) + "," + Math.floor(j - Math.floor(v[1] * m)) + "," + ".75)";
+        "rgba(" + Math.floor(i - Math.floor(Math.log(w[1]) * rlog_factor)) + "," + Math.floor(j - Math.floor(Math.log(w[1]) * m)) + "," + Math.floor(k - Math.floor(w[1] * n)) + "," + ".75)";
         //((d[1]/drawdat.max)/4+0.6)+")";
         /*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
 		gradient.addColorStop(0,fc+"0)");
@@ -428,9 +431,23 @@ function drawPlot(a, b, c) {
 		gradient.addColorStop(1,fc+"1)");*/
         //ctx.fillStyle = gradient;
         //ctx.fillRect(cx-rx,cy-rx,wx,wy);
-        ctx.fillRect(w, x - q, p, q);
+        ctx.fillRect(x, y - r, q, r);
     }
-    console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - n) + "ms");
+    if (d !== undefined) {
+        if (c === undefined) {
+            c = drawdat.reso;
+        }
+        var B = index2canvasCoord(d, c);
+        /*ctx.fillStyle = "rgba(150,250,150,0.3)";
+		ctx.beginPath();
+		ctx.arc(c[0]+rx,c[1]-ry,rx*2,0,TPI);
+		ctx.fill();*/
+        ctx.lineWidth = 2 / lastTransformState.scale;
+        ctx.strokeStyle = "rgba(255,127,0,0.75)";
+        //orange";
+        ctx.strokeRect(B[0], B[1] - r, q, r);
+    }
+    console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - o) + "ms");
     ctx.restore();
 }
 
@@ -525,6 +542,22 @@ function canvasMouseMove() {
         bubbleTimer = setTimeout(function() {
             $("div#bubble").css("opacity", "0");
         }, 250);
+    }
+}
+
+function canvasMouseClick() {
+    // TODO copied from cabvasMouseMove, DRY?
+    if (drawdat === undefined) {
+        return false;
+    }
+    // no drawing, no info!
+    var a = d3.event.pageX - canvasL;
+    var b = d3.event.pageY - canvasT;
+    var c = canvasCoord2geoCoord(a, b);
+    var d = coord2index(c.x, c.y, drawdat.reso);
+    var e = cellmap[d];
+    if (e !== undefined) {
+        drawPlot(true, undefined, undefined, d);
     }
 }
 

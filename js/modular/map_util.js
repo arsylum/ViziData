@@ -104,6 +104,21 @@ function canvasMouseMove() {
 	}
 }
 
+function canvasMouseClick() {
+	// TODO copied from cabvasMouseMove, DRY?
+	if(drawdat === undefined) { return false; } // no drawing, no info!
+
+	var x = d3.event.pageX - canvasL;
+	var y = d3.event.pageY - canvasT;
+
+	var gc = canvasCoord2geoCoord(x,y);
+	var i = coord2index(gc.x, gc.y, drawdat.reso);
+	var cell = cellmap[i];
+
+	if(cell !== undefined) {
+		drawPlot(true, undefined, undefined, i);
+	}
+}
 
 /**
 * zoom the map */

@@ -30,6 +30,8 @@ var	//ARR_UNDEFINED = null,	// undefined value
 	ARR_M_LON = 0,			// longitude
 	ARR_M_LAT = 1,			// latitude
 	ARR_M_I = 2;			// ref to prop
+
+var TPI = Math.PI * 2;
 ///_________________
 /// pseudo constants
 ////////////////////
