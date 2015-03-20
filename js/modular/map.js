@@ -87,7 +87,7 @@ function generateGrid(reso, mAE, data) {
 							if(section_filter(a,mAE)) {									// if it actually lies within map bounds
 								ti = coord2index(a[ARR_M_LON],a[ARR_M_LAT],reso);
 								if(cellmap[ti] === undefined) {	cellmap[ti] = []; }			// aggregate it on the grid
-								cellmap[ti].push(a[ARR_M_I]);
+								cellmap[ti].push([a[ARR_M_I],j]);
 								cellmapprog[ti] = cellmap[ti];
 
 								count++;

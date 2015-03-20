@@ -301,7 +301,7 @@ function generateGrid(a, b, c) {
                                     cellmap[o] = [];
                                 }
                                 // aggregate it on the grid
-                                cellmap[o].push(n[ARR_M_I]);
+                                cellmap[o].push([ n[ARR_M_I], q ]);
                                 l[o] = cellmap[o];
                                 f++;
                             }
@@ -552,13 +552,24 @@ function canvasMouseClick() {
         return false;
     }
     // no drawing, no info!
-    var a = d3.event.pageX - canvasL;
-    var b = d3.event.pageY - canvasT;
-    var c = canvasCoord2geoCoord(a, b);
-    var d = coord2index(c.x, c.y, drawdat.reso);
-    var e = cellmap[d];
-    if (e !== undefined) {
-        drawPlot(true, undefined, undefined, d);
+    var a = $("#infolist");
+    a.html("");
+    // clear the list
+    var b = d3.event.pageX - canvasL;
+    var c = d3.event.pageY - canvasT;
+    var d = canvasCoord2geoCoord(b, c);
+    var e = coord2index(d.x, d.y, drawdat.reso);
+    var f = cellmap[e];
+    if (f !== undefined) {
+        drawPlot(true, undefined, undefined, e);
+        // highlight cell
+        //console.log(cell);
+        // TODO failsafe for large arrays?
+        $.each(f, function() {
+            //console.log(this);
+            var b = current_datsel.props.members[this[0]];
+            a.append("<tr>" + '<td><a href="https://www.wikidata.org/wiki/' + b + '" target="wikidata">' + b + "</a></td>" + "<td>" + this[1] + "</td>" + "</tr>");
+        });
     }
 }
 

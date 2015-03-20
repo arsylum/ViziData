@@ -108,6 +108,9 @@ function canvasMouseClick() {
 	// TODO copied from cabvasMouseMove, DRY?
 	if(drawdat === undefined) { return false; } // no drawing, no info!
 
+	var tb = $("#infolist");
+	tb.html(""); // clear the list
+
 	var x = d3.event.pageX - canvasL;
 	var y = d3.event.pageY - canvasT;
 
@@ -117,6 +120,16 @@ function canvasMouseClick() {
 
 	if(cell !== undefined) {
 		drawPlot(true, undefined, undefined, i); // highlight cell
+		//console.log(cell);
+		// TODO failsafe for large arrays?
+		$.each(cell, function() {
+			//console.log(this);
+			var q = current_datsel.props.members[this[0]];
+			tb.append("<tr>"+
+				"<td><a href=\"https://www.wikidata.org/wiki/"+q+"\" target=\"wikidata\">"+q+"</a></td>"+
+				"<td>"+this[1]+"</td>"+
+			"</tr>");
+		});
 	}
 }
 

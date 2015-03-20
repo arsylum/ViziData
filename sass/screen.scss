@@ -138,15 +138,91 @@ menu#timefilter {
 	background: $control-mbg-color;
 }
 
-#cellinfo {
-	@extend #legend;
-	flex: 1 1 auto !important;
-}
 
 #stuff {
 	@extend #legend;
 	font-size: .8em;
 	line-height: 1em;
+}
+
+#cellinfo {
+	@extend #legend;
+	flex: 1 1 auto !important;
+	padding: 0;
+	//display: flex;
+	//flex-flow: column;
+
+	position: relative;
+
+	div, table {
+		//border: 1px black solid;
+	}
+	div {
+		//flex: 0 1 auto;
+	}
+	.table-wrapper {
+		display: block;
+		position: absolute;
+		height: 100%;
+		width: 100%;
+
+		table {
+			//flex: 1 1 auto;
+			//position: absolute;
+			//display: block;
+			//display: table;
+			width: 100%;
+
+			thead, tbody {
+				
+				width: 100%;
+			}
+
+			tr {
+				width: 100%;
+		        display: flex;
+		        text-align: left;
+
+				td {
+					margin: 0 $box-padding;
+				}
+
+		        td:first-child {
+		        	float: left;
+		        	width: 70%;
+		        }
+		        td:last-child {
+		        	//float: right;
+		        	text-align: right;
+		        	width: 30%;
+		        }
+			}
+			
+			//height: 100%;
+
+			padding: $box-padding;
+			//display: flex;
+			//flex-flow: column;
+			thead {
+				//flex: 0 1 auto;
+				font-size: 1.1em;
+				font-weight: bold;
+				td:last-child {
+					margin: 0 26px;
+				}
+			}
+			tbody {
+				position: absolute;
+				top: 1.2em;
+				bottom: 0;
+				overflow: auto;
+				//float: left;
+				tr {
+					border-bottom: 1px solid rgba(0,0,0,0.06);
+				}
+			}
+		}
+	}
 }
 
 #map {
