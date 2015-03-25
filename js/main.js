@@ -385,9 +385,11 @@ function drawPlot(a, b, c, d) {
             reso: c
         };
     }
-    console.log("  ~ drawing " + drawdat.draw.length + " shapes");
-    console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
-    console.log("  |BM| (dataset generation in " + (new Date() - e) + "ms)");
+    if (a) {
+        console.log("  ~ drawing " + drawdat.draw.length + " shapes");
+        console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
+        console.log("  |BM| (dataset generation in " + (new Date() - e) + "ms)");
+    }
     // color defs
     /// TODO color calculation is buggy
     // (using hsl model might be good idea)

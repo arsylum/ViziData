@@ -181,9 +181,11 @@ function drawPlot(clear, newmap, reso, highlight) {
 		});
 		drawdat = {draw: draw, min: min, max: max, reso: reso};
 	}
-	console.log("  ~ drawing "+drawdat.draw.length+" shapes");
-	console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);
-	console.log("  |BM| (dataset generation in "+(new Date()-uMBM)+"ms)");
+	if(clear) {
+		console.log("  ~ drawing "+drawdat.draw.length+" shapes");
+		console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);
+		console.log("  |BM| (dataset generation in "+(new Date()-uMBM)+"ms)");
+	}
 
 	// color defs
 	/// TODO color calculation is buggy

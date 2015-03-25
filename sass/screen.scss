@@ -182,20 +182,30 @@ menu#timefilter {
 				width: 100%;
 		        display: flex;
 		        text-align: left;
+		        font-family: sans-serif;
 
-				td {
+				td,th {
 					margin: 0 $box-padding;
-				}
+					font-size: 0.8em;
 
-		        td:first-child {
-		        	float: left;
-		        	width: 70%;
-		        }
-		        td:last-child {
-		        	//float: right;
-		        	text-align: right;
-		        	width: 30%;
-		        }
+			        &:first-child {
+			        	float: left;
+			        	width: 70%;
+			        }
+			        &:last-child {
+			        	//float: right;
+			        	text-align: right;
+			        	width: 30%;
+			        }
+
+			        a {
+			        	color: rgb(5, 19, 115);
+			        }
+		    	}
+		    	th {
+		    		font-size: 1em;
+		    		margin-top: 0.1em;
+		    	}
 			}
 			
 			//height: 100%;
@@ -207,13 +217,13 @@ menu#timefilter {
 				//flex: 0 1 auto;
 				font-size: 1.1em;
 				font-weight: bold;
-				td:last-child {
-					margin: 0 26px;
+				th:last-child {
+					margin-right: 26px;
 				}
 			}
 			tbody {
 				position: absolute;
-				top: 1.2em;
+				top: 1.4em;
 				bottom: 0;
 				overflow-y: scroll;
 				//float: left;

@@ -218,43 +218,54 @@ menu#timefilter {
   width: 100%;
   display: flex;
   text-align: left;
+  font-family: sans-serif;
 }
-/* line 186, ../sass/screen.scss */
-#cellinfo .table-wrapper table tr td {
+/* line 187, ../sass/screen.scss */
+#cellinfo .table-wrapper table tr td, #cellinfo .table-wrapper table tr th {
   margin: 0 10px;
+  font-size: 0.8em;
 }
-/* line 190, ../sass/screen.scss */
-#cellinfo .table-wrapper table tr td:first-child {
+/* line 191, ../sass/screen.scss */
+#cellinfo .table-wrapper table tr td:first-child, #cellinfo .table-wrapper table tr th:first-child {
   float: left;
   width: 70%;
 }
-/* line 194, ../sass/screen.scss */
-#cellinfo .table-wrapper table tr td:last-child {
+/* line 195, ../sass/screen.scss */
+#cellinfo .table-wrapper table tr td:last-child, #cellinfo .table-wrapper table tr th:last-child {
   text-align: right;
   width: 30%;
 }
-/* line 206, ../sass/screen.scss */
+/* line 201, ../sass/screen.scss */
+#cellinfo .table-wrapper table tr td a, #cellinfo .table-wrapper table tr th a {
+  color: #051373;
+}
+/* line 205, ../sass/screen.scss */
+#cellinfo .table-wrapper table tr th {
+  font-size: 1em;
+  margin-top: 0.1em;
+}
+/* line 216, ../sass/screen.scss */
 #cellinfo .table-wrapper table thead {
   font-size: 1.1em;
   font-weight: bold;
 }
-/* line 210, ../sass/screen.scss */
-#cellinfo .table-wrapper table thead td:last-child {
-  margin: 0 26px;
+/* line 220, ../sass/screen.scss */
+#cellinfo .table-wrapper table thead th:last-child {
+  margin-right: 26px;
 }
-/* line 214, ../sass/screen.scss */
+/* line 224, ../sass/screen.scss */
 #cellinfo .table-wrapper table tbody {
   position: absolute;
-  top: 1.2em;
+  top: 1.4em;
   bottom: 0;
   overflow-y: scroll;
 }
-/* line 220, ../sass/screen.scss */
+/* line 230, ../sass/screen.scss */
 #cellinfo .table-wrapper table tbody tr {
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* line 228, ../sass/screen.scss */
+/* line 238, ../sass/screen.scss */
 #map {
   height: 74.6%;
   /*($filter-height)+($legend-height)-($timeline-height);*/
@@ -264,7 +275,7 @@ menu#timefilter {
   /*+$map-margin;*/
 }
 
-/* line 236, ../sass/screen.scss */
+/* line 246, ../sass/screen.scss */
 #bubble {
   position: absolute;
   bottom: 1337px;
@@ -286,7 +297,7 @@ menu#timefilter {
   pointer-events: none;
 }
 
-/* line 251, ../sass/screen.scss */
+/* line 261, ../sass/screen.scss */
 #bubble > span,
 #legend > span,
 #stuff > span,
@@ -296,7 +307,7 @@ menu#timefilter {
   font-family: sans-serif;
 }
 
-/* line 260, ../sass/screen.scss */
+/* line 270, ../sass/screen.scss */
 #sidebar header h1 {
   clear: both;
   font-family: sans-serif;
@@ -304,29 +315,29 @@ menu#timefilter {
   margin: 15px 15px 5px;
   font-weight: bold;
 }
-/* line 267, ../sass/screen.scss */
+/* line 277, ../sass/screen.scss */
 #sidebar header h1 span {
   font-size: .5em;
 }
-/* line 272, ../sass/screen.scss */
+/* line 282, ../sass/screen.scss */
 #sidebar header #github_link {
   position: relative;
   float: left;
   width: 120px;
   margin: 0 15px;
 }
-/* line 278, ../sass/screen.scss */
+/* line 288, ../sass/screen.scss */
 #sidebar header #github_link img {
   float: left;
 }
-/* line 282, ../sass/screen.scss */
+/* line 292, ../sass/screen.scss */
 #sidebar header #github_link img[src*=logo] {
   transition: .5s;
   position: absolute;
   left: 100px;
   opacity: 0;
 }
-/* line 291, ../sass/screen.scss */
+/* line 301, ../sass/screen.scss */
 #sidebar header:hover #github_link img[src*=logo] {
   left: 38px;
   opacity: 1;
@@ -334,19 +345,19 @@ menu#timefilter {
 
 /************
 *** Forms **/
-/* line 299, ../sass/screen.scss */
+/* line 309, ../sass/screen.scss */
 select, label {
   display: block;
 }
 
-/* line 304, ../sass/screen.scss */
+/* line 314, ../sass/screen.scss */
 #controls > label {
   line-height: 1.5em;
   margin: .5em 0;
   display: inline-block;
   width: 74%;
 }
-/* line 311, ../sass/screen.scss */
+/* line 321, ../sass/screen.scss */
 #controls input {
   display: inline-block;
   padding: 2%;
@@ -355,7 +366,7 @@ select, label {
   vertical-align: middle;
   width: 100%;
 }
-/* line 320, ../sass/screen.scss */
+/* line 330, ../sass/screen.scss */
 #controls input[type=text][readonly] {
   width: 14%;
   margin-left: 6%;
@@ -368,7 +379,7 @@ select, label {
 	height: 1px;
 	content: "";
 }*/
-/* line 336, ../sass/screen.scss */
+/* line 346, ../sass/screen.scss */
 button {
   width: 100%;
   border: 1px solid #ACACAC;
@@ -389,7 +400,7 @@ button {
   box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
 }
 
-/* line 347, ../sass/screen.scss */
+/* line 357, ../sass/screen.scss */
 button:hover {
   color: #ffffff;
   background: #BBBED1;
@@ -397,7 +408,7 @@ button:hover {
   /*@include box-shadow(0 -3px 3px -3px rgba(100, 0, 0, 0.8), 0 3px 3px -3px rgba(100, 0, 0, 0.8));*/
 }
 
-/* line 354, ../sass/screen.scss */
+/* line 364, ../sass/screen.scss */
 button[disabled] {
   background: #ECECEC;
   cursor: default;
@@ -438,12 +449,12 @@ button[disabled] {
 }*/
 /***********
 *** text **/
-/* line 394, ../sass/screen.scss */
+/* line 404, ../sass/screen.scss */
 #filter {
   line-height: 1.5em;
 }
 
-/* line 399, ../sass/screen.scss */
+/* line 409, ../sass/screen.scss */
 em {
   font-style: italic;
   color: #aa5500;
@@ -451,7 +462,7 @@ em {
 
 /************
 *** fancy **/
-/* line 408, ../sass/screen.scss */
+/* line 418, ../sass/screen.scss */
 menu > div {
   -moz-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
   -webkit-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
@@ -463,7 +474,7 @@ menu > div {
 }*/
 /****************
 *** technical **/
-/* line 419, ../sass/screen.scss */
+/* line 429, ../sass/screen.scss */
 #bubble {
   opacity: 0;
 }
