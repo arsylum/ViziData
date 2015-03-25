@@ -85,9 +85,10 @@ currentGenGrid = 0, // genGrid cancelation with newer calls
 redrawTimer, // genGrid
 bubbleTimer, // hide map tooltip bubble
 boundsTimer, // forceBounds
-resizeTimeout;
+resizeTimer, // window resize handling
+infolistTimer;
 
-// window resize handling
+// item table scroll handler
 var gdata = [], // global rawdata
 current_datsel, // slected data group
 current_setsel, // selected dataset
@@ -95,13 +96,13 @@ cellmap, // latest generated tilemap;
 drawdat;
 
 // latest generated drawing dataset
+/// positions and dimensions
 var viewportH, viewportW;
 
-var lastTransformState;
-
-// remember map scaling (only redraw on changes)
 // canvas
 var canvas, ctx, canvasW, canvasH, canvasT, canvasL;
+
+var lastTransformState;
 
 ///////////////////
 /// entry point ///
@@ -131,10 +132,11 @@ $(function() {
         colorize = !this.checked;
         genGrid();
     });
+    $("#infolist").on("scroll", infolistScroll);
     // bind window resize handling
     $(window).resize(function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(onResize, 400);
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(onResize, 400);
     });
     // zoombehaviour
     zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
@@ -566,10 +568,75 @@ function canvasMouseClick() {
         //console.log(cell);
         // TODO failsafe for large arrays?
         $.each(f, function() {
+            //console.log('('+(this[0]-1)+')prev: '+current_datsel.props.members[this[0]-1]);
             //console.log(this);
+            //console.log('('+(this[0]+1)+')next: '+current_datsel.props.members[this[0]+1]);
+            //console.log('---');
             var b = current_datsel.props.members[this[0]];
-            a.append("<tr>" + '<td><a href="https://www.wikidata.org/wiki/' + b + '" target="wikidata">' + b + "</a></td>" + "<td>" + this[1] + "</td>" + "</tr>");
+            a.append("<tr>" + '<td><a class="q" href="https://www.wikidata.org/wiki/' + b + '" target="wikidata">' + b + "</a></td>" + "<td>" + this[1] + "</td>" + "</tr>");
         });
+        a.trigger("scroll");
+    }
+}
+
+/**
+* infolistScroll Timeout Wrapper*/
+function infolistScroll() {
+    clearTimeout(infolistTimer);
+    infolistTimer = setTimeout(infolistScrollFkt, 200);
+}
+
+/**
+* infolist scroll handler, fetches labels for visible items */
+function infolistScrollFkt() {
+    var a = $("#cellinfo");
+    var b = $("#infolist");
+    var c = a.position().top + b.position().top;
+    var d = c + b.height();
+    var e = [];
+    b.find("a.q").each(function() {
+        var a = this.getBoundingClientRect().top;
+        if (a >= c && a <= d) {
+            e.push(this);
+        }
+    });
+    //console.log(qarray);
+    // process result of ajax request
+    var f = function(a) {
+        //console.log(data);
+        // TODO error handling
+        $.each(a.entities, function() {
+            var a = this.id;
+            // + ' (no label)';
+            if (this.labels !== undefined) {
+                // TODO
+                if (this.labels.en !== undefined) {
+                    // this sanity check is 
+                    if (this.labels.en.value !== undefined) {
+                        // probably slightly overkill
+                        a = this.labels.en.value;
+                    }
+                }
+            }
+            $(e).filter('[href$="' + this.id + '"]').removeClass("q").text(a);
+        });
+    };
+    var g = 0, h = 20;
+    // query up to m labels simultaneously
+    var i = "https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=", j = "&props=labels&languages=en&languagefallback=&callback=?";
+    var k = -1, l = i;
+    while (++k < e.length) {
+        if (g > 0) {
+            l += "|";
+        }
+        l += $(e[k]).text();
+        if (++g >= h || k + 1 === e.length) {
+            // run a query, reset qstr
+            l += j;
+            $.getJSON(l, f);
+            l = i;
+            g = 0;
+        }
     }
 }
 

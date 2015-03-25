@@ -25,13 +25,13 @@ $(function(){
 		colorize = !this.checked;
 		genGrid();
 	});
+	$("#infolist").on("scroll", infolistScroll);
 
 	// bind window resize handling
 	$(window).resize(function() {
-		clearTimeout(resizeTimeout);
-		resizeTimeout = setTimeout(onResize, 400);
+		clearTimeout(resizeTimer);
+		resizeTimer = setTimeout(onResize, 400);
 	});
-
 
 	// zoombehaviour
 	zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);

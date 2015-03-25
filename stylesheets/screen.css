@@ -247,7 +247,7 @@ menu#timefilter {
   position: absolute;
   top: 1.2em;
   bottom: 0;
-  overflow: auto;
+  overflow-y: scroll;
 }
 /* line 220, ../sass/screen.scss */
 #cellinfo .table-wrapper table tbody tr {

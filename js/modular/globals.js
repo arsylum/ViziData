@@ -22,7 +22,8 @@ var M_BOUNDING_THRESHOLD = 10,	// grid clipping tolerance
 // DATA
 var DATA_DIR = "./data/",
 	META_FILES = [
-		"humans.json" 
+		"humans.json",
+		//"any.json"
 	];
 var DEFAULT_DATASET = 0;	// dataset to load up initially
 
@@ -50,18 +51,19 @@ var allow_redraw = true,
 	redrawTimer, // genGrid
 	bubbleTimer, // hide map tooltip bubble
 	boundsTimer, // forceBounds
-	resizeTimeout; // window resize handling
+	resizeTimer, // window resize handling
+	infolistTimer; // item table scroll handler
 
 var gdata = [],		// global rawdata
 	current_datsel,	// slected data group
 	current_setsel,	// selected dataset
 	cellmap, // latest generated tilemap;
 	drawdat; // latest generated drawing dataset
-	
+
+
+/// positions and dimensions
 var viewportH,
 	viewportW;
-
-var lastTransformState; // remember map scaling (only redraw on changes)
 
 // canvas
 var canvas,
@@ -70,6 +72,8 @@ var canvas,
 	canvasH,
 	canvasT,
 	canvasL;
+
+var lastTransformState; // remember map scaling (only redraw on changes)
 //_____________
 /// global vars
 ///////////////

@@ -123,13 +123,74 @@ function canvasMouseClick() {
 		//console.log(cell);
 		// TODO failsafe for large arrays?
 		$.each(cell, function() {
+			//console.log('('+(this[0]-1)+')prev: '+current_datsel.props.members[this[0]-1]);
 			//console.log(this);
+			//console.log('('+(this[0]+1)+')next: '+current_datsel.props.members[this[0]+1]);
+			//console.log('---');
 			var q = current_datsel.props.members[this[0]];
 			tb.append("<tr>"+
-				"<td><a href=\"https://www.wikidata.org/wiki/"+q+"\" target=\"wikidata\">"+q+"</a></td>"+
+				"<td><a class=\"q\" href=\"https://www.wikidata.org/wiki/"+q+"\" target=\"wikidata\">"+q+"</a></td>"+
 				"<td>"+this[1]+"</td>"+
 			"</tr>");
 		});
+
+		tb.trigger("scroll");
+	}
+}
+
+/**
+* infolistScroll Timeout Wrapper*/
+function infolistScroll() {
+	clearTimeout(infolistTimer);
+	infolistTimer = setTimeout(infolistScrollFkt, 200);
+}
+
+/**
+* infolist scroll handler, fetches labels for visible items */
+function infolistScrollFkt() {
+	var cellinfo = $("#cellinfo");
+	var infolist = $("#infolist");
+	var infolistT = cellinfo.position().top + infolist.position().top;
+	var infolistB = infolistT + infolist.height();
+	var qarray = [];
+
+	infolist.find("a.q").each(function() {
+		var t = this.getBoundingClientRect().top;
+		if(t >= infolistT && t <= infolistB) {
+			qarray.push(this);
+		}
+	});
+	//console.log(qarray);
+
+	// process result of ajax request
+	var processLabels = function(data) {
+		//console.log(data);
+		// TODO error handling
+		$.each(data.entities, function() {
+			var text = this.id;// + ' (no label)';
+			if(this.labels !== undefined) {						// TODO
+				if(this.labels.en !== undefined) {				// this sanity check is 
+					if(this.labels.en.value !== undefined) {	// probably slightly overkill
+						text = this.labels.en.value;
+			}	}	}
+			$(qarray).filter('[href$="'+this.id+'"]').removeClass("q").text(text);
+		});
+	};
+
+	var n = 0, m = 20; // query up to m labels simultaneously
+	var qpre = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=',
+		qsuf = '&props=labels&languages=en&languagefallback=&callback=?';
+	var i = -1, qstr = qpre;
+	while(++i < qarray.length) {
+		if(n > 0) {	qstr += '|'; }
+		qstr += $(qarray[i]).text();
+
+		if(++n >= m || (i+1 === qarray.length)) { // run a query, reset qstr
+			qstr += qsuf;
+			$.getJSON(qstr, processLabels);
+			qstr = qpre;
+			n = 0;
+		}
 	}
 }
 
