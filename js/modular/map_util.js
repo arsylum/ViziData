@@ -195,7 +195,7 @@ function infolistScrollFkt() {
 }
 
 /**
-* zoom the map */
+* zoom or move the map */
 function zoom() {
 	if( d3.event.translate[0] !== lastTransformState.translate[0] ||
 		d3.event.translate[1] !== lastTransformState.translate[1] ||
@@ -206,7 +206,7 @@ function zoom() {
 		
 		$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
-		drawPlot(undefined,undefined); // TODO function parameters
+		drawPlot(undefined,undefined); // TODO function parameters (?)
 		//forceBounds();
 		genGrid();
 	}

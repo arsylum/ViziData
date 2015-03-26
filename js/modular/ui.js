@@ -45,6 +45,52 @@ function setupControlHandlers() {
 }
 
 /**
+* encodes current state of viz into url to make it shareable*/
+function urlifyState() {
+	// TODO selected cells are note encoded yet
+	// TODO properly encode selcted dataset (depends on data management module)
+	var setsel = $("#filter input[type='radio']:checked").val();
+	var hash = "d="+setsel;
+	hash += "&t=" + lastTransformState.translate[0] + "_" + lastTransformState.translate[1] + "&s=" + lastTransformState.scale;
+	window.location.hash = hash;
+}
+
+/**
+* restore the url encoded viz state */
+function statifyUrl() {
+	var hash = window.location.hash;
+	if (hash === "") { return false; }
+
+	var ds = 0;
+	hash = hash.substring(1).split("&");
+	for(var i= 0; i<hash.length; ++i) {
+		var key = hash[i].substring(0,1);
+		var val = hash[i].substring(2);
+		switch(key) {
+			case "d":
+				ds = parseInt(val);
+				break;
+			case "t":
+				var t = val.split("_");
+				lastTransformState.translate = [parseFloat(t[0]),parseFloat(t[1])];
+				break;
+			case "s":
+				lastTransformState.scale = parseFloat(val);
+				break;
+			default:
+				console.log("|WARNING| discarded unrecognized parameter '"+ hash[i].substring(0,1) + "' in url pattern");
+		}
+	}
+
+	zoombh.scale(lastTransformState.scale);
+	zoombh.translate(lastTransformState.translate);
+
+	if($("#filter input").get(ds) === undefined) { return false; }
+	$("#filter input")[ds].click();
+	return true;
+}
+
+/**
  * SVG export*/
 function exportSvg() {
 	$("#export").attr("disabled", "disabled");

@@ -52,8 +52,10 @@ $(function(){
 
 	// Load default dataset once ready
 	$(document).on("meta_files_ready", function() {
-		current_datsel = gdata[0]; // TODO get from dom
-		$("#filter input")[DEFAULT_DATASET].click(); // select&load initial dataset
+		current_datsel = gdata[0]; // TODO [get from dom] (depends on data management)
+		if(!statifyUrl()) {
+			$("#filter input")[DEFAULT_DATASET].click(); // select&load initial dataset
+		}
 	});
 
 	/// TODO

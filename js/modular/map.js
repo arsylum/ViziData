@@ -71,6 +71,8 @@ function generateGrid(reso, mAE, data) {
 				"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
 			$("#export").removeAttr("disabled");
 
+			urlifyState();
+
 			console.log("\\~~ grid generation complete~~/ ");
 		};
 

@@ -154,8 +154,10 @@ $(function() {
     // Load default dataset once ready
     $(document).on("meta_files_ready", function() {
         current_datsel = gdata[0];
-        // TODO get from dom
-        $("#filter input")[DEFAULT_DATASET].click();
+        // TODO [get from dom] (depends on data management)
+        if (!statifyUrl()) {
+            $("#filter input")[DEFAULT_DATASET].click();
+        }
     });
     /// TODO
     // load all the meta data meta files
@@ -277,6 +279,7 @@ function generateGrid(a, b, c) {
             $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
             "we have registered a total of<br>" + "<em>" + f + " " + c.parent.label + "</em><br>" + "that <em>" + c.strings.term + "</em><br>" + "between <em>" + g.min + "</em> and <em>" + g.max + "</em>");
             $("#export").removeAttr("disabled");
+            urlifyState();
             console.log("\\~~ grid generation complete~~/ ");
         };
         var k = function(e) {
@@ -643,14 +646,14 @@ function infolistScrollFkt() {
 }
 
 /**
-* zoom the map */
+* zoom or move the map */
 function zoom() {
     if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
         //plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
         lastTransformState = d3.event;
         $("#ctrl-zoom>input").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
         drawPlot(undefined, undefined);
-        // TODO function parameters
+        // TODO function parameters (?)
         //forceBounds();
         genGrid();
     }
@@ -820,6 +823,56 @@ function setupControlHandlers() {
         $(this).attr("disabled", "disabled");
         exportSvg();
     });
+}
+
+/**
+* encodes current state of viz into url to make it shareable*/
+function urlifyState() {
+    // TODO selected cells are note encoded yet
+    // TODO properly encode selcted dataset (depends on data management module)
+    var a = $("#filter input[type='radio']:checked").val();
+    var b = "d=" + a;
+    b += "&t=" + lastTransformState.translate[0] + "_" + lastTransformState.translate[1] + "&s=" + lastTransformState.scale;
+    window.location.hash = b;
+}
+
+/**
+* restore the url encoded viz state */
+function statifyUrl() {
+    var a = window.location.hash;
+    if (a === "") {
+        return false;
+    }
+    var b = 0;
+    a = a.substring(1).split("&");
+    for (var c = 0; c < a.length; ++c) {
+        var d = a[c].substring(0, 1);
+        var e = a[c].substring(2);
+        switch (d) {
+          case "d":
+            b = parseInt(e);
+            break;
+
+          case "t":
+            var f = e.split("_");
+            lastTransformState.translate = [ parseFloat(f[0]), parseFloat(f[1]) ];
+            break;
+
+          case "s":
+            lastTransformState.scale = parseFloat(e);
+            break;
+
+          default:
+            console.log("|WARNING| discarded unrecognized parameter '" + a[c].substring(0, 1) + "' in url pattern");
+        }
+    }
+    zoombh.scale(lastTransformState.scale);
+    zoombh.translate(lastTransformState.translate);
+    if ($("#filter input").get(b) === undefined) {
+        return false;
+    }
+    $("#filter input")[b].click();
+    return true;
 }
 
 /**
