@@ -535,6 +535,7 @@ function canvasMouseMove() {
     var c = canvasCoord2geoCoord(a, b);
     var d = coord2index(c.x, c.y, drawdat.reso);
     var e = cellmap[d];
+    $("#hud").text("(" + c.x.toFixed(5) + ", " + c.y.toFixed(5) + ")");
     if (e !== undefined) {
         /*console.log(" ~~~~");
 		console.log("index: "+i);

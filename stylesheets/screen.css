@@ -274,8 +274,23 @@ menu#timefilter {
   margin-left: 250px;
   /*+$map-margin;*/
 }
+/* line 244, ../sass/screen.scss */
+#map #hud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.8);
+  display: inline-block;
+  padding: .5em;
+  border-radius: 0 0 5px 0;
+  font-family: monospace;
+  transition: opacity 0.2s;
+  opacity: 0;
+}
+/* line 254, ../sass/screen.scss */
+#map:hover #hud {
+  opacity: 1;
+}
 
-/* line 246, ../sass/screen.scss */
+/* line 260, ../sass/screen.scss */
 #bubble {
   position: absolute;
   bottom: 1337px;
@@ -297,7 +312,7 @@ menu#timefilter {
   pointer-events: none;
 }
 
-/* line 261, ../sass/screen.scss */
+/* line 275, ../sass/screen.scss */
 #bubble > span,
 #legend > span,
 #stuff > span,
@@ -307,7 +322,7 @@ menu#timefilter {
   font-family: sans-serif;
 }
 
-/* line 270, ../sass/screen.scss */
+/* line 284, ../sass/screen.scss */
 #sidebar header h1 {
   clear: both;
   font-family: sans-serif;
@@ -315,29 +330,29 @@ menu#timefilter {
   margin: 15px 15px 5px;
   font-weight: bold;
 }
-/* line 277, ../sass/screen.scss */
+/* line 291, ../sass/screen.scss */
 #sidebar header h1 span {
   font-size: .5em;
 }
-/* line 282, ../sass/screen.scss */
+/* line 296, ../sass/screen.scss */
 #sidebar header #github_link {
   position: relative;
   float: left;
   width: 120px;
   margin: 0 15px;
 }
-/* line 288, ../sass/screen.scss */
+/* line 302, ../sass/screen.scss */
 #sidebar header #github_link img {
   float: left;
 }
-/* line 292, ../sass/screen.scss */
+/* line 306, ../sass/screen.scss */
 #sidebar header #github_link img[src*=logo] {
   transition: .5s;
   position: absolute;
   left: 100px;
   opacity: 0;
 }
-/* line 301, ../sass/screen.scss */
+/* line 315, ../sass/screen.scss */
 #sidebar header:hover #github_link img[src*=logo] {
   left: 38px;
   opacity: 1;
@@ -345,19 +360,19 @@ menu#timefilter {
 
 /************
 *** Forms **/
-/* line 309, ../sass/screen.scss */
+/* line 323, ../sass/screen.scss */
 select, label {
   display: block;
 }
 
-/* line 314, ../sass/screen.scss */
+/* line 328, ../sass/screen.scss */
 #controls > label {
   line-height: 1.5em;
   margin: .5em 0;
   display: inline-block;
   width: 74%;
 }
-/* line 321, ../sass/screen.scss */
+/* line 335, ../sass/screen.scss */
 #controls input {
   display: inline-block;
   padding: 2%;
@@ -366,7 +381,7 @@ select, label {
   vertical-align: middle;
   width: 100%;
 }
-/* line 330, ../sass/screen.scss */
+/* line 344, ../sass/screen.scss */
 #controls input[type=text][readonly] {
   width: 14%;
   margin-left: 6%;
@@ -379,7 +394,7 @@ select, label {
 	height: 1px;
 	content: "";
 }*/
-/* line 346, ../sass/screen.scss */
+/* line 360, ../sass/screen.scss */
 button {
   width: 100%;
   border: 1px solid #ACACAC;
@@ -400,7 +415,7 @@ button {
   box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
 }
 
-/* line 357, ../sass/screen.scss */
+/* line 371, ../sass/screen.scss */
 button:hover {
   color: #ffffff;
   background: #BBBED1;
@@ -408,7 +423,7 @@ button:hover {
   /*@include box-shadow(0 -3px 3px -3px rgba(100, 0, 0, 0.8), 0 3px 3px -3px rgba(100, 0, 0, 0.8));*/
 }
 
-/* line 364, ../sass/screen.scss */
+/* line 378, ../sass/screen.scss */
 button[disabled] {
   background: #ECECEC;
   cursor: default;
@@ -449,12 +464,12 @@ button[disabled] {
 }*/
 /***********
 *** text **/
-/* line 404, ../sass/screen.scss */
+/* line 418, ../sass/screen.scss */
 #filter {
   line-height: 1.5em;
 }
 
-/* line 409, ../sass/screen.scss */
+/* line 423, ../sass/screen.scss */
 em {
   font-style: italic;
   color: #aa5500;
@@ -462,7 +477,7 @@ em {
 
 /************
 *** fancy **/
-/* line 418, ../sass/screen.scss */
+/* line 432, ../sass/screen.scss */
 menu > div {
   -moz-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
   -webkit-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
@@ -474,7 +489,7 @@ menu > div {
 }*/
 /****************
 *** technical **/
-/* line 429, ../sass/screen.scss */
+/* line 443, ../sass/screen.scss */
 #bubble {
   opacity: 0;
 }

@@ -79,6 +79,8 @@ function canvasMouseMove() {
 	var i = coord2index(gc.x, gc.y, drawdat.reso);
 	var cell = cellmap[i];
 
+	$("#hud").text('(' + gc.x.toFixed(5) + ', ' + gc.y.toFixed(5) + ')');
+
 	if(cell !== undefined) {
 		/*console.log(" ~~~~");
 		console.log("index: "+i);

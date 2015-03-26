@@ -240,6 +240,20 @@ menu#timefilter {
 	/*margin: $map-margin;*/
 	padding: $map-padding;
 	margin-left: ($left-row-width);/*+$map-margin;*/
+
+	#hud {
+		position: absolute;
+		background: rgba(255,255,255,.8);
+		display: inline-block;
+		padding: .5em;
+		border-radius: 0 0 5px 0;
+		font-family: monospace;
+		transition: opacity 0.2s;
+		opacity: 0;
+	}
+	&:hover #hud {
+		opacity: 1;
+	}
 }
 
 
