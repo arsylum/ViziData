@@ -93,9 +93,10 @@ var gdata = [], // global rawdata
 current_datsel, // slected data group
 current_setsel, // selected dataset
 cellmap, // latest generated tilemap;
-drawdat;
+drawdat, // latest generated drawing dataset
+renderRTL = false;
 
-// latest generated drawing dataset
+// flag for tile iteration direction
 /// positions and dimensions
 var viewportH, viewportW;
 
@@ -286,10 +287,14 @@ function generateGrid(a, b, c) {
             if (d < currentGenGrid) {
                 return 0;
             }
-            // cancel if newer genGrid is running
-            var l = {}, m, n, o;
-            var p = h + e;
-            if (p <= i) {
+            // cancel loop if newer genGrid is running
+            var l = {}, m, n, o, p;
+            if (!renderRTL) {
+                p = h + e;
+            } else {
+                p = i - e;
+            }
+            if (p <= i && p >= h) {
                 // still work to do							// for each map tile in visible area
                 for (var q = g.min; q <= g.max; q++) {
                     // go over each key in range
@@ -316,9 +321,10 @@ function generateGrid(a, b, c) {
                 // draw each tile after aggregating
                 drawPlot(false, l, a);
                 setTimeout(function() {
-                    k(e + 1);
+                    k(++e);
                 }, 1);
             } else {
+                // iterated over all tiles
                 j();
             }
         };
@@ -650,7 +656,7 @@ function infolistScrollFkt() {
 * zoom or move the map */
 function zoom() {
     if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
-        //plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        renderRTL = d3.event.translate[0] < lastTransformState.translate[0];
         lastTransformState = d3.event;
         $("#ctrl-zoom>input").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
         drawPlot(undefined, undefined);

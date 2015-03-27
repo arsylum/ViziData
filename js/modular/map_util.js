@@ -202,8 +202,8 @@ function zoom() {
 	if( d3.event.translate[0] !== lastTransformState.translate[0] ||
 		d3.event.translate[1] !== lastTransformState.translate[1] ||
 		d3.event.scale !== lastTransformState.scale) {
-		//plotlayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-		
+
+		renderRTL = (d3.event.translate[0] < lastTransformState.translate[0]);		
 		lastTransformState = d3.event;
 		
 		$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");

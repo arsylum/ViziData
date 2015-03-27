@@ -77,10 +77,11 @@ function generateGrid(reso, mAE, data) {
 		};
 
 		var iterate = function(offset) {
-			if(thisGenGrid < currentGenGrid) { return 0; } // cancel if newer genGrid is running
-			var cellmapprog = {}, l, a, ti;
-			var i = tMin + offset;
-			if(i <= tMax) {	// still work to do							// for each map tile in visible area
+			if(thisGenGrid < currentGenGrid) { return 0; } // cancel loop if newer genGrid is running
+			var cellmapprog = {}, l, a, ti, i;
+			if(!renderRTL) { i = tMin + offset; }
+					  else { i = tMax - offset; }
+			if(i <= tMax && i >= tMin) {	// still work to do							// for each map tile in visible area
 				for(var j = cAE.min; j <= cAE.max; j++) { 					// go over each key in range
 					if(data.data[i][j] !== undefined) {							// if it is defined
 						l = data.data[i][j].length;
@@ -100,10 +101,9 @@ function generateGrid(reso, mAE, data) {
 				// draw each tile after aggregating
 				drawPlot(false, cellmapprog, reso);
 				setTimeout(function() {
-					iterate(offset+1);
+					iterate(++offset);
 				},1);
-
-			} else {
+			} else { // iterated over all tiles
 				finish();
 			}
 		};

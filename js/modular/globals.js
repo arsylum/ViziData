@@ -58,7 +58,8 @@ var gdata = [],		// global rawdata
 	current_datsel,	// slected data group
 	current_setsel,	// selected dataset
 	cellmap, // latest generated tilemap;
-	drawdat; // latest generated drawing dataset
+	drawdat, // latest generated drawing dataset
+	renderRTL = false; // flag for tile iteration direction
 
 
 /// positions and dimensions
