@@ -365,7 +365,7 @@ function drawPlot(a, b, c, d) {
         a = true;
     }
     if (b !== undefined && c === undefined) {
-        conslole.log("|WARNING| newmap given but no resolution. Using old drawing data.");
+        conslole.warn("drawPlot(): newmap given but no resolution. Using old drawing data.");
     }
     ctx.save();
     if (a !== false) {
@@ -870,7 +870,7 @@ function statifyUrl() {
             break;
 
           default:
-            console.log("|WARNING| discarded unrecognized parameter '" + a[c].substring(0, 1) + "' in url pattern");
+            console.warn("statifyUrl(): discarded unrecognized parameter '" + a[c].substring(0, 1) + "' in url pattern");
         }
     }
     zoombh.scale(lastTransformState.scale);

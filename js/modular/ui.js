@@ -78,7 +78,7 @@ function statifyUrl() {
 				lastTransformState.scale = parseFloat(val);
 				break;
 			default:
-				console.log("|WARNING| discarded unrecognized parameter '"+ hash[i].substring(0,1) + "' in url pattern");
+				console.warn("statifyUrl(): discarded unrecognized parameter '"+ hash[i].substring(0,1) + "' in url pattern");
 		}
 	}
 

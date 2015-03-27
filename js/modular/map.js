@@ -156,7 +156,7 @@ function drawPlot(clear, newmap, reso, highlight) {
 	if(clear === undefined) { clear = true; }
 
 	if(newmap !== undefined && reso === undefined) { 
-		conslole.log('|WARNING| newmap given but no resolution. Using old drawing data.');
+		conslole.warn('drawPlot(): newmap given but no resolution. Using old drawing data.');
 	} 
 
 	ctx.save();
