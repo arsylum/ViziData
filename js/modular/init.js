@@ -5,11 +5,11 @@ $(function(){
 	// init stuff
 	lastTransformState = {scale: 1, translate: [0,0]};
 
-	Highcharts.setOptions({
+	/*Highcharts.setOptions({
 		global: {
 			useUTC: false
 		}
-	});
+	});*/
 
 	$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);
 	$("#freezer>input").on("change", function() {
@@ -96,5 +96,6 @@ function onResize() {
 	canvasH = Math.floor($("#map").height());
 	canvas.attr("width", canvasW).attr("height", canvasH);
 	ctx = canvas.node().getContext("2d");
+	initChart();
 	genGrid();
 }

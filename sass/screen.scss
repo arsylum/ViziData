@@ -10,6 +10,7 @@
 
 @import "compass/reset";
 @import 'mixins';
+@import 'envision';
 
 /************
 ** COLORS **/
@@ -82,6 +83,29 @@ menu#timefilter {
 	min-height: $timeline-min-height;
 	max-height: $timelline-max-height;
 	/*margin-left: ($left-row-width)-($controls-padding);*/
+
+	#chart {
+		background: white;
+
+
+		.summary .flotr-labels {
+			.last {
+				right: 0;
+				left: initial !important;
+				text-align: right !important;
+				margin-right: 4px;
+			}
+		}
+
+		.detail .flotr-labels {
+			div {
+				margin-left: 4px;
+			}
+			.last {
+				display: none;
+			}
+		}
+	}
 }
 
 #sidebar {

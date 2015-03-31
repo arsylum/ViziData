@@ -38,9 +38,22 @@ function generateGrid(reso, mAE, data) {
 
 		/// calculate everything we can outside the loop for performance
 		// get axisExtremes
-		var cAE = chart.xAxis[0].getExtremes();
+		/*var cAE = chart.xAxis[0].getExtremes();
 		cAE.min = new Date(cAE.min).getFullYear();
-		cAE.max = new Date(cAE.max).getFullYear();
+		cAE.max = new Date(cAE.max).getFullYear();*/
+		// TODO doesn't look very sane
+		var cAE;
+		var sel = chart.components[2].api.flotr.selection;
+		if(sel.selecting !== false) {
+			cAE = chart.components[2].api.flotr.selection.getArea();
+			cAE.min = parseInt(cAE.x1);
+			cAE.max = parseInt(cAE.x2);
+		} else {
+			cAE = {
+				min: data.min,
+				max: data.max
+			};
+		}
 
 		// boundary enforcement
 		if(mAE[0].min < C_WMIN) { mAE[0].min = C_WMIN; }

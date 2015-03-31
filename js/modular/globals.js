@@ -57,7 +57,8 @@ var allow_redraw = true,
 var gdata = [],		// global rawdata
 	current_datsel,	// slected data group
 	current_setsel,	// selected dataset
-	cellmap, // latest generated tilemap;
+	chartdat = undefined, // timeline rendering data
+	cellmap, // latest generated tilemap
 	drawdat, // latest generated drawing dataset
 	renderRTL = false; // flag for tile iteration direction
 
