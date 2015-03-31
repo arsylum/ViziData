@@ -1439,12 +1439,4 @@ function urlifyState(){// TODO selected cells are note encoded yet
 // TODO properly encode selcted dataset (depends on data management module)
 var setsel=$("#filter input[type='radio']:checked").val();var hash="d="+setsel;hash+="&t="+lastTransformState.translate[0]+"_"+lastTransformState.translate[1]+"&s="+lastTransformState.scale;window.location.hash=hash}/**
 * restore the url encoded viz state */
-function statifyUrl(){var hash=window.location.hash;if(hash===""){return false}var ds=0;hash=hash.substring(1).split("&");for(var i=0;i<hash.length;++i){var key=hash[i].substring(0,1);var val=hash[i].substring(2);switch(key){case"d":ds=parseInt(val);break;case"t":var t=val.split("_");lastTransformState.translate=[parseFloat(t[0]),parseFloat(t[1])];break;case"s":lastTransformState.scale=parseFloat(val);break;default:console.warn("statifyUrl(): discarded unrecognized parameter '"+hash[i].substring(0,1)+"' in url pattern")}}zoombh.scale(lastTransformState.scale);zoombh.translate(lastTransformState.translate);if($("#filter input").get(ds)===undefined){return false}$("#filter input")[ds].click();return true}/**
- * SVG export*/
-function exportSvg(){$("#export").attr("disabled","disabled");var iframe=$("<iframe>",{css:{display:"none"}}).appendTo("body");var formHTML='<form action="" method="post">'+'<input type="hidden" name="filename" />'+'<input type="hidden" name="content" />'+"</form>";var body=iframe.prop("contentDocument").body;/* don't care about IE
-    (iframe.prop('contentDocument') !== undefined) ?
-		iframe.prop('contentDocument').body :
-        iframe.prop('document').body;	// IE*/
-$(body).html(formHTML);var form=$(body).find("form");form.attr("action","export.php");form.find("input[name=filename]").val("dataPlot.svg");form.find("input[name=content]").val($("#map").html());// Submitting the form to export.php. This will
-// cause the file download dialog box to appear.
-form.submit()}
+function statifyUrl(){var hash=window.location.hash;if(hash===""){return false}var ds=0;hash=hash.substring(1).split("&");for(var i=0;i<hash.length;++i){var key=hash[i].substring(0,1);var val=hash[i].substring(2);switch(key){case"d":ds=parseInt(val);break;case"t":var t=val.split("_");lastTransformState.translate=[parseFloat(t[0]),parseFloat(t[1])];break;case"s":lastTransformState.scale=parseFloat(val);break;default:console.warn("statifyUrl(): discarded unrecognized parameter '"+hash[i].substring(0,1)+"' in url pattern")}}zoombh.scale(lastTransformState.scale);zoombh.translate(lastTransformState.translate);if($("#filter input").get(ds)===undefined){return false}$("#filter input")[ds].click();return true}

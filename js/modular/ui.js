@@ -89,33 +89,3 @@ function statifyUrl() {
 	$("#filter input")[ds].click();
 	return true;
 }
-
-/**
- * SVG export*/
-function exportSvg() {
-	$("#export").attr("disabled", "disabled");
-
-    var iframe = $('<iframe>',{css:{display:'none'}})
-		.appendTo('body');
-
-    var formHTML = '<form action="" method="post">'+
-        '<input type="hidden" name="filename" />'+
-        '<input type="hidden" name="content" />'+
-        '</form>';
-
-    var body = iframe.prop('contentDocument').body;
-    /* don't care about IE
-    (iframe.prop('contentDocument') !== undefined) ?
-		iframe.prop('contentDocument').body :
-        iframe.prop('document').body;	// IE*/
-    $(body).html(formHTML);
-
-    var form = $(body).find('form');
-    form.attr('action',"export.php");
-    form.find('input[name=filename]').val("dataPlot.svg");
-    form.find('input[name=content]').val($("#map").html());
-
-    // Submitting the form to export.php. This will
-    // cause the file download dialog box to appear.
-    form.submit();
-}
