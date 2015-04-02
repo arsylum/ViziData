@@ -1420,18 +1420,18 @@ var container=$("#chart");var containerW=container.width(),detailH=Math.floor(co
 var initSelection={// default initial selection
 data:{// TODO this could go into dataset config options
 x:{min:1500,max:2014}}};var selCallback=function(){// callback function for selection change
-genGrid()};var detail,detailOptions,summary,summaryOptions,connection,connectionOptions;// Configuration for detail (top view):
+var range=getTimeSelection();$("#range-tt-min").text(range.min);$("#range-tt-max").text(range.max);genGrid()};var detail,detailOptions,summary,summaryOptions,connection,connectionOptions;// Configuration for detail (top view):
 detailOptions={name:"detail",data:chartdat,height:detailH,width:containerW,title:"Timeline",// Flotr Configuration
 config:{bars:{lineWidth:1,show:true,fill:true,fillOpacity:.6},mouse:{track:true,trackY:false,trackAll:true,sensibility:1,trackDecimals:4,position:"ne",lineColor:"#ff9900",fillColor:"#ff9900",fillOpacity:.6,trackFormatter:function(o){return"<em>"+parseInt(o.y)+" "+current_setsel.strings.label+"</em> in "+parseInt(o.x)}},yaxis:{autoscale:true,autoscaleMargin:.05,noTicks:4,showLabels:true,min:0}}};// Configuration for summary (bottom view):
 summaryOptions={name:"summary",data:chartdat,height:summaryH,width:containerW,// Flotr Configuration
 config:{lines:{show:true,lineWidth:1,fill:true,fillOpacity:.2,fillBorder:true},xaxis:{noTicks:5,showLabels:true},yaxis:{autoscale:true,autoscaleMargin:.1},handles:{show:true},selection:{mode:"x"},grid:{verticalLines:false},mouse:{margin:100}}};connectionOptions={name:"connection",adapterConstructor:envision.components.QuadraticDrawing,height:connectionH,width:containerW};// Building the vis:
 chart=new envision.Visualization;detail=new envision.Component(detailOptions);summary=new envision.Component(summaryOptions);connection=new envision.Component(connectionOptions);interaction=new envision.Interaction;// Render Visualization
 chart.add(detail).add(connection).add(summary).render(container.get(0));// Wireup Interaction
-interaction.leader(summary).follower(detail).follower(connection).add(envision.actions.selection,{callback:selCallback});// set to initial selection state
+interaction.leader(summary).follower(detail).follower(connection).add(envision.actions.selection,{callback:selCallback});appendTimelineRangeTips();// set to initial selection state
 summary.trigger("select",initSelection)}/**
 * returns sanitized selection of the timeline */
 function getTimeSelection(){var cAE,min=current_setsel.min,max=current_setsel.max,sel=chart.components[2].api.flotr.selection;if(sel.selecting!==false){cAE=sel.getArea();cAE.min=parseInt(cAE.x1);cAE.max=parseInt(cAE.x2)}else{cAE={min:min,max:max}}// TODO simplify
-return{min:cAE.min>=min?cAE.min:min,max:cAE.max<=max?cAE.max:max}}/**
+return{min:cAE.min>=min?cAE.min:min,max:cAE.max<=max?cAE.max:max}}function appendTimelineRangeTips(){var cont=$('<div id="range-tt-min" class="range-tt hover-tt">lefttt</div>'+'<div id="range-tt-max" class="range-tt hover-tt">righttt</div>').hide();$("#chart").append(cont);$("#chart .summary").on("mouseenter",function(){$(".range-tt").show()}).on("mouseleave",function(){$(".range-tt").hide()})}/**
 * updates/builds the chart
 * (addSeries is bugged so build the chart from the ground)*/
 function updateChart(seriez){}//////////////////////

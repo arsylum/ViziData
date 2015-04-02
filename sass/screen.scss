@@ -70,6 +70,13 @@ body {
 	height: 100%;
 }
 
+.hover-tt {
+	display: inline-block;
+	padding: $widget-tt-padding;
+	border-radius: ($outer-border-radius/4);
+	background: $widget-tt-bg;
+	color: white;
+}
 
 menu {
 	background: $control-bg-color;
@@ -128,6 +135,19 @@ menu#timefilter {
 					color: rgb(255, 219, 153);
 					margin-right: .2em;
 				}
+			}
+		}
+
+		.range-tt {
+			position: absolute;
+			top: ($controls-padding + $widget-tt-margin);
+			color: rgb(255, 219, 153);
+
+			&#range-tt-min {
+				left: $left-row-width + $widget-tt-margin;
+			}
+			&#range-tt-max {
+				right: $controls-padding + $widget-tt-margin;
 			}
 		}
 	}
@@ -289,18 +309,14 @@ menu#timefilter {
 		//top: $widget-tt-margin;
 		right: ($widget-tt-margin + $controls-padding);
 		//background: rgba(255,255,255,.8);
-		display: inline-block;
+		
 		//padding: .5em;
-		padding: $widget-tt-padding;
+		
 		//border-radius: 0 0 5px 0;
-		border-radius: ($outer-border-radius/4);
 		font-family: monospace;
 		transition: opacity 0.2s;
 		opacity: 0;
-
 		//right: 0;
-		background: $widget-tt-bg;
-		color: white;
 	}
 	&:hover #hud {
 		opacity: 1;

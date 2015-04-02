@@ -76,6 +76,9 @@ function initChart() {
     }  	}   };
 
     var selCallback = function() { // callback function for selection change
+    	var range = getTimeSelection();
+    	$("#range-tt-min").text(range.min);
+    	$("#range-tt-max").text(range.max);
 		genGrid();
 	};
 
@@ -193,6 +196,7 @@ function initChart() {
         .follower(connection)
         .add(envision.actions.selection, {callback: selCallback});
 
+   	appendTimelineRangeTips();
     // set to initial selection state
   	summary.trigger('select', initSelection);
 }
@@ -221,6 +225,17 @@ function getTimeSelection() {
 	};
 }
 
+function appendTimelineRangeTips() {
+	var cont = $(
+		'<div id="range-tt-min" class="range-tt hover-tt">lefttt</div>' +
+		'<div id="range-tt-max" class="range-tt hover-tt">righttt</div>').hide();
+	$("#chart").append(cont);
+	$("#chart .summary").on("mouseenter", function() {
+		$(".range-tt").show();
+	}).on("mouseleave", function() {
+		$(".range-tt").hide();
+	});
+}
 
 
 /**
