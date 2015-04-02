@@ -40,7 +40,7 @@ function generateGrid(reso, mAE, data) {
 		// get axisExtremes
 		/*var cAE = chart.xAxis[0].getExtremes();
 		cAE.min = new Date(cAE.min).getFullYear();
-		cAE.max = new Date(cAE.max).getFullYear();*/
+		cAE.max = new Date(cAE.max).getFullYear();*
 		// TODO doesn't look very sane
 		var cAE;
 		var sel = chart.components[2].api.flotr.selection;
@@ -53,7 +53,8 @@ function generateGrid(reso, mAE, data) {
 				min: data.min,
 				max: data.max
 			};
-		}
+		}*/
+		var cAE = getTimeSelection();
 
 		// boundary enforcement
 		if(mAE[0].min < C_WMIN) { mAE[0].min = C_WMIN; }

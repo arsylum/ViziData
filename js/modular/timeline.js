@@ -32,9 +32,6 @@ function genChart(data){
 
 	for(i=data.min; i<=data.max; i++) {
 		if(dat_obj[i] !== undefined) {
-			//dat_arr.push([new Date(0,0).setFullYear(i),dat_obj[i]]);
-			//x.push(new Date(0,0).setFullYear(i));
-			//ticks.push(new Date(0,0).setFullYear(i));
 			x.push(i);
 			y.push(dat_obj[i]);
 		}
@@ -50,12 +47,6 @@ function genChart(data){
 
 	initChart();
 
-	//chart = new envision.templates.Finance(options);
-	/*
-	updateChart([{
-		data: dat_arr,
-		name: data.strings.label
-	}]);*/
 	console.log("  |BM| chart creation complete (total of "+(new Date()-benchmark_chart)+"ms");
 	console.log("\\~~ finished generating chart ~~/ ");
 }
@@ -70,11 +61,12 @@ function initChart() {
 	}
 
 	var connectionH = 10; // height of connection component
+		//summargin = 10; // extend value range of the summary component
 
 	var container = $("#chart");
 	var containerW = container.width(),
 		detailH = Math.floor(container.height() * (2/3)) - connectionH,
-		summaryH = Math.floor(container.height() * (1/3)) - connectionH;
+		summaryH = Math.floor(container.height() * (1/3)); // - connectionH;
 
 	var initSelection = {	// default initial selection
       	data : {			// TODO this could go into dataset config options
@@ -101,11 +93,11 @@ function initChart() {
         title: "Timeline",
         // Flotr Configuration
         config : {
-	        'lite-lines' : {
+	        'bars' : {
 	    	    lineWidth : 1,
 	          	show : true,
 	          	fill : true,
-	          	fillOpacity : 0.2
+	          	fillOpacity : 0.6
 	        },
 	        mouse : {
 				track: true,
@@ -114,8 +106,11 @@ function initChart() {
 				sensibility: 1,
 				trackDecimals: 4,
 				position: 'ne',
+				lineColor: '#ff9900',
+				fillColor: '#ff9900',
+				fillOpacity: 0.6,
 				trackFormatter : function (o) {
-			    	return parseInt(o.y) + " " + current_setsel.strings.label + " in " + parseInt(o.x);
+			    	return "<em>" + parseInt(o.y) + " " + current_setsel.strings.label + "</em> in " + parseInt(o.x);
 			    }
 	        },
 	        yaxis : { 
@@ -124,9 +119,6 @@ function initChart() {
 	          	noTicks : 4,
 	          	showLabels : true,
 	          	min : 0
-	        },
-	        xaxis: { // TODO what is this?
-	        	margin: false,
 	        }
 		}
     };
@@ -139,7 +131,7 @@ function initChart() {
         width: containerW,
         // Flotr Configuration
         config : {
-	        'lite-lines' : {
+	        'lines' : {
 				show : true,
 				lineWidth : 1,
 				fill : true,
@@ -149,6 +141,8 @@ function initChart() {
 	        xaxis : {
 	          	noTicks: 5,
 	          	showLabels : true,
+	        	//min: current_setsel.min - summargin, // messy hack for issue #11
+	        	//max: current_setsel.max + summargin  // causes trouble
 	        },
 	        yaxis : {
 	          	autoscale : true,
@@ -162,7 +156,12 @@ function initChart() {
 	        },
 	        grid : {
 	          	verticalLines : false
+	        },
+	        mouse: {
+	        	margin: 100
 	        }
+
+
       	}
     };
 
@@ -196,6 +195,30 @@ function initChart() {
 
     // set to initial selection state
   	summary.trigger('select', initSelection);
+}
+
+/**
+* returns sanitized selection of the timeline */
+function getTimeSelection() {
+	var cAE, min = current_setsel.min, max = current_setsel.max,
+		sel = chart.components[2].api.flotr.selection;
+
+	if(sel.selecting !== false) {
+		cAE = sel.getArea();
+		cAE.min = parseInt(cAE.x1);
+		cAE.max = parseInt(cAE.x2);
+	} else {
+		cAE = {
+			min: min,
+			max: max
+		};
+	}
+
+	// TODO simplify
+	return {
+		min: (cAE.min >= min ? cAE.min : min),
+		max: (cAE.max <= max ? cAE.max : max)
+	};
 }
 
 

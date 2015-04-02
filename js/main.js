@@ -1272,9 +1272,21 @@ console.log("/~~ generating new grid with resolution "+reso+" ~~\\");var bms=new
 // get axisExtremes
 /*var cAE = chart.xAxis[0].getExtremes();
 		cAE.min = new Date(cAE.min).getFullYear();
-		cAE.max = new Date(cAE.max).getFullYear();*/
-// TODO doesn't look very sane
-var cAE;var sel=chart.components[2].api.flotr.selection;if(sel.selecting!==false){cAE=chart.components[2].api.flotr.selection.getArea();cAE.min=parseInt(cAE.x1);cAE.max=parseInt(cAE.x2)}else{cAE={min:data.min,max:data.max}}// boundary enforcement
+		cAE.max = new Date(cAE.max).getFullYear();*
+		// TODO doesn't look very sane
+		var cAE;
+		var sel = chart.components[2].api.flotr.selection;
+		if(sel.selecting !== false) {
+			cAE = chart.components[2].api.flotr.selection.getArea();
+			cAE.min = parseInt(cAE.x1);
+			cAE.max = parseInt(cAE.x2);
+		} else {
+			cAE = {
+				min: data.min,
+				max: data.max
+			};
+		}*/
+var cAE=getTimeSelection();// boundary enforcement
 if(mAE[0].min<C_WMIN){mAE[0].min=C_WMIN}if(mAE[0].max>C_WMAX){mAE[0].max=C_WMAX}if(mAE[1].min<C_HMIN){mAE[1].min=C_HMIN}if(mAE[1].max>C_HMAX){mAE[1].max=C_HMAX}var tMin=0;while(mAE[0].min>C_WMIN+(tMin+1)*data.parent.tile_width){tMin++}var tMax=tMin;while(mAE[0].max>C_WMIN+(tMax+1)*data.parent.tile_width){tMax++}console.log("  # will iterate over tiles "+tMin+" to "+tMax);var finish=function(){console.log("  |BM| iteration complete ("+(new Date-bms)+"ms)");drawPlot(true,cellmap,reso);console.log("  |BM| finished genGrid (total of "+(new Date-bms)+"ms)");$("#legend").html("<em>inside the visible area</em><br>"+//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
 "we have registered a total of<br>"+"<em>"+count+" "+data.parent.label+"</em><br>"+"that <em>"+data.strings.term+"</em><br>"+"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");$("#export").removeAttr("disabled");urlifyState();console.log("\\~~ grid generation complete~~/ ")};var iterate=function(offset){if(thisGenGrid<currentGenGrid){return 0}// cancel loop if newer genGrid is running
 var cellmapprog={},l,a,ti,i;if(!renderRTL){i=tMin+offset}else{i=tMax-offset}if(i<=tMax&&i>=tMin){// still work to do							// for each map tile in visible area
@@ -1402,29 +1414,24 @@ console.log("/~~ generating chart data ~~\\ ");var benchmark_chart=new Date;////
 /// tomporary hacky timeline fix for changed data structure
 // TODO refurbish when upgrading timeline
 // still TODO? check if it can improved
-var x=[],y=[],ticks=[];var dat_obj={},i,j,d;var tilecount=(C_WMAX-C_WMIN)/data.parent.tile_width;for(i=0;i<tilecount;i++){for(j=data.min;j<=data.max;j++){d=data.data[i][j];if(d!==undefined){if(dat_obj[j]===undefined){dat_obj[j]=d.length}else{dat_obj[j]+=d.length}}}}for(i=data.min;i<=data.max;i++){if(dat_obj[i]!==undefined){//dat_arr.push([new Date(0,0).setFullYear(i),dat_obj[i]]);
-//x.push(new Date(0,0).setFullYear(i));
-//ticks.push(new Date(0,0).setFullYear(i));
-x.push(i);y.push(dat_obj[i])}}chartdat=[[x,y]];console.log("  |BM| iterating and sorting finished (took "+(new Date-benchmark_chart)+"ms)");initChart();//chart = new envision.templates.Finance(options);
-/*
-	updateChart([{
-		data: dat_arr,
-		name: data.strings.label
-	}]);*/
-console.log("  |BM| chart creation complete (total of "+(new Date-benchmark_chart)+"ms");console.log("\\~~ finished generating chart ~~/ ")}function initChart(){if(chartdat===undefined){return false}if(chart!==undefined){chart.destroy()}var connectionH=10;// height of connection component
-var container=$("#chart");var containerW=container.width(),detailH=Math.floor(container.height()*(2/3))-connectionH,summaryH=Math.floor(container.height()*(1/3))-connectionH;var initSelection={// default initial selection
+var x=[],y=[],ticks=[];var dat_obj={},i,j,d;var tilecount=(C_WMAX-C_WMIN)/data.parent.tile_width;for(i=0;i<tilecount;i++){for(j=data.min;j<=data.max;j++){d=data.data[i][j];if(d!==undefined){if(dat_obj[j]===undefined){dat_obj[j]=d.length}else{dat_obj[j]+=d.length}}}}for(i=data.min;i<=data.max;i++){if(dat_obj[i]!==undefined){x.push(i);y.push(dat_obj[i])}}chartdat=[[x,y]];console.log("  |BM| iterating and sorting finished (took "+(new Date-benchmark_chart)+"ms)");initChart();console.log("  |BM| chart creation complete (total of "+(new Date-benchmark_chart)+"ms");console.log("\\~~ finished generating chart ~~/ ")}function initChart(){if(chartdat===undefined){return false}if(chart!==undefined){chart.destroy()}var connectionH=10;// height of connection component
+//summargin = 10; // extend value range of the summary component
+var container=$("#chart");var containerW=container.width(),detailH=Math.floor(container.height()*(2/3))-connectionH,summaryH=Math.floor(container.height()*(1/3));// - connectionH;
+var initSelection={// default initial selection
 data:{// TODO this could go into dataset config options
 x:{min:1500,max:2014}}};var selCallback=function(){// callback function for selection change
 genGrid()};var detail,detailOptions,summary,summaryOptions,connection,connectionOptions;// Configuration for detail (top view):
 detailOptions={name:"detail",data:chartdat,height:detailH,width:containerW,title:"Timeline",// Flotr Configuration
-config:{"lite-lines":{lineWidth:1,show:true,fill:true,fillOpacity:.2},mouse:{track:true,trackY:false,trackAll:true,sensibility:1,trackDecimals:4,position:"ne",trackFormatter:function(o){return parseInt(o.y)+" "+current_setsel.strings.label+" in "+parseInt(o.x)}},yaxis:{autoscale:true,autoscaleMargin:.05,noTicks:4,showLabels:true,min:0},xaxis:{// TODO what is this?
-margin:false}}};// Configuration for summary (bottom view):
+config:{bars:{lineWidth:1,show:true,fill:true,fillOpacity:.6},mouse:{track:true,trackY:false,trackAll:true,sensibility:1,trackDecimals:4,position:"ne",lineColor:"#ff9900",fillColor:"#ff9900",fillOpacity:.6,trackFormatter:function(o){return"<em>"+parseInt(o.y)+" "+current_setsel.strings.label+"</em> in "+parseInt(o.x)}},yaxis:{autoscale:true,autoscaleMargin:.05,noTicks:4,showLabels:true,min:0}}};// Configuration for summary (bottom view):
 summaryOptions={name:"summary",data:chartdat,height:summaryH,width:containerW,// Flotr Configuration
-config:{"lite-lines":{show:true,lineWidth:1,fill:true,fillOpacity:.2,fillBorder:true},xaxis:{noTicks:5,showLabels:true},yaxis:{autoscale:true,autoscaleMargin:.1},handles:{show:true},selection:{mode:"x"},grid:{verticalLines:false}}};connectionOptions={name:"connection",adapterConstructor:envision.components.QuadraticDrawing,height:connectionH,width:containerW};// Building the vis:
+config:{lines:{show:true,lineWidth:1,fill:true,fillOpacity:.2,fillBorder:true},xaxis:{noTicks:5,showLabels:true},yaxis:{autoscale:true,autoscaleMargin:.1},handles:{show:true},selection:{mode:"x"},grid:{verticalLines:false},mouse:{margin:100}}};connectionOptions={name:"connection",adapterConstructor:envision.components.QuadraticDrawing,height:connectionH,width:containerW};// Building the vis:
 chart=new envision.Visualization;detail=new envision.Component(detailOptions);summary=new envision.Component(summaryOptions);connection=new envision.Component(connectionOptions);interaction=new envision.Interaction;// Render Visualization
 chart.add(detail).add(connection).add(summary).render(container.get(0));// Wireup Interaction
 interaction.leader(summary).follower(detail).follower(connection).add(envision.actions.selection,{callback:selCallback});// set to initial selection state
 summary.trigger("select",initSelection)}/**
+* returns sanitized selection of the timeline */
+function getTimeSelection(){var cAE,min=current_setsel.min,max=current_setsel.max,sel=chart.components[2].api.flotr.selection;if(sel.selecting!==false){cAE=sel.getArea();cAE.min=parseInt(cAE.x1);cAE.max=parseInt(cAE.x2)}else{cAE={min:min,max:max}}// TODO simplify
+return{min:cAE.min>=min?cAE.min:min,max:cAE.max<=max?cAE.max:max}}/**
 * updates/builds the chart
 * (addSeries is bugged so build the chart from the ground)*/
 function updateChart(seriez){}//////////////////////
