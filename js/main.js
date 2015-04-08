@@ -1431,7 +1431,7 @@ interaction.leader(summary).follower(detail).follower(connection).add(envision.a
 summary.trigger("select",initSelection)}/**
 * returns sanitized selection of the timeline */
 function getTimeSelection(){var cAE,min=current_setsel.min,max=current_setsel.max,sel=chart.components[2].api.flotr.selection;if(sel.selecting!==false){cAE=sel.getArea();cAE.min=parseInt(cAE.x1);cAE.max=parseInt(cAE.x2)}else{cAE={min:min,max:max}}// TODO simplify
-return{min:cAE.min>=min?cAE.min:min,max:cAE.max<=max?cAE.max:max}}function appendTimelineRangeTips(){var cont=$('<div id="range-tt-min" class="range-tt hover-tt">lefttt</div>'+'<div id="range-tt-max" class="range-tt hover-tt">righttt</div>').hide();$("#chart").append(cont);$("#chart .summary").on("mouseenter",function(){$(".range-tt").show()}).on("mouseleave",function(){$(".range-tt").hide()})}/**
+return{min:cAE.min>=min?cAE.min:min,max:cAE.max<=max?cAE.max:max}}function appendTimelineRangeTips(){var cont=$('<div id="range-tt-min" class="range-tt hover-tt"></div>'+'<div id="range-tt-max" class="range-tt hover-tt"></div>').hide();$("#chart").append(cont);$("#chart .summary").on("mouseenter",function(){$(".range-tt").show()}).on("mouseleave",function(){$(".range-tt").hide()})}/**
 * updates/builds the chart
 * (addSeries is bugged so build the chart from the ground)*/
 function updateChart(seriez){}//////////////////////

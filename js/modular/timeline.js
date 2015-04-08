@@ -227,8 +227,8 @@ function getTimeSelection() {
 
 function appendTimelineRangeTips() {
 	var cont = $(
-		'<div id="range-tt-min" class="range-tt hover-tt">lefttt</div>' +
-		'<div id="range-tt-max" class="range-tt hover-tt">righttt</div>').hide();
+		'<div id="range-tt-min" class="range-tt hover-tt"></div>' +
+		'<div id="range-tt-max" class="range-tt hover-tt"></div>').hide();
 	$("#chart").append(cont);
 	$("#chart .summary").on("mouseenter", function() {
 		$(".range-tt").show();
