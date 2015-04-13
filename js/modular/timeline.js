@@ -38,9 +38,7 @@ function genChart(data){
 	}
 	
 
-	chartdat = [
-		[x,y]
-	];
+	chartdat.push([x,y]);
 
 
 	console.log("  |BM| iterating and sorting finished (took "+(new Date()-benchmark_chart)+"ms)");
@@ -55,7 +53,7 @@ function genChart(data){
 
 
 function initChart() {
-	if(chartdat === undefined) { return false; }
+	if(chartdat.length <= 0) { return false; }
 	if(chart !== undefined) {
 		chart.destroy();
 	}
@@ -156,13 +154,13 @@ function initChart() {
 	        },
 	        selection : {
 	          	mode : 'x'
-	        },
+	        },/*
 	        grid : {
 	          	verticalLines : false
 	        },
 	        mouse: {
 	        	margin: 100
-	        }
+	        }*/
 
 
       	}
