@@ -1632,11 +1632,12 @@ gmax=235;//205;
 glog_factor=gmax/Math.log(drawdat.max);rmax=185;//14;
 rlog_factor=rmax/Math.log(drawdat.max)}var canvasRenderBM=new Date;
 // sizes and radii of primitiva
-var bleed=1+1/lastTransformState.scale*.25;// 1.25; // larger size for bleeding with alpha channel
+var bleed=1.1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
 var wx=drawdat.reso*canvasW/360*bleed,wy=drawdat.reso*canvasH/180*bleed,rx=drawdat.reso*canvasW/360/2*bleed,ry=drawdat.reso*canvasH/180/2*bleed;var i=-1,n=drawdat.draw.length,d,cx,cy,fc,gradient;// TODO keep only what is used
 ctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);ctx.scale(lastTransformState.scale,lastTransformState.scale);while(++i<n){d=drawdat.draw[i];cx=d[0][0];cy=d[0][1];ctx.fillStyle=
 //fc = 
-"rgba("+Math.floor(rmax-Math.floor(Math.log(d[1])*rlog_factor))+","+Math.floor(gmax-Math.floor(Math.log(d[1])*glog_factor))+","+Math.floor(bmax-Math.floor(d[1]*blog_factor))+","+".85)";//((d[1]/drawdat.max)/4+0.6)+")";
+"rgb("+Math.floor(rmax-Math.floor(Math.log(d[1])*rlog_factor))+","+Math.floor(gmax-Math.floor(Math.log(d[1])*glog_factor))+","+Math.floor(bmax-Math.floor(d[1]*blog_factor))+")";//,"+
+//".85)";//((d[1]/drawdat.max)/4+0.6)+")";
 /*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
 		gradient.addColorStop(0,fc+"0)");
 		gradient.addColorStop(0.6, fc+"0.4)");
