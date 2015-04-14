@@ -113,7 +113,7 @@ function generateGrid(reso, mAE, data) {
 					}
 				}
 				// draw each tile after aggregating
-				drawPlot(false, cellmapprog, reso);
+				drawPlot(i, cellmapprog, reso);
 				setTimeout(function() {
 					iterate(++offset);
 				},1);
@@ -162,7 +162,7 @@ function testing_aggregator(tmap,obj,reso) {
 
 /**
 * draw the map layer
-* [@param clear] if false, do not clear canvas before drawing
+* [@param clear] clear before drawing, true: everything, false: nothing, i: tile i
 * [@param newmap] new cell mapping to derive drawing data from
 * [@param reso] required if newmap is given - resolution of new gridmap 
 * [@param highlight] index of cell to highlight */
@@ -174,7 +174,7 @@ function drawPlot(clear, newmap, reso, highlight) {
 	} 
 
 	mapctx.save();
-	if(clear !== false) {
+	if(clear === true) {
 		mapctx.clearRect(0,0,canvasW,canvasH);
 	}
 
@@ -236,6 +236,10 @@ function drawPlot(clear, newmap, reso, highlight) {
 
   	mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
   	mapctx.scale(lastTransformState.scale, lastTransformState.scale);
+
+  	if(typeof clear == "number") {
+  		clearTile(clear);
+  	}
 
 	while(++i < n) {
 		d = drawdat.draw[i];

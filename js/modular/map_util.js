@@ -68,6 +68,17 @@ function canvasCoord2geoCoord(x, y){
 }
 
 /**
+* clears the area of tile i on map canvas */
+function clearTile(i) {
+	var ppd = canvasW / (C_WMAX - C_WMIN);
+	mapctx.clearRect(
+		current_datsel.tile_width*i*ppd, 0,		// x, y
+		current_datsel.tile_width*ppd, canvasH	// w, h
+	);
+}
+
+
+/**
 * map tooltip */
 function canvasMouseMove() {
 	if(drawdat === undefined) { return false; } // no drawing, no tooltip!
@@ -213,6 +224,7 @@ function zoom() {
 		genGrid();
 	}
 }
+
 
 ////
 /// TODO issue #1
