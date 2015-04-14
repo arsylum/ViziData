@@ -1507,8 +1507,8 @@ drawdat,// latest generated drawing dataset
 renderRTL=false;// flag for tile iteration direction
 /// positions and dimensions
 var viewportH,viewportW;
-// canvas
-var canvas,ctx,canvasW,canvasH,canvasT,canvasL;var lastTransformState;///////////////////
+// map canvas
+var mapcan,mapctx,overcan,overctx,canvasW,canvasH,canvasT,canvasL;var lastTransformState;///////////////////
 /// entry point ///
 ///////////////////
 $(function(){
@@ -1524,7 +1524,7 @@ $(window).resize(function(){clearTimeout(resizeTimer);resizeTimer=setTimeout(onR
 // zoombehaviour
 zoombh=d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1),Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom",zoom);
 // setup canvas
-canvas=d3.select("#map").append("canvas").call(zoombh).on("mousemove",canvasMouseMove).on("click",canvasMouseClick);onResize();// set canvas dimensions
+mapcan=d3.select("#map").append("canvas").call(zoombh).on("mousemove",canvasMouseMove).on("click",canvasMouseClick);overcan=d3.select("#map").append("canvas");onResize();// set canvas dimensions
 // setup svg
 /*d3.select("#mapcanvas").append("g").attr("id","maplayer");//experimental
 	plotlayer = d3.select("#mapcanvas")
@@ -1547,7 +1547,9 @@ function onResize(){
 // get viewport size
 viewportW=$(window).width();viewportH=$(window).height();
 // set canvas dimensions
-var pos=$(canvas.node()).position();canvasT=Math.floor(pos.top);canvasL=Math.floor(pos.left);canvasW=Math.floor($("#map").width());canvasH=Math.floor($("#map").height());canvas.attr("width",canvasW).attr("height",canvasH);ctx=canvas.node().getContext("2d");initChart();genGrid()}/////////////////////////
+var pos=$(mapcan.node()).position();canvasT=Math.floor(pos.top);canvasL=Math.floor(pos.left);canvasW=Math.floor($("#map").width());canvasH=Math.floor($("#map").height());
+//d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
+$([mapcan.node(),overcan.node()]).attr("width",canvasW).attr("height",canvasH);mapctx=mapcan.node().getContext("2d");overctx=overcan.node().getContext("2d");initChart();genGrid()}/////////////////////////
 /// general map logic ///
 /////////////////////////
 /**
@@ -1619,7 +1621,7 @@ function testing_aggregator(tmap,obj,reso) {
 * [@param newmap] new cell mapping to derive drawing data from
 * [@param reso] required if newmap is given - resolution of new gridmap 
 * [@param highlight] index of cell to highlight */
-function drawPlot(clear,newmap,reso,highlight){if(clear===undefined){clear=true}if(newmap!==undefined&&reso===undefined){conslole.warn("drawPlot(): newmap given but no resolution. Using old drawing data.")}ctx.save();if(clear!==false){ctx.clearRect(0,0,canvasW,canvasH)}var uMBM=new Date;if(newmap!==undefined&&reso!==undefined){// calculate new drawing map
+function drawPlot(clear,newmap,reso,highlight){if(clear===undefined){clear=true}if(newmap!==undefined&&reso===undefined){conslole.warn("drawPlot(): newmap given but no resolution. Using old drawing data.")}mapctx.save();if(clear!==false){mapctx.clearRect(0,0,canvasW,canvasH)}var uMBM=new Date;if(newmap!==undefined&&reso!==undefined){// calculate new drawing map
 var draw=[],min=Infinity,max=-Infinity;$.each(newmap,function(k,v){var c=index2canvasCoord(k,reso);v=v.length;draw.push([[c[0],c[1]],v]);
 // get extreme values
 if(v<min){min=v}if(v>max){max=v}});drawdat={draw:draw,min:min,max:max,reso:reso}}if(clear){console.log("  ~ drawing "+drawdat.draw.length+" shapes");console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);console.log("  |BM| (dataset generation in "+(new Date-uMBM)+"ms)")}
@@ -1634,7 +1636,7 @@ rlog_factor=rmax/Math.log(drawdat.max)}var canvasRenderBM=new Date;
 // sizes and radii of primitiva
 var bleed=1.1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
 var wx=drawdat.reso*canvasW/360*bleed,wy=drawdat.reso*canvasH/180*bleed,rx=drawdat.reso*canvasW/360/2*bleed,ry=drawdat.reso*canvasH/180/2*bleed;var i=-1,n=drawdat.draw.length,d,cx,cy,fc,gradient;// TODO keep only what is used
-ctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);ctx.scale(lastTransformState.scale,lastTransformState.scale);while(++i<n){d=drawdat.draw[i];cx=d[0][0];cy=d[0][1];ctx.fillStyle=
+mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);mapctx.scale(lastTransformState.scale,lastTransformState.scale);while(++i<n){d=drawdat.draw[i];cx=d[0][0];cy=d[0][1];mapctx.fillStyle=
 //fc = 
 "rgb("+Math.floor(rmax-Math.floor(Math.log(d[1])*rlog_factor))+","+Math.floor(gmax-Math.floor(Math.log(d[1])*glog_factor))+","+Math.floor(bmax-Math.floor(d[1]*blog_factor))+")";//,"+
 //".85)";//((d[1]/drawdat.max)/4+0.6)+")";
@@ -1645,12 +1647,12 @@ ctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);c
 		gradient.addColorStop(1,fc+"1)");*/
 //ctx.fillStyle = gradient;
 //ctx.fillRect(cx-rx,cy-rx,wx,wy);
-ctx.fillRect(cx,cy-wy,wx,wy)}if(highlight!==undefined){if(reso===undefined){reso=drawdat.reso}var c=index2canvasCoord(highlight,reso);/*ctx.fillStyle = "rgba(150,250,150,0.3)";
+mapctx.fillRect(cx,cy-wy,wx,wy)}if(highlight!==undefined){if(reso===undefined){reso=drawdat.reso}var c=index2canvasCoord(highlight,reso);/*ctx.fillStyle = "rgba(150,250,150,0.3)";
 		ctx.beginPath();
 		ctx.arc(c[0]+rx,c[1]-ry,rx*2,0,TPI);
 		ctx.fill();*/
-ctx.lineWidth=2/lastTransformState.scale;ctx.strokeStyle="rgba(255,127,0,0.75)";//orange";
-ctx.strokeRect(c[0],c[1]-wy,wx,wy)}console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date-canvasRenderBM)+"ms");ctx.restore()}/////////////////////
+mapctx.lineWidth=2/lastTransformState.scale;mapctx.strokeStyle="rgba(255,127,0,0.75)";//orange";
+mapctx.strokeRect(c[0],c[1]-wy,wx,wy)}console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date-canvasRenderBM)+"ms");mapctx.restore()}/////////////////////
 /// map utilities ///
 /////////////////////
 /**

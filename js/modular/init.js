@@ -37,7 +37,8 @@ $(function(){
 	zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
 
 	// setup canvas
-	canvas = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
+	mapcan = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
+	overcan = d3.select("#map").append("canvas");
 	onResize(); // set canvas dimensions
 
 	// setup svg
@@ -89,13 +90,15 @@ function onResize() {
 	viewportH = $(window).height();
 
 	// set canvas dimensions
-	var pos = $(canvas.node()).position();
+	var pos = $(mapcan.node()).position();
 	canvasT = Math.floor(pos.top);
 	canvasL = Math.floor(pos.left);
 	canvasW = Math.floor($("#map").width());
 	canvasH = Math.floor($("#map").height());
-	canvas.attr("width", canvasW).attr("height", canvasH);
-	ctx = canvas.node().getContext("2d");
+	//d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
+	$([mapcan.node(),overcan.node()]).attr("width", canvasW).attr("height", canvasH);
+	mapctx = mapcan.node().getContext("2d");
+	overctx = overcan.node().getContext("2d");
 	initChart();
 	genGrid();
 }

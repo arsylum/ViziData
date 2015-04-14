@@ -173,9 +173,9 @@ function drawPlot(clear, newmap, reso, highlight) {
 		conslole.warn('drawPlot(): newmap given but no resolution. Using old drawing data.');
 	} 
 
-	ctx.save();
+	mapctx.save();
 	if(clear !== false) {
-		ctx.clearRect(0,0,canvasW,canvasH);
+		mapctx.clearRect(0,0,canvasW,canvasH);
 	}
 
 	var uMBM = new Date();
@@ -234,14 +234,14 @@ function drawPlot(clear, newmap, reso, highlight) {
 
 	var i= -1, n = drawdat.draw.length, d, cx, cy, fc, gradient; // TODO keep only what is used
 
-  	ctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
-  	ctx.scale(lastTransformState.scale, lastTransformState.scale);
+  	mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
+  	mapctx.scale(lastTransformState.scale, lastTransformState.scale);
 
 	while(++i < n) {
 		d = drawdat.draw[i];
 		cx = d[0][0];
 		cy = d[0][1];
-		ctx.fillStyle = 
+		mapctx.fillStyle = 
 		//fc = 
 		"rgb("+
 			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
@@ -257,7 +257,7 @@ function drawPlot(clear, newmap, reso, highlight) {
 		//ctx.fillStyle = gradient;
 
 		//ctx.fillRect(cx-rx,cy-rx,wx,wy);
-		ctx.fillRect(cx,cy-wy,wx,wy);/*
+		mapctx.fillRect(cx,cy-wy,wx,wy);/*
 		ctx.beginPath();
 		//ctx.moveTo(cx,cy);
 		//ctx.arc(cx, cy, rx, 0, 2 * Math.PI);
@@ -275,11 +275,11 @@ function drawPlot(clear, newmap, reso, highlight) {
 		ctx.arc(c[0]+rx,c[1]-ry,rx*2,0,TPI);
 		ctx.fill();*/
 
-		ctx.lineWidth = 2/lastTransformState.scale;
-		ctx.strokeStyle = "rgba(255,127,0,0.75)"; //orange";
-		ctx.strokeRect(c[0],c[1]-wy,wx,wy);
+		mapctx.lineWidth = 2/lastTransformState.scale;
+		mapctx.strokeStyle = "rgba(255,127,0,0.75)"; //orange";
+		mapctx.strokeRect(c[0],c[1]-wy,wx,wy);
 	}
 
 	console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");
-	ctx.restore();
+	mapctx.restore();
 }

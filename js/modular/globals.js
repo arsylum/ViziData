@@ -67,9 +67,9 @@ var gdata = [],		// global rawdata
 var viewportH,
 	viewportW;
 
-// canvas
-var canvas,
-	ctx,
+// map canvas
+var mapcan,	mapctx,
+	overcan, overctx,
 	canvasW,
 	canvasH,
 	canvasT,
