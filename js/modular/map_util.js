@@ -167,7 +167,7 @@ function canvasMouseClick() {
 			//console.log('---');
 			var q = current_datsel.props.members[this[0]];
 			tb.append("<tr>"+
-				"<td><a class=\"q\" href=\"https://www.wikidata.org/wiki/"+q+"\" target=\"wikidata\">"+q+"</a></td>"+
+				"<td><a class=\"q\" href=\"https://www.wikidata.org/wiki/"+q+"\" data-qid=\""+q+"\" target=\"wikidata\">"+q+"</a></td>"+
 				"<td>"+this[1]+"</td>"+
 			"</tr>");
 		});
@@ -200,6 +200,7 @@ function infolistScrollFkt() {
 	var infolistT = cellinfo.position().top + infolist.position().top;
 	var infolistB = infolistT + infolist.height();
 	var qarray = [];
+	var lang = $("#langsel").val();
 
 	infolist.find("a.q").each(function() {
 		var t = this.getBoundingClientRect().top;
@@ -226,11 +227,11 @@ function infolistScrollFkt() {
 
 	var n = 0, m = 20; // query up to m labels simultaneously
 	var qpre = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=',
-		qsuf = '&props=labels&languages=en&languagefallback=&callback=?';
+		qsuf = '&props=labels&languages='+lang+'&languagefallback=&callback=?';
 	var i = -1, qstr = qpre;
 	while(++i < qarray.length) {
 		if(n > 0) {	qstr += '|'; }
-		qstr += $(qarray[i]).text();
+		qstr += $(qarray[i]).attr("data-qid");
 
 		if(++n >= m || (i+1 === qarray.length)) { // run a query, reset qstr
 			qstr += qsuf;

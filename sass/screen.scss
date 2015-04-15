@@ -282,6 +282,10 @@ menu#timefilter {
 				th:last-child {
 					margin-right: 26px;
 				}
+
+				select {
+					display: inline;
+				}
 			}
 			tbody {
 				position: absolute;

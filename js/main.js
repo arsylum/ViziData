@@ -1434,11 +1434,11 @@ $.each(cell,function(){//console.log('('+(this[0]-1)+')prev: '+current_datsel.pr
 //console.log(this);
 //console.log('('+(this[0]+1)+')next: '+current_datsel.props.members[this[0]+1]);
 //console.log('---');
-var q=current_datsel.props.members[this[0]];tb.append("<tr>"+'<td><a class="q" href="https://www.wikidata.org/wiki/'+q+'" target="wikidata">'+q+"</a></td>"+"<td>"+this[1]+"</td>"+"</tr>")});$("#legend").append($("<div><hr>"+"the <em>selected cell</em> <span>at "+"("+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+")</span> "+"contains <em>"+cell.length+"</em> of them:</div>"));tb.trigger("scroll")}else{selectedCell=false;highlightCell(false)}}/**
+var q=current_datsel.props.members[this[0]];tb.append("<tr>"+'<td><a class="q" href="https://www.wikidata.org/wiki/'+q+'" data-qid="'+q+'" target="wikidata">'+q+"</a></td>"+"<td>"+this[1]+"</td>"+"</tr>")});$("#legend").append($("<div><hr>"+"the <em>selected cell</em> <span>at "+"("+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+")</span> "+"contains <em>"+cell.length+"</em> of them:</div>"));tb.trigger("scroll")}else{selectedCell=false;highlightCell(false)}}/**
 * infolistScroll Timeout Wrapper*/
 function infolistScroll(){clearTimeout(infolistTimer);infolistTimer=setTimeout(infolistScrollFkt,200)}/**
 * infolist scroll handler, fetches labels for visible items */
-function infolistScrollFkt(){var cellinfo=$("#cellinfo");var infolist=$("#infolist");var infolistT=cellinfo.position().top+infolist.position().top;var infolistB=infolistT+infolist.height();var qarray=[];infolist.find("a.q").each(function(){var t=this.getBoundingClientRect().top;if(t>=infolistT&&t<=infolistB){qarray.push(this)}});//console.log(qarray);
+function infolistScrollFkt(){var cellinfo=$("#cellinfo");var infolist=$("#infolist");var infolistT=cellinfo.position().top+infolist.position().top;var infolistB=infolistT+infolist.height();var qarray=[];var lang=$("#langsel").val();infolist.find("a.q").each(function(){var t=this.getBoundingClientRect().top;if(t>=infolistT&&t<=infolistB){qarray.push(this)}});//console.log(qarray);
 // process result of ajax request
 var processLabels=function(data){//console.log(data);
 // TODO error handling
@@ -1447,7 +1447,7 @@ if(this.labels!==undefined){// TODO
 if(this.labels.en!==undefined){// this sanity check is 
 if(this.labels.en.value!==undefined){// probably slightly overkill
 text=this.labels.en.value}}}$(qarray).filter('[href$="'+this.id+'"]').removeClass("q").text(text)})};var n=0,m=20;// query up to m labels simultaneously
-var qpre="https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=",qsuf="&props=labels&languages=en&languagefallback=&callback=?";var i=-1,qstr=qpre;while(++i<qarray.length){if(n>0){qstr+="|"}qstr+=$(qarray[i]).text();if(++n>=m||i+1===qarray.length){// run a query, reset qstr
+var qpre="https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=",qsuf="&props=labels&languages="+lang+"&languagefallback=&callback=?";var i=-1,qstr=qpre;while(++i<qarray.length){if(n>0){qstr+="|"}qstr+=$(qarray[i]).attr("data-qid");if(++n>=m||i+1===qarray.length){// run a query, reset qstr
 qstr+=qsuf;$.getJSON(qstr,processLabels);qstr=qpre;n=0}}}/**
 * zoom or move the map */
 function zoom(){if(d3.event.translate[0]!==lastTransformState.translate[0]||d3.event.translate[1]!==lastTransformState.translate[1]||d3.event.scale!==lastTransformState.scale){renderRTL=d3.event.translate[0]<lastTransformState.translate[0];lastTransformState=d3.event;$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");drawPlot(undefined,undefined);// TODO function parameters (?)
@@ -1486,7 +1486,9 @@ function updateChart(seriez){}//////////////////////
 /**
 * bind control handlers */
 function setupControlHandlers(){// build filter menu
-var fn=function(){setSetSel(this.value)};var filter=$("#filter");for(var i=0;i<gdata.length;i++){var fs=$("<fieldset>");fs.append("<legend>"+gdata[i].title+"</legend>");for(var j=0;j<gdata[i].datasets.length;j++){var b=$('<input type="radio" name="radio" value="'+j+'" />').on("change",fn);fs.append($("<label>"+gdata[i].datasets[j].strings.label+"</label>").prepend(b))}filter.append(fs)}$("#controls input[type='range']").on("input",function(){$(this).parent().next("input[type='text']").val(parseFloat($(this).val()).toFixed(1))});$("#zoom-slider").on("change",function(){transitTo(getZoomTransform($(this).val()))});$("#reso-slider").on("change",function(){resoFactor=parseFloat($(this).val());genGrid()});$(window).resize(function(){viewportW=$(this).width();viewportH=$(this).height()});$("#export").click(function(){$(this).attr("disabled","disabled");exportSvg()})}/**
+var fn=function(){setSetSel(this.value)};var filter=$("#filter");for(var i=0;i<gdata.length;i++){var fs=$("<fieldset>");fs.append("<legend>"+gdata[i].title+"</legend>");for(var j=0;j<gdata[i].datasets.length;j++){var b=$('<input type="radio" name="radio" value="'+j+'" />').on("change",fn);fs.append($("<label>"+gdata[i].datasets[j].strings.label+"</label>").prepend(b))}filter.append(fs)}$("#controls input[type='range']").on("input",function(){$(this).parent().next("input[type='text']").val(parseFloat($(this).val()).toFixed(1))});$("#zoom-slider").on("change",function(){transitTo(getZoomTransform($(this).val()))});$("#reso-slider").on("change",function(){resoFactor=parseFloat($(this).val());genGrid()});$(window).resize(function(){viewportW=$(this).width();viewportH=$(this).height()});$("#export").click(function(){$(this).attr("disabled","disabled");exportSvg()});// label language
+// TODO get full list from..where?
+var langs=["en","de"];for(i=0;i<langs.length;i++){$("#langsel").append($('<option value="'+langs[i]+'">'+langs[i]+"</option>"))}$("#langsel").on("change",function(){$("#infolist a").addClass("q");$("#infolist").trigger("scroll")})}/**
 * encodes current state of viz into url to make it shareable*/
 function urlifyState(){// TODO selected cells are note encoded yet
 // TODO properly encode selcted dataset (depends on data management module)

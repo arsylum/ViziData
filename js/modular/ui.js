@@ -43,6 +43,19 @@ function setupControlHandlers() {
 		$(this).attr("disabled","disabled");
 		exportSvg();
 	});
+
+
+	// label language
+	// TODO get full list from..where?
+	var langs = ["en", "de"];
+	for(i = 0; i<langs.length; i++) {
+		$("#langsel").append($('<option value="'+langs[i]+'">'+
+			langs[i]+'</option>'));
+	}
+	$("#langsel").on("change", function() {
+		$("#infolist a").addClass("q");
+		$("#infolist").trigger("scroll");
+	});
 }
 
 /**
