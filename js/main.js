@@ -1489,7 +1489,7 @@ $("#chart").append(cont);/*	$("#chart .detail").on("mouseenter", function() {
 	}).on("mouseleave", function() {
 		$(".range-tt").removeClass("hintin");
 	});*/
-var drag=d3.behavior.drag().on("drag",function(u,i){if(i===0){changeTimeSel(d3.event.dx,0)}else{changeTimeSel(0,d3.event.dx)}summary.trigger("select",timeSel)}).on("dragstart",function(){d3.select(this).classed("draggin",true)}).on("dragend",function(){d3.select(this).classed("draggin",false)});d3.selectAll("#chart .range-tt").call(drag)}/**
+var drag=d3.behavior.drag().on("drag",function(u,i){if(i===0){changeTimeSel(d3.event.dx,0)}else{changeTimeSel(0,d3.event.dx)}summary.trigger("select",timeSel)}).on("dragstart",function(){d3.select(this).classed("draggin",true);allow_redraw=false}).on("dragend",function(){d3.select(this).classed("draggin",false);$("#freezer>input").trigger("change")});d3.selectAll("#chart .range-tt").call(drag)}/**
 * updates/builds the chart
 * (addSeries is bugged so build the chart from the ground)*/
 function updateChart(seriez){}//////////////////////

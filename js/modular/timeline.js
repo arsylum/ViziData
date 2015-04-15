@@ -267,8 +267,10 @@ function appendTimelineRangeTips() {
 
         }).on("dragstart", function() {
         	d3.select(this).classed("draggin",true);
+        	allow_redraw = false;
         }).on("dragend", function() {
         	d3.select(this).classed("draggin", false);
+        	$("#freezer>input").trigger("change");
         });
     d3.selectAll("#chart .range-tt").call(drag);
 }
