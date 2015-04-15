@@ -579,9 +579,9 @@ menu#timefilter #chart .range-tt#range-tt-max {
 
 /* line 349, ../sass/screen.scss */
 #bubble > span,
-#legend > span,
-#stuff > span,
-#cellinfo > span {
+#legend span,
+#stuff span,
+#cellinfo span {
   font-size: .7em;
   color: rgba(0, 0, 0, 0.5);
   font-family: sans-serif;

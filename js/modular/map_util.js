@@ -116,6 +116,7 @@ function canvasMouseMove() {
 		console.log("we have "+cellmap[i].length+" events here: ");
 		console.log(cellmap[i]);
 		console.log(" ~~~~");*/
+		//var p = index2canvasCoord(c);
 
 		// hover highlight
 		highlightCell(i);
@@ -123,8 +124,8 @@ function canvasMouseMove() {
 		// display the info bubble
 		clearTimeout(bubbleTimer);
 		$("div#bubble").css("opacity","1")
-			.css("bottom", (viewportH - d3.event.pageY + M_BUBBLE_OFFSET*lastTransformState.scale) + "px")
-			.css("right", (viewportW - d3.event.pageX + M_BUBBLE_OFFSET*lastTransformState.scale) + "px")
+			.css("bottom", (viewportH - d3.event.pageY + drawdat.wy + M_BUBBLE_OFFSET) + "px")
+			.css("right", (viewportW - d3.event.pageX + drawdat.wy + M_BUBBLE_OFFSET*resoFactor) + "px")
 			.html(cell.length +" <em>"+current_setsel.strings.label+"</em><br>"+
 				"<span>["+(gc.x.toFixed(2))+", "+(gc.y.toFixed(2))+"]</span>");
 
@@ -144,6 +145,7 @@ function canvasMouseClick() {
 
 	var tb = $("#infolist");
 	tb.html(""); // clear the list
+	$("#legend div:last-child").remove();
 
 	var cc = cco();
 	var x = cc[0],
@@ -154,7 +156,8 @@ function canvasMouseClick() {
 	var cell = cellmap[i];
 
 	if(cell !== undefined) {
-		drawPlot(true, undefined, undefined, i); // highlight cell
+		//drawPlot(true, undefined, undefined, i); // highlight cell
+		highlightCell(i,true);
 		//console.log(cell);
 		// TODO failsafe for large arrays?
 		$.each(cell, function() {
@@ -169,7 +172,16 @@ function canvasMouseClick() {
 			"</tr>");
 		});
 
+
+		$("#legend").append($("<div><hr>"+
+		"the <em>selected cell</em> <span>at "+
+		"("+(gc.x.toFixed(2))+", "+(gc.y.toFixed(2))+")</span> "+
+		"contains <em>"+cell.length+"</em> of them:</div>"));
+
 		tb.trigger("scroll");
+	} else {
+		selectedCell = false;
+		highlightCell(false);
 	}
 }
 

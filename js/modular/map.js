@@ -88,7 +88,7 @@ function generateGrid(reso, mAE, data) {
 				"<em>"+count+" "+data.parent.label+"</em><br>"+
 				"that <em>"+data.strings.term+"</em><br>"+
 				"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
-			$("#export").removeAttr("disabled");
+			//$("#export").removeAttr("disabled");
 
 			urlifyState();
 
@@ -169,9 +169,8 @@ function testing_aggregator(tmap,obj,reso) {
 * draw the map layer
 * [@param clear] clear before drawing, true: everything, false: nothing, i: tile i
 * [@param newmap] new cell mapping to derive drawing data from
-* [@param reso] required if newmap is given - resolution of new gridmap 
-* [@param highlight] index of cell to highlight */
-function drawPlot(clear, newmap, reso, highlight) {
+* [@param reso] required if newmap is given - resolution of new gridmap */
+function drawPlot(clear, newmap, reso) {
 	if(clear === undefined) { clear = true; }
 
 	if(newmap !== undefined && reso === undefined) { 
@@ -280,84 +279,104 @@ function drawPlot(clear, newmap, reso, highlight) {
 		ctx.fill();
 		//*/
 	}
-	if(highlight !== undefined) {
+	/*if(highlight !== undefined) {
 		if(reso === undefined) { reso = drawdat.reso; }
 		var c = index2canvasCoord(highlight, reso);
 
 		/*ctx.fillStyle = "rgba(150,250,150,0.3)";
 		ctx.beginPath();
 		ctx.arc(c[0]+rx,c[1]-ry,rx*2,0,TPI);
-		ctx.fill();*/
+		ctx.fill();* /
 
 		mapctx.lineWidth = 2/lastTransformState.scale;
 		mapctx.strokeStyle = "rgba(255,127,0,0.75)"; //orange";
 		mapctx.strokeRect(c[0],c[1]-wy,wx,wy);
-	}
+	}*/
 
 	console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");
 	mapctx.restore();
 }
 
 
-function highlightCell(c) {
+function highlightCell(c, select) {
 
-
-	var x,y;
+	var x,y,p;
 
 	var wx = drawdat.wx,
 		wy = drawdat.wy,
 		rx = drawdat.rx,
 		ry = drawdat.ry;
 
-	overctx.save();
+	if(select === true) {
+		selectedCell = c;
+	}
 
+	overctx.save();
 	overctx.clearRect(0,0,canvasW,canvasH);
 
-	/*if(c.constructor === Array) {
+	overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
+  	overctx.scale(lastTransformState.scale, lastTransformState.scale);
+
+	
+
+	if(selectedCell !== false) {
+  		p = index2canvasCoord(selectedCell);
+  		x = p[0];
+  		y = p[1];
+
+  		overctx.fillStyle = "rgba(255,120,0,0.8)";
+		overctx.fillRect(x,y-wy,wx,wy);
+
+		overctx.strokeStyle = "rgba(255,255,255,0.4)";
+		overctx.lineWidth = 3/lastTransformState.scale;
+		overctx.beginPath();
+		overctx.ellipse(x+rx,y-ry,rx*1.5,ry*1.5,0,0,TPI);
+		overctx.stroke();
+		overctx.strokeStyle = "rgba(0,0,0,0.4)";
+		overctx.lineWidth = 1/lastTransformState.scale;
+		overctx.beginPath();
+		overctx.ellipse(x+rx,y-ry,rx*1.5,ry*1.5,0,0,TPI);
+		overctx.stroke();
+  	}
+
+  	/*if(c.constructor === Array) {
 		x = c[0];
 		y = c[1];
 	} else if (typeof c === "number") {*/
-
-
-	if(c === false) { return false; }
-	var p = index2canvasCoord(c);
-	x = p[0];
-	y = p[1];
+	if(c === false) { 
+		overctx.restore();
+		return false; 
+	}
+	
+	if(select !== true) {
+		p = index2canvasCoord(c);
+		x = p[0];
+		y = p[1];
+	}
 /*	} else {
 		console.warn("highlightCell: invalid first argument");
 		return false;
 	}*/
 
 
-
-	overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
-  	overctx.scale(lastTransformState.scale, lastTransformState.scale);
-
   	// highlight cell rect
   	overctx.fillStyle = "rgba(255,130,0,0.7)";
 	overctx.fillRect(x,y-wy,wx,wy);
 
 	// glow circle
-	/*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
-		gradient.addColorStop(0,fc+"0)");
-		gradient.addColorStop(0.6, fc+"0.4)");
-		gradient.addColorStop(0.7, fc+"1)");
-		gradient.addColorStop(1,fc+"1)");*/
-		//ctx.fillStyle = gradient;
-	var gradient = overctx.createRadialGradient(x+rx,y-ry,0, x+rx, y-ry, rx*3);
+	var gradient = overctx.createRadialGradient(x+rx,y-ry,0, x+rx, y-ry, rx*4);
 	gradient.addColorStop(0,"rgba(255,255,255,0.6");
+	gradient.addColorStop(0.25, "rgba(255,255,255,0.5");
 	gradient.addColorStop(1,"rgba(255,255,255,0.1");
 	overctx.fillStyle = gradient;
-
-	//overctx.fillStyle = "rgba(200,200,255,0.6)";
-	//overctx.strokeStyle = "rgba(0,0,0,1)";
-
-	//overctx.fillRect(x,y,10,10);
 	overctx.beginPath();
-	overctx.ellipse(x+rx,y-ry,rx*2,ry*2,0,0,TPI);
+	overctx.ellipse(x+rx,y-ry,rx*4,ry*4,0,0,TPI);
 	overctx.fill();
-	//overctx.stroke();
-	
 
+	// text bubble?..
+	/*overctx.fillStyle = "rgba(0,0,0,.9)";
+	overctx.font = "sans-serif 12pt";
+	overctx.fillText("blabla", x, y);*/
+	
 	overctx.restore();
 }

@@ -1191,7 +1191,7 @@ var l=0;var lAnim=setInterval(function(){var txt=["loading... &nbsp; &nbsp; â”¬â
 var C_WMIN=-180,C_WMAX=180,C_HMIN=-90,C_HMAX=90,C_W=C_WMAX-C_WMIN,C_H=C_HMAX-C_HMIN;// map parameters
 var M_BOUNDING_THRESHOLD=10,// grid clipping tolerance
 M_ZOOM_RANGE=[1,8],// zoom range (results in svg scale 2^(v-1))
-M_BUBBLE_OFFSET=5,// distance of map tooltip from pointer
+M_BUBBLE_OFFSET=10,// distance of map tooltip from pointer
 M_HOVER_OFFSET={// pointer selection offset
 l:-2,t:-2};// DATA
 var DATA_DIR="./data/",META_FILES=["humans.json"];var DEFAULT_DATASET=0;// dataset to load up initially
@@ -1221,7 +1221,8 @@ current_datsel,// slected data group
 current_setsel,// selected dataset
 chartdat=[],// timeline rendering data
 cellmap,// latest generated tilemap
-drawdat,// latest generated drawing dataset
+drawdat,// latest generated drawing data
+selectedCell=false,// currently selected cell
 renderRTL=false,// flag for tile iteration direction
 resoFactor;// current value of the reso slider
 /// positions and dimensions
@@ -1296,7 +1297,8 @@ console.log("/~~ generating new grid with resolution "+reso+" ~~\\");var bms=new
 		}*/
 var cAE=getTimeSelection();// boundary enforcement
 if(mAE[0].min<C_WMIN){mAE[0].min=C_WMIN}if(mAE[0].max>C_WMAX){mAE[0].max=C_WMAX}if(mAE[1].min<C_HMIN){mAE[1].min=C_HMIN}if(mAE[1].max>C_HMAX){mAE[1].max=C_HMAX}var tMin=0;while(mAE[0].min>C_WMIN+(tMin+1)*data.parent.tile_width){tMin++}var tMax=tMin;while(mAE[0].max>C_WMIN+(tMax+1)*data.parent.tile_width){tMax++}console.log("  # will iterate over tiles "+tMin+" to "+tMax);var finish=function(){console.log("  |BM| iteration complete ("+(new Date-bms)+"ms)");drawPlot(true,cellmap,reso);console.log("  |BM| finished genGrid (total of "+(new Date-bms)+"ms)");$("#legend").html("<em>inside the visible area</em><br>"+//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
-"we have registered a total of<br>"+"<em>"+count+" "+data.parent.label+"</em><br>"+"that <em>"+data.strings.term+"</em><br>"+"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");$("#export").removeAttr("disabled");urlifyState();console.log("\\~~ grid generation complete~~/ ")};var iterate=function(offset){if(thisGenGrid<currentGenGrid){return 0}// cancel loop if newer genGrid is running
+"we have registered a total of<br>"+"<em>"+count+" "+data.parent.label+"</em><br>"+"that <em>"+data.strings.term+"</em><br>"+"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");//$("#export").removeAttr("disabled");
+urlifyState();console.log("\\~~ grid generation complete~~/ ")};var iterate=function(offset){if(thisGenGrid<currentGenGrid){return 0}// cancel loop if newer genGrid is running
 var cellmapprog={},l,a,ti,i;if(!renderRTL){i=tMin+offset}else{i=tMax-offset}if(i<=tMax&&i>=tMin){// still work to do							// for each map tile in visible area
 for(var j=cAE.min;j<=cAE.max;j++){// go over each key in range
 if(data.data[i][j]!==undefined){// if it is defined
@@ -1327,9 +1329,8 @@ function testing_aggregator(tmap,obj,reso) {
 * draw the map layer
 * [@param clear] clear before drawing, true: everything, false: nothing, i: tile i
 * [@param newmap] new cell mapping to derive drawing data from
-* [@param reso] required if newmap is given - resolution of new gridmap 
-* [@param highlight] index of cell to highlight */
-function drawPlot(clear,newmap,reso,highlight){if(clear===undefined){clear=true}if(newmap!==undefined&&reso===undefined){conslole.warn("drawPlot(): newmap given but no resolution. Using old drawing data.")}mapctx.save();if(clear===true){mapctx.clearRect(0,0,canvasW,canvasH)}var uMBM=new Date;if(newmap!==undefined&&reso!==undefined){// calculate new drawing map
+* [@param reso] required if newmap is given - resolution of new gridmap */
+function drawPlot(clear,newmap,reso){if(clear===undefined){clear=true}if(newmap!==undefined&&reso===undefined){conslole.warn("drawPlot(): newmap given but no resolution. Using old drawing data.")}mapctx.save();if(clear===true){mapctx.clearRect(0,0,canvasW,canvasH)}var uMBM=new Date;if(newmap!==undefined&&reso!==undefined){// calculate new drawing map
 var draw=[],min=Infinity,max=-Infinity;$.each(newmap,function(k,v){var c=index2canvasCoord(k,reso);v=v.length;draw.push([[c[0],c[1]],v]);// get extreme values
 if(v<min){min=v}if(v>max){max=v}});drawdat={draw:draw,min:min,max:max,reso:reso}}if(clear){console.log("  ~ drawing "+drawdat.draw.length+" shapes");console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);console.log("  |BM| (dataset generation in "+(new Date-uMBM)+"ms)")}// color defs
 /// TODO color calculation is buggy
@@ -1351,31 +1352,33 @@ mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]
 		gradient.addColorStop(1,fc+"1)");*/
 //ctx.fillStyle = gradient;
 //ctx.fillRect(cx-rx,cy-rx,wx,wy);
-mapctx.fillRect(cx,cy-wy,wx,wy)}if(highlight!==undefined){if(reso===undefined){reso=drawdat.reso}var c=index2canvasCoord(highlight,reso);/*ctx.fillStyle = "rgba(150,250,150,0.3)";
+mapctx.fillRect(cx,cy-wy,wx,wy)}/*if(highlight !== undefined) {
+		if(reso === undefined) { reso = drawdat.reso; }
+		var c = index2canvasCoord(highlight, reso);
+
+		/*ctx.fillStyle = "rgba(150,250,150,0.3)";
 		ctx.beginPath();
 		ctx.arc(c[0]+rx,c[1]-ry,rx*2,0,TPI);
-		ctx.fill();*/
-mapctx.lineWidth=2/lastTransformState.scale;mapctx.strokeStyle="rgba(255,127,0,0.75)";//orange";
-mapctx.strokeRect(c[0],c[1]-wy,wx,wy)}console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date-canvasRenderBM)+"ms");mapctx.restore()}function highlightCell(c){var x,y;var wx=drawdat.wx,wy=drawdat.wy,rx=drawdat.rx,ry=drawdat.ry;overctx.save();overctx.clearRect(0,0,canvasW,canvasH);/*if(c.constructor === Array) {
+		ctx.fill();* /
+
+		mapctx.lineWidth = 2/lastTransformState.scale;
+		mapctx.strokeStyle = "rgba(255,127,0,0.75)"; //orange";
+		mapctx.strokeRect(c[0],c[1]-wy,wx,wy);
+	}*/
+console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date-canvasRenderBM)+"ms");mapctx.restore()}function highlightCell(c,select){var x,y,p;var wx=drawdat.wx,wy=drawdat.wy,rx=drawdat.rx,ry=drawdat.ry;if(select===true){selectedCell=c}overctx.save();overctx.clearRect(0,0,canvasW,canvasH);overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);overctx.scale(lastTransformState.scale,lastTransformState.scale);if(selectedCell!==false){p=index2canvasCoord(selectedCell);x=p[0];y=p[1];overctx.fillStyle="rgba(255,120,0,0.8)";overctx.fillRect(x,y-wy,wx,wy);overctx.strokeStyle="rgba(255,255,255,0.4)";overctx.lineWidth=3/lastTransformState.scale;overctx.beginPath();overctx.ellipse(x+rx,y-ry,rx*1.5,ry*1.5,0,0,TPI);overctx.stroke();overctx.strokeStyle="rgba(0,0,0,0.4)";overctx.lineWidth=1/lastTransformState.scale;overctx.beginPath();overctx.ellipse(x+rx,y-ry,rx*1.5,ry*1.5,0,0,TPI);overctx.stroke()}/*if(c.constructor === Array) {
 		x = c[0];
 		y = c[1];
 	} else if (typeof c === "number") {*/
-if(c===false){return false}var p=index2canvasCoord(c);x=p[0];y=p[1];/*	} else {
+if(c===false){overctx.restore();return false}if(select!==true){p=index2canvasCoord(c);x=p[0];y=p[1]}/*	} else {
 		console.warn("highlightCell: invalid first argument");
 		return false;
 	}*/
-overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);overctx.scale(lastTransformState.scale,lastTransformState.scale);// highlight cell rect
+// highlight cell rect
 overctx.fillStyle="rgba(255,130,0,0.7)";overctx.fillRect(x,y-wy,wx,wy);// glow circle
-/*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
-		gradient.addColorStop(0,fc+"0)");
-		gradient.addColorStop(0.6, fc+"0.4)");
-		gradient.addColorStop(0.7, fc+"1)");
-		gradient.addColorStop(1,fc+"1)");*/
-//ctx.fillStyle = gradient;
-var gradient=overctx.createRadialGradient(x+rx,y-ry,0,x+rx,y-ry,rx*3);gradient.addColorStop(0,"rgba(255,255,255,0.6");gradient.addColorStop(1,"rgba(255,255,255,0.1");overctx.fillStyle=gradient;//overctx.fillStyle = "rgba(200,200,255,0.6)";
-//overctx.strokeStyle = "rgba(0,0,0,1)";
-//overctx.fillRect(x,y,10,10);
-overctx.beginPath();overctx.ellipse(x+rx,y-ry,rx*2,ry*2,0,0,TPI);overctx.fill();//overctx.stroke();
+var gradient=overctx.createRadialGradient(x+rx,y-ry,0,x+rx,y-ry,rx*4);gradient.addColorStop(0,"rgba(255,255,255,0.6");gradient.addColorStop(.25,"rgba(255,255,255,0.5");gradient.addColorStop(1,"rgba(255,255,255,0.1");overctx.fillStyle=gradient;overctx.beginPath();overctx.ellipse(x+rx,y-ry,rx*4,ry*4,0,0,TPI);overctx.fill();// text bubble?..
+/*overctx.fillStyle = "rgba(0,0,0,.9)";
+	overctx.font = "sans-serif 12pt";
+	overctx.fillText("blabla", x, y);*/
 overctx.restore()}/////////////////////
 /// map utilities ///
 /////////////////////
@@ -1417,20 +1420,21 @@ var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);var c
 		console.log("we have "+cellmap[i].length+" events here: ");
 		console.log(cellmap[i]);
 		console.log(" ~~~~");*/
+//var p = index2canvasCoord(c);
 // hover highlight
 highlightCell(i);// display the info bubble
-clearTimeout(bubbleTimer);$("div#bubble").css("opacity","1").css("bottom",viewportH-d3.event.pageY+M_BUBBLE_OFFSET*lastTransformState.scale+"px").css("right",viewportW-d3.event.pageX+M_BUBBLE_OFFSET*lastTransformState.scale+"px").html(cell.length+" <em>"+current_setsel.strings.label+"</em><br>"+"<span>["+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+"]</span>")}else{// hide the info bubble
+clearTimeout(bubbleTimer);$("div#bubble").css("opacity","1").css("bottom",viewportH-d3.event.pageY+drawdat.wy+M_BUBBLE_OFFSET+"px").css("right",viewportW-d3.event.pageX+drawdat.wy+M_BUBBLE_OFFSET*resoFactor+"px").html(cell.length+" <em>"+current_setsel.strings.label+"</em><br>"+"<span>["+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+"]</span>")}else{// hide the info bubble
 highlightCell(false);clearTimeout(bubbleTimer);bubbleTimer=setTimeout(function(){$("div#bubble").css("opacity","0")},250)}}function canvasMouseClick(){// TODO copied from cabvasMouseMove, DRY?
 if(drawdat===undefined){return false}// no drawing, no info!
 var tb=$("#infolist");tb.html("");// clear the list
-var cc=cco();var x=cc[0],y=cc[1];var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);var cell=cellmap[i];if(cell!==undefined){drawPlot(true,undefined,undefined,i);// highlight cell
-//console.log(cell);
+$("#legend div:last-child").remove();var cc=cco();var x=cc[0],y=cc[1];var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);var cell=cellmap[i];if(cell!==undefined){//drawPlot(true, undefined, undefined, i); // highlight cell
+highlightCell(i,true);//console.log(cell);
 // TODO failsafe for large arrays?
 $.each(cell,function(){//console.log('('+(this[0]-1)+')prev: '+current_datsel.props.members[this[0]-1]);
 //console.log(this);
 //console.log('('+(this[0]+1)+')next: '+current_datsel.props.members[this[0]+1]);
 //console.log('---');
-var q=current_datsel.props.members[this[0]];tb.append("<tr>"+'<td><a class="q" href="https://www.wikidata.org/wiki/'+q+'" target="wikidata">'+q+"</a></td>"+"<td>"+this[1]+"</td>"+"</tr>")});tb.trigger("scroll")}}/**
+var q=current_datsel.props.members[this[0]];tb.append("<tr>"+'<td><a class="q" href="https://www.wikidata.org/wiki/'+q+'" target="wikidata">'+q+"</a></td>"+"<td>"+this[1]+"</td>"+"</tr>")});$("#legend").append($("<div><hr>"+"the <em>selected cell</em> <span>at "+"("+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+")</span> "+"contains <em>"+cell.length+"</em> of them:</div>"));tb.trigger("scroll")}else{selectedCell=false;highlightCell(false)}}/**
 * infolistScroll Timeout Wrapper*/
 function infolistScroll(){clearTimeout(infolistTimer);infolistTimer=setTimeout(infolistScrollFkt,200)}/**
 * infolist scroll handler, fetches labels for visible items */
