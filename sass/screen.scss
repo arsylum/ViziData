@@ -17,9 +17,10 @@
 $control-bg-color: #E3E3E3 /*#dddddd*/;
 $control-mbg-color: #F9FAFF /*#f8f8f8*/; 
 $highlight-color: #aa5500;
-$widget-tt-bg: rgba(0,0,0,.6);
+$widget-tt-bg: rgba(0,0,0,.5);
 $widget-tt-margin: 3px;
 $widget-tt-padding: .1em .3em;
+$range-tt-arrow-length: 10px;
 
 
 /************
@@ -126,9 +127,12 @@ menu#timefilter {
 			.flotr-mouse-value {
 				background: $widget-tt-bg !important;
 				opacity: 1 !important;
-				right: $widget-tt-margin !important;
-				top: $widget-tt-margin !important;
-				left: initial !important;
+				//right: $widget-tt-margin !important;
+				//top: $widget-tt-margin !important;
+				top: 103% !important;
+				z-index: 9;
+				//left: initial !important;
+				left: $widget-tt-margin !important;
 				padding: $widget-tt-padding !important;
 				border-radius: ($outer-border-radius/4) !important;
 				em {
@@ -140,15 +144,58 @@ menu#timefilter {
 
 		.range-tt {
 			position: absolute;
+			z-index: 9;
 			top: ($controls-padding + $widget-tt-margin);
 			color: rgb(255, 219, 153);
+			cursor: ew-resize;
+
+			&:before, &:after {
+				content: "";
+				border-color: rgba(0,0,0,0) $widget-tt-bg;
+				border-style: solid;
+				border-width: 0.5em 0 0.5em 0;
+				display: block;
+				height: 0;
+				width: 0;
+				top: 0.1em;
+				position: absolute;
+				z-index: 8;
+				transition: all 0.3s;
+			}
+			&:before {
+				//border-width: 0.5em 0.75em 0.5em 0;
+				border-right-width: $range-tt-arrow-length/2;
+				left: -$range-tt-arrow-length/2;
+			}
+			&:after {
+				//border-width: 0.5em 0 0.5em 0.75em;
+				border-left-width: $range-tt-arrow-length/2;
+				right: -$range-tt-arrow-length/2;
+			}
+			&:hover:before, &.draggin:before {
+				border-right-width: $range-tt-arrow-length;
+				left: -$range-tt-arrow-length;
+			}
+			&:hover:after, &.draggin:after {
+				border-left-width: $range-tt-arrow-length;
+				right: -$range-tt-arrow-length;
+			}
+			&.draggin:before, &.draggin:after {
+				border-color: rgba(0,0,0,0) rgb(248, 213, 150);
+			}
 
 			&#range-tt-min {
-				left: $left-row-width + $widget-tt-margin;
+				left: $left-row-width + $widget-tt-margin + $range-tt-arrow-length;
 			}
 			&#range-tt-max {
-				right: $controls-padding + $widget-tt-margin;
+				right: $controls-padding + $widget-tt-margin + $range-tt-arrow-length;
 			}
+
+			opacity: 0.1;
+			transition: opacity 0.3s;
+		}
+		&:hover .range-tt {
+			opacity: 1;
 		}
 	}
 }

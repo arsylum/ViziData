@@ -38,8 +38,8 @@ function genChart(data){
 	}
 	
 
-	chartdat.push([x,y]);
-
+	//chartdat.push([x,y]);
+	chartdat[0] = [x,y];
 
 	console.log("  |BM| iterating and sorting finished (took "+(new Date()-benchmark_chart)+"ms)");
 
@@ -66,22 +66,29 @@ function initChart() {
 		detailH = Math.floor(container.height() * (2/3)) - connectionH,
 		summaryH = Math.floor(container.height() * (1/3)); // - connectionH;
 
-	var initSelection = {	// default initial selection
-      	data : {			// TODO this could go into dataset config options
-        	x : {
-          		min : 1500,
-          		max : 2014
-    }  	}   };
+	//var initSelection = {	// default initial selection
+	if(timeSel === undefined) {
+		timeSel = {
+	      	data : {		// TODO this could go into dataset config options
+	        	x : {
+	          		min : 1500,
+	          		max : 2014
+    	}  	}   };
+	}
 
     var selCallback = function() { // callback function for selection change
     	var range = getTimeSelection();
+    	timeSel.data.x = {
+    		min: range.min,
+    		max: range.max
+    	};
     	$("#range-tt-min").text(range.min);
     	$("#range-tt-max").text(range.max);
 		genGrid();
 	};
 
     var detail, detailOptions,
-        summary, summaryOptions,
+        summaryOptions, // summary, (global)
         connection, connectionOptions;
 
 
@@ -106,12 +113,12 @@ function initChart() {
 				trackAll: true,
 				sensibility: 1,
 				trackDecimals: 4,
-				position: 'ne',
+				position: 'nw',
 				lineColor: '#ff9900',
 				fillColor: '#ff9900',
 				fillOpacity: 0.6,
 				trackFormatter : function (o) {
-			    	return "<em>" + parseInt(o.y) + " " + current_setsel.strings.label + "</em> in " + parseInt(o.x);
+			    	return "<em>" + current_setsel.strings.label + "</em> in " + parseInt(o.x) + ": <em>"+ parseInt(o.y) + "</em>";
 			    }
 	        },
 	        yaxis : { 
@@ -196,8 +203,26 @@ function initChart() {
 
    	appendTimelineRangeTips();
     // set to initial selection state
-  	summary.trigger('select', initSelection);
+  	summary.trigger('select', timeSel);
+
 }
+
+/**
+* sets or changes the time selection */
+function changeTimeSel(min,max,relative) {
+	if(relative === undefined) { relative = true; }
+	if(relative) {
+		min += timeSel.data.x.min;
+		max += timeSel.data.x.max;
+	}
+	timeSel = {
+      	data : {
+        	x : {
+          		min : min,
+          		max : max
+	}  	}   };
+}
+
 
 /**
 * returns sanitized selection of the timeline */
@@ -226,13 +251,26 @@ function getTimeSelection() {
 function appendTimelineRangeTips() {
 	var cont = $(
 		'<div id="range-tt-min" class="range-tt hover-tt"></div>' +
-		'<div id="range-tt-max" class="range-tt hover-tt"></div>').hide();
+		'<div id="range-tt-max" class="range-tt hover-tt"></div>'); //.hide();
 	$("#chart").append(cont);
-	$("#chart .summary").on("mouseenter", function() {
-		$(".range-tt").show();
+
+/*	$("#chart .detail").on("mouseenter", function() {
+		$(".range-tt").addClass("hintin");
 	}).on("mouseleave", function() {
-		$(".range-tt").hide();
-	});
+		$(".range-tt").removeClass("hintin");
+	});*/
+	var drag = d3.behavior.drag()
+        .on("drag", function(u,i) {
+        	if(i===0) { changeTimeSel(d3.event.dx,0); }
+        		 else { changeTimeSel(0, d3.event.dx);}
+            summary.trigger("select", timeSel);
+
+        }).on("dragstart", function() {
+        	d3.select(this).classed("draggin",true);
+        }).on("dragend", function() {
+        	d3.select(this).classed("draggin", false);
+        });
+    d3.selectAll("#chart .range-tt").call(drag);
 }
 
 

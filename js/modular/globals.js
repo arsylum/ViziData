@@ -45,6 +45,7 @@ var TPI = Math.PI * 2;
 /// global vars
 //^^^^^^^^^^^^^
 var chart,		// Timeline / dataLine
+	summary, 	// summary component of timeline (interaction leader)
 	//plotlayer,  // plot drawing layer (<g>)
 	bubble,		// popup bubble on map
 	zoombh;		// zoomBehavior
@@ -62,6 +63,7 @@ var gdata = [],		// global rawdata
 	current_datsel,	// slected data group
 	current_setsel,	// selected dataset
 	chartdat = [], // timeline rendering data
+	timeSel, // current timeline selection
 	cellmap, // latest generated tilemap
 	drawdat, // latest generated drawing data
 	selectedCell = false, // currently selected cell

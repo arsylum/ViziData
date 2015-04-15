@@ -171,8 +171,9 @@ function selectCell(i) {
 	if(cell !== undefined) {
 		//drawPlot(true, undefined, undefined, i); // highlight cell
 		var p = index2canvasCoord(i);
-		var x = (p[0] + drawdat.rx).toFixed(2),
-			y = (p[1] + drawdat.ry).toFixed(2);
+		p = canvasCoord2geoCoord(p[0] + drawdat.rx ,p[1] + drawdat.ry);
+		var x = (p.x).toFixed(2),
+			y = (p.y).toFixed(2);
 
 		highlightCell(i,true);
 		//console.log(cell);
