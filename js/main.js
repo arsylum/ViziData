@@ -1298,7 +1298,7 @@ console.log("/~~ generating new grid with resolution "+reso+" ~~\\");var bms=new
 var cAE=getTimeSelection();// boundary enforcement
 if(mAE[0].min<C_WMIN){mAE[0].min=C_WMIN}if(mAE[0].max>C_WMAX){mAE[0].max=C_WMAX}if(mAE[1].min<C_HMIN){mAE[1].min=C_HMIN}if(mAE[1].max>C_HMAX){mAE[1].max=C_HMAX}var tMin=0;while(mAE[0].min>C_WMIN+(tMin+1)*data.parent.tile_width){tMin++}var tMax=tMin;while(mAE[0].max>C_WMIN+(tMax+1)*data.parent.tile_width){tMax++}console.log("  # will iterate over tiles "+tMin+" to "+tMax);var finish=function(){console.log("  |BM| iteration complete ("+(new Date-bms)+"ms)");drawPlot(true,cellmap,reso);console.log("  |BM| finished genGrid (total of "+(new Date-bms)+"ms)");$("#legend").html("<em>inside the visible area</em><br>"+//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
 "we have registered a total of<br>"+"<em>"+count+" "+data.parent.label+"</em><br>"+"that <em>"+data.strings.term+"</em><br>"+"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");//$("#export").removeAttr("disabled");
-urlifyState();console.log("\\~~ grid generation complete~~/ ")};var iterate=function(offset){if(thisGenGrid<currentGenGrid){return 0}// cancel loop if newer genGrid is running
+selectCell();urlifyState();console.log("\\~~ grid generation complete~~/ ")};var iterate=function(offset){if(thisGenGrid<currentGenGrid){return 0}// cancel loop if newer genGrid is running
 var cellmapprog={},l,a,ti,i;if(!renderRTL){i=tMin+offset}else{i=tMax-offset}if(i<=tMax&&i>=tMin){// still work to do							// for each map tile in visible area
 for(var j=cAE.min;j<=cAE.max;j++){// go over each key in range
 if(data.data[i][j]!==undefined){// if it is defined
@@ -1341,7 +1341,9 @@ gmax=235;//205;
 glog_factor=gmax/Math.log(drawdat.max);rmax=185;//14;
 rlog_factor=rmax/Math.log(drawdat.max)}var canvasRenderBM=new Date;// sizes and radii of primitiva
 var bleed=1.1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
-var wx=drawdat.reso*canvasW/360*bleed,wy=drawdat.reso*canvasH/180*bleed,rx=drawdat.reso*canvasW/360/2*bleed,ry=drawdat.reso*canvasH/180/2*bleed;drawdat.wx=wx;drawdat.wy=wy;drawdat.rx=rx;drawdat.ry=ry;var i=-1,n=drawdat.draw.length,d,cx,cy,fc,gradient;// TODO keep only what is used
+var wx=drawdat.reso*canvasW/360*bleed,wy=drawdat.reso*canvasH/180*bleed,//rx = ((drawdat.reso*canvasW)/360/2) * bleed,
+//ry = ((drawdat.reso*canvasH)/180/2) * bleed;
+rx=wx/2,ry=wy/2;drawdat.wx=wx;drawdat.wy=wy;drawdat.rx=rx;drawdat.ry=ry;var i=-1,n=drawdat.draw.length,d,cx,cy,fc,gradient;// TODO keep only what is used
 mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);mapctx.scale(lastTransformState.scale,lastTransformState.scale);if(typeof clear=="number"){clearTile(clear)}while(++i<n){d=drawdat.draw[i];cx=d[0][0];cy=d[0][1];mapctx.fillStyle=//fc = 
 "rgb("+Math.floor(rmax-Math.floor(Math.log(d[1])*rlog_factor))+","+Math.floor(gmax-Math.floor(Math.log(d[1])*glog_factor))+","+Math.floor(bmax-Math.floor(d[1]*blog_factor))+")";//,"+
 //".85)";//((d[1]/drawdat.max)/4+0.6)+")";
@@ -1426,15 +1428,13 @@ highlightCell(i);// display the info bubble
 clearTimeout(bubbleTimer);$("div#bubble").css("opacity","1").css("bottom",viewportH-d3.event.pageY+drawdat.wy+M_BUBBLE_OFFSET+"px").css("right",viewportW-d3.event.pageX+drawdat.wy+M_BUBBLE_OFFSET*resoFactor+"px").html(cell.length+" <em>"+current_setsel.strings.label+"</em><br>"+"<span>["+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+"]</span>")}else{// hide the info bubble
 highlightCell(false);clearTimeout(bubbleTimer);bubbleTimer=setTimeout(function(){$("div#bubble").css("opacity","0")},250)}}function canvasMouseClick(){// TODO copied from cabvasMouseMove, DRY?
 if(drawdat===undefined){return false}// no drawing, no info!
-var tb=$("#infolist");tb.html("");// clear the list
-$("#legend div:last-child").remove();var cc=cco();var x=cc[0],y=cc[1];var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);var cell=cellmap[i];if(cell!==undefined){//drawPlot(true, undefined, undefined, i); // highlight cell
-highlightCell(i,true);//console.log(cell);
-// TODO failsafe for large arrays?
-$.each(cell,function(){//console.log('('+(this[0]-1)+')prev: '+current_datsel.props.members[this[0]-1]);
-//console.log(this);
-//console.log('('+(this[0]+1)+')next: '+current_datsel.props.members[this[0]+1]);
-//console.log('---');
-var q=current_datsel.props.members[this[0]];tb.append("<tr>"+'<td><a class="q" href="https://www.wikidata.org/wiki/'+q+'" data-qid="'+q+'" target="wikidata">'+q+"</a></td>"+"<td>"+this[1]+"</td>"+"</tr>")});$("#legend").append($("<div><hr>"+"the <em>selected cell</em> <span>at "+"("+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+")</span> "+"contains <em>"+cell.length+"</em> of them:</div>"));tb.trigger("scroll")}else{selectedCell=false;highlightCell(false)}}/**
+var cc=cco();var x=cc[0],y=cc[1];var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);selectCell(i)}/**
+* select cell i and fill the infolist table */
+function selectCell(i){if(i===undefined){i=selectedCell}if(i===false){highlightCell(false);return false}var tb=$("#infolist");tb.html("");// clear the list
+$("#legend div:last-child").remove();var cell=cellmap[i];if(cell!==undefined){//drawPlot(true, undefined, undefined, i); // highlight cell
+var p=index2canvasCoord(i);var x=(p[0]+drawdat.rx).toFixed(2),y=(p[1]+drawdat.ry).toFixed(2);highlightCell(i,true);//console.log(cell);
+// TODO recursive timeouts for large arrays (around >5000)
+$.each(cell,function(){var q=current_datsel.props.members[this[0]];tb.append("<tr>"+'<td><a class="q" href="https://www.wikidata.org/wiki/'+q+'" data-qid="'+q+'" target="wikidata">'+q+"</a></td>"+"<td>"+this[1]+"</td>"+"</tr>")});$("#legend").append($("<div><hr>"+"the <em>selected cell</em> <span>at "+"("+x+", "+y+")</span> "+"contains <em>"+cell.length+"</em> of them:</div>"));tb.trigger("scroll")}else{selectedCell=false;highlightCell(false)}}/**
 * infolistScroll Timeout Wrapper*/
 function infolistScroll(){clearTimeout(infolistTimer);infolistTimer=setTimeout(infolistScrollFkt,200)}/**
 * infolist scroll handler, fetches labels for visible items */

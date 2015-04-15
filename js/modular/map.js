@@ -90,6 +90,7 @@ function generateGrid(reso, mAE, data) {
 				"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
 			//$("#export").removeAttr("disabled");
 
+			selectCell();
 			urlifyState();
 
 			console.log("\\~~ grid generation complete~~/ ");
@@ -233,8 +234,10 @@ function drawPlot(clear, newmap, reso) {
 	var bleed = 1.1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
 	var wx = ((drawdat.reso*canvasW)/360) * bleed,
 		wy = ((drawdat.reso*canvasH)/180) * bleed, 
-		rx = ((drawdat.reso*canvasW)/360/2) * bleed,
-		ry = ((drawdat.reso*canvasH)/180/2) * bleed;
+		//rx = ((drawdat.reso*canvasW)/360/2) * bleed,
+		//ry = ((drawdat.reso*canvasH)/180/2) * bleed;
+		rx = wx/2,
+		ry = wy/2;
 
 	drawdat.wx = wx;
 	drawdat.wy = wy;

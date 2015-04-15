@@ -143,28 +143,41 @@ function canvasMouseClick() {
 	// TODO copied from cabvasMouseMove, DRY?
 	if(drawdat === undefined) { return false; } // no drawing, no info!
 
-	var tb = $("#infolist");
-	tb.html(""); // clear the list
-	$("#legend div:last-child").remove();
-
 	var cc = cco();
 	var x = cc[0],
 		y = cc[1];
 
 	var gc = canvasCoord2geoCoord(x,y);
 	var i = coord2index(gc.x, gc.y, drawdat.reso);
+
+	selectCell(i);
+}
+
+/**
+* select cell i and fill the infolist table */
+function selectCell(i) {
+	if(i === undefined) { i = selectedCell; }
+	if(i === false) {
+		highlightCell(false);
+		return false;
+	}
+	
+	var tb = $("#infolist");
+	tb.html(""); // clear the list
+	$("#legend div:last-child").remove();
+
 	var cell = cellmap[i];
 
 	if(cell !== undefined) {
 		//drawPlot(true, undefined, undefined, i); // highlight cell
+		var p = index2canvasCoord(i);
+		var x = (p[0] + drawdat.rx).toFixed(2),
+			y = (p[1] + drawdat.ry).toFixed(2);
+
 		highlightCell(i,true);
 		//console.log(cell);
-		// TODO failsafe for large arrays?
+		// TODO recursive timeouts for large arrays (around >5000)
 		$.each(cell, function() {
-			//console.log('('+(this[0]-1)+')prev: '+current_datsel.props.members[this[0]-1]);
-			//console.log(this);
-			//console.log('('+(this[0]+1)+')next: '+current_datsel.props.members[this[0]+1]);
-			//console.log('---');
 			var q = current_datsel.props.members[this[0]];
 			tb.append("<tr>"+
 				"<td><a class=\"q\" href=\"https://www.wikidata.org/wiki/"+q+"\" data-qid=\""+q+"\" target=\"wikidata\">"+q+"</a></td>"+
@@ -175,10 +188,11 @@ function canvasMouseClick() {
 
 		$("#legend").append($("<div><hr>"+
 		"the <em>selected cell</em> <span>at "+
-		"("+(gc.x.toFixed(2))+", "+(gc.y.toFixed(2))+")</span> "+
+		"("+ x +", "+ y +")</span> "+
 		"contains <em>"+cell.length+"</em> of them:</div>"));
 
 		tb.trigger("scroll");
+
 	} else {
 		selectedCell = false;
 		highlightCell(false);
