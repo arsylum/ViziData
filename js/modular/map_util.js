@@ -85,6 +85,7 @@ function canvasMouseMove() {
 
 	var x = d3.event.pageX - canvasL;
 	var y = d3.event.pageY - canvasT;
+	//console.log(d3.event);
 	//console.log('Position in canvas: ('+x+','+y+')');
 	var gc = canvasCoord2geoCoord(x,y);
 	var i = coord2index(gc.x, gc.y, drawdat.reso);

@@ -300,9 +300,9 @@ menu#timefilter {
 #map {
 	height: (100) - (2*($map-padding)) - ($timeline-height);/*($filter-height)+($legend-height)-($timeline-height);*/
 	/*margin: $map-margin;*/
-	padding: $map-padding;
+	//padding: $map-padding;
 	margin-left: ($left-row-width);/*+$map-margin;*/
-	//position: relative; somehow breaks hovering!
+	position: relative; //somehow breaks hovering?!
 
 	#hud {
 		position: absolute;
@@ -321,6 +321,13 @@ menu#timefilter {
 	&:hover #hud {
 		opacity: 1;
 	}
+}
+
+.overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	pointer-events: none;
 }
 
 

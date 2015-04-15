@@ -1236,7 +1236,7 @@ lastTransformState={scale:1,translate:[0,0]};/*Highcharts.setOptions({
 $("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);$("#freezer>input").on("change",function(){allow_redraw=!this.checked;if(this.checked){$("#legend").css("opacity",".5")}else{$("#legend").css("opacity","1");genGrid()}});$("#colorizer>input").on("change",function(){colorize=!this.checked;genGrid()});$("#infolist").on("scroll",infolistScroll);// bind window resize handling
 $(window).resize(function(){clearTimeout(resizeTimer);resizeTimer=setTimeout(onResize,400)});// zoombehaviour
 zoombh=d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1),Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom",zoom);// setup canvas
-mapcan=d3.select("#map").append("canvas").call(zoombh).on("mousemove",canvasMouseMove).on("click",canvasMouseClick);overcan=d3.select("#map").append("canvas");onResize();// set canvas dimensions
+mapcan=d3.select("#map").append("canvas").call(zoombh).on("mousemove",canvasMouseMove).on("click",canvasMouseClick);overcan=d3.select("#map").append("canvas").classed("overlay",true);onResize();// set canvas dimensions
 // setup svg
 /*d3.select("#mapcanvas").append("g").attr("id","maplayer");//experimental
 	plotlayer = d3.select("#mapcanvas")
@@ -1255,7 +1255,8 @@ for(var j=0;j<gdata[mfc].datasets.length;j++){gdata[mfc].datasets[j].parent=gdat
 ////////////////
 function onResize(){// get viewport size
 viewportW=$(window).width();viewportH=$(window).height();// set canvas dimensions
-var pos=$(mapcan.node()).position();canvasT=Math.floor(pos.top);canvasL=Math.floor(pos.left);canvasW=Math.floor($("#map").width());canvasH=Math.floor($("#map").height());//d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
+canvasT=Math.floor($("#map").position().top);canvasL=Math.floor($("#sidebar").width());//doesen't change but is set here for code maintainability
+canvasW=Math.floor($("#map").width());canvasH=Math.floor($("#map").height());//d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
 $([mapcan.node(),overcan.node()]).attr("width",canvasW).attr("height",canvasH);mapctx=mapcan.node().getContext("2d");overctx=overcan.node().getContext("2d");initChart();genGrid()}/////////////////////////
 /// general map logic ///
 /////////////////////////
@@ -1375,7 +1376,8 @@ function clearTile(i){var ppd=canvasW/(C_WMAX-C_WMIN);mapctx.clearRect(current_d
 current_datsel.tile_width*ppd,canvasH)}/**
 * map tooltip */
 function canvasMouseMove(){if(drawdat===undefined){return false}// no drawing, no tooltip!
-var x=d3.event.pageX-canvasL;var y=d3.event.pageY-canvasT;//console.log('Position in canvas: ('+x+','+y+')');
+var x=d3.event.pageX-canvasL;var y=d3.event.pageY-canvasT;//console.log(d3.event);
+//console.log('Position in canvas: ('+x+','+y+')');
 var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);var cell=cellmap[i];$("#hud").text("("+gc.x.toFixed(5)+", "+gc.y.toFixed(5)+")");if(cell!==undefined){/*console.log(" ~~~~");
 		console.log("index: "+i);
 		console.log("we have "+cellmap[i].length+" events here: ");

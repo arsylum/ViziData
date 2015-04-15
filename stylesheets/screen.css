@@ -530,9 +530,9 @@ menu#timefilter #chart .range-tt#range-tt-max {
   height: 74.6%;
   /*($filter-height)+($legend-height)-($timeline-height);*/
   /*margin: $map-margin;*/
-  padding: 0.2%;
   margin-left: 250px;
   /*+$map-margin;*/
+  position: relative;
 }
 /* line 307, ../sass/screen.scss */
 #map #hud {
@@ -547,7 +547,15 @@ menu#timefilter #chart .range-tt#range-tt-max {
   opacity: 1;
 }
 
-/* line 327, ../sass/screen.scss */
+/* line 326, ../sass/screen.scss */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+/* line 334, ../sass/screen.scss */
 #bubble {
   position: absolute;
   bottom: 1337px;
@@ -569,7 +577,7 @@ menu#timefilter #chart .range-tt#range-tt-max {
   pointer-events: none;
 }
 
-/* line 342, ../sass/screen.scss */
+/* line 349, ../sass/screen.scss */
 #bubble > span,
 #legend > span,
 #stuff > span,
@@ -579,7 +587,7 @@ menu#timefilter #chart .range-tt#range-tt-max {
   font-family: sans-serif;
 }
 
-/* line 351, ../sass/screen.scss */
+/* line 358, ../sass/screen.scss */
 #sidebar header h1 {
   clear: both;
   font-family: sans-serif;
@@ -587,29 +595,29 @@ menu#timefilter #chart .range-tt#range-tt-max {
   margin: 15px 15px 5px;
   font-weight: bold;
 }
-/* line 358, ../sass/screen.scss */
+/* line 365, ../sass/screen.scss */
 #sidebar header h1 span {
   font-size: .5em;
 }
-/* line 363, ../sass/screen.scss */
+/* line 370, ../sass/screen.scss */
 #sidebar header #github_link {
   position: relative;
   float: left;
   width: 120px;
   margin: 0 15px;
 }
-/* line 369, ../sass/screen.scss */
+/* line 376, ../sass/screen.scss */
 #sidebar header #github_link img {
   float: left;
 }
-/* line 373, ../sass/screen.scss */
+/* line 380, ../sass/screen.scss */
 #sidebar header #github_link img[src*=logo] {
   transition: .5s;
   position: absolute;
   left: 100px;
   opacity: 0;
 }
-/* line 382, ../sass/screen.scss */
+/* line 389, ../sass/screen.scss */
 #sidebar header:hover #github_link img[src*=logo] {
   left: 38px;
   opacity: 1;
@@ -617,19 +625,19 @@ menu#timefilter #chart .range-tt#range-tt-max {
 
 /************
 *** Forms **/
-/* line 390, ../sass/screen.scss */
+/* line 397, ../sass/screen.scss */
 select, label {
   display: block;
 }
 
-/* line 395, ../sass/screen.scss */
+/* line 402, ../sass/screen.scss */
 #controls > label {
   line-height: 1.5em;
   margin: .5em 0;
   display: inline-block;
   width: 74%;
 }
-/* line 402, ../sass/screen.scss */
+/* line 409, ../sass/screen.scss */
 #controls input {
   display: inline-block;
   padding: 2%;
@@ -638,7 +646,7 @@ select, label {
   vertical-align: middle;
   width: 100%;
 }
-/* line 411, ../sass/screen.scss */
+/* line 418, ../sass/screen.scss */
 #controls input[type=text][readonly] {
   width: 14%;
   margin-left: 6%;
@@ -651,7 +659,7 @@ select, label {
 	height: 1px;
 	content: "";
 }*/
-/* line 427, ../sass/screen.scss */
+/* line 434, ../sass/screen.scss */
 button {
   width: 100%;
   border: 1px solid #ACACAC;
@@ -672,7 +680,7 @@ button {
   box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
 }
 
-/* line 438, ../sass/screen.scss */
+/* line 445, ../sass/screen.scss */
 button:hover {
   color: #ffffff;
   background: #BBBED1;
@@ -680,7 +688,7 @@ button:hover {
   /*@include box-shadow(0 -3px 3px -3px rgba(100, 0, 0, 0.8), 0 3px 3px -3px rgba(100, 0, 0, 0.8));*/
 }
 
-/* line 445, ../sass/screen.scss */
+/* line 452, ../sass/screen.scss */
 button[disabled] {
   background: #ECECEC;
   cursor: default;
@@ -721,12 +729,12 @@ button[disabled] {
 }*/
 /***********
 *** text **/
-/* line 485, ../sass/screen.scss */
+/* line 492, ../sass/screen.scss */
 #filter {
   line-height: 1.5em;
 }
 
-/* line 490, ../sass/screen.scss */
+/* line 497, ../sass/screen.scss */
 em {
   font-style: italic;
   color: #aa5500;
@@ -734,7 +742,7 @@ em {
 
 /************
 *** fancy **/
-/* line 499, ../sass/screen.scss */
+/* line 506, ../sass/screen.scss */
 menu > div {
   -moz-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
   -webkit-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
@@ -746,7 +754,7 @@ menu > div {
 }*/
 /****************
 *** technical **/
-/* line 510, ../sass/screen.scss */
+/* line 517, ../sass/screen.scss */
 #bubble {
   opacity: 0;
 }

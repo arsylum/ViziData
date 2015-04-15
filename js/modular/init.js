@@ -38,7 +38,7 @@ $(function(){
 
 	// setup canvas
 	mapcan = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
-	overcan = d3.select("#map").append("canvas");
+	overcan = d3.select("#map").append("canvas").classed("overlay", true);
 	onResize(); // set canvas dimensions
 
 	// setup svg
@@ -90,9 +90,8 @@ function onResize() {
 	viewportH = $(window).height();
 
 	// set canvas dimensions
-	var pos = $(mapcan.node()).position();
-	canvasT = Math.floor(pos.top);
-	canvasL = Math.floor(pos.left);
+	canvasT = Math.floor($("#map").position().top); 
+	canvasL = Math.floor($("#sidebar").width()); //doesen't change but is set here for code maintainability
 	canvasW = Math.floor($("#map").width());
 	canvasH = Math.floor($("#map").height());
 	//d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
