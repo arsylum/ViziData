@@ -29,6 +29,7 @@ function setupControlHandlers() {
 		transitTo(getZoomTransform($(this).val()));
 	});
 	$("#reso-slider").on("change", function() {
+		resoFactor = parseFloat($(this).val());
 		genGrid();
 	});
 

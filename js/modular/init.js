@@ -11,6 +11,7 @@ $(function(){
 		}
 	});*/
 
+	resoFactor = parseFloat($("#reso-slider").val());
 	$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);
 	$("#freezer>input").on("change", function() {
 		allow_redraw = !this.checked;

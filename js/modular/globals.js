@@ -17,7 +17,11 @@ var C_WMIN = -180,
 // map parameters
 var M_BOUNDING_THRESHOLD = 10,	// grid clipping tolerance
 	M_ZOOM_RANGE = [1,8],		// zoom range (results in svg scale 2^(v-1))
-	M_BUBBLE_OFFSET = 5;		// distance of map tooltip from pointer
+	M_BUBBLE_OFFSET = 5,		// distance of map tooltip from pointer
+	M_HOVER_OFFSET = {			// pointer selection offset
+		l: -2, 
+		t: -2
+	};
 
 // DATA
 var DATA_DIR = "./data/",
@@ -60,7 +64,8 @@ var gdata = [],		// global rawdata
 	chartdat = [], // timeline rendering data
 	cellmap, // latest generated tilemap
 	drawdat, // latest generated drawing dataset
-	renderRTL = false; // flag for tile iteration direction
+	renderRTL = false, // flag for tile iteration direction
+	resoFactor; // current value of the reso slider
 
 
 /// positions and dimensions

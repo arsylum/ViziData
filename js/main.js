@@ -1191,8 +1191,9 @@ var l=0;var lAnim=setInterval(function(){var txt=["loading... &nbsp; &nbsp; â”¬â
 var C_WMIN=-180,C_WMAX=180,C_HMIN=-90,C_HMAX=90,C_W=C_WMAX-C_WMIN,C_H=C_HMAX-C_HMIN;// map parameters
 var M_BOUNDING_THRESHOLD=10,// grid clipping tolerance
 M_ZOOM_RANGE=[1,8],// zoom range (results in svg scale 2^(v-1))
-M_BUBBLE_OFFSET=5;// distance of map tooltip from pointer
-// DATA
+M_BUBBLE_OFFSET=5,// distance of map tooltip from pointer
+M_HOVER_OFFSET={// pointer selection offset
+l:-2,t:-2};// DATA
 var DATA_DIR="./data/",META_FILES=["humans.json"];var DEFAULT_DATASET=0;// dataset to load up initially
 var//ARR_UNDEFINED = null,	// undefined value
 ARR_M_LON=0,// longitude
@@ -1221,7 +1222,8 @@ current_setsel,// selected dataset
 chartdat=[],// timeline rendering data
 cellmap,// latest generated tilemap
 drawdat,// latest generated drawing dataset
-renderRTL=false;// flag for tile iteration direction
+renderRTL=false,// flag for tile iteration direction
+resoFactor;// current value of the reso slider
 /// positions and dimensions
 var viewportH,viewportW;// map canvas
 var mapcan,mapctx,overcan,overctx,canvasW,canvasH,canvasT,canvasL;var lastTransformState;///////////////////
@@ -1233,7 +1235,7 @@ lastTransformState={scale:1,translate:[0,0]};/*Highcharts.setOptions({
 			useUTC: false
 		}
 	});*/
-$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);$("#freezer>input").on("change",function(){allow_redraw=!this.checked;if(this.checked){$("#legend").css("opacity",".5")}else{$("#legend").css("opacity","1");genGrid()}});$("#colorizer>input").on("change",function(){colorize=!this.checked;genGrid()});$("#infolist").on("scroll",infolistScroll);// bind window resize handling
+resoFactor=parseFloat($("#reso-slider").val());$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);$("#freezer>input").on("change",function(){allow_redraw=!this.checked;if(this.checked){$("#legend").css("opacity",".5")}else{$("#legend").css("opacity","1");genGrid()}});$("#colorizer>input").on("change",function(){colorize=!this.checked;genGrid()});$("#infolist").on("scroll",infolistScroll);// bind window resize handling
 $(window).resize(function(){clearTimeout(resizeTimer);resizeTimer=setTimeout(onResize,400)});// zoombehaviour
 zoombh=d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1),Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom",zoom);// setup canvas
 mapcan=d3.select("#map").append("canvas").call(zoombh).on("mousemove",canvasMouseMove).on("click",canvasMouseClick);overcan=d3.select("#map").append("canvas").classed("overlay",true);onResize();// set canvas dimensions
@@ -1260,6 +1262,10 @@ canvasW=Math.floor($("#map").width());canvasH=Math.floor($("#map").height());//d
 $([mapcan.node(),overcan.node()]).attr("width",canvasW).attr("height",canvasH);mapctx=mapcan.node().getContext("2d");overctx=overcan.node().getContext("2d");initChart();genGrid()}/////////////////////////
 /// general map logic ///
 /////////////////////////
+/**
+** grid generation and 
+** drawing functions 
+*/
 /**
 * timeout wrapper*/
 function genGrid(reso,mAE,data){if(chart===undefined){return 0}// depend on timeline
@@ -1334,7 +1340,7 @@ gmax=235;//205;
 glog_factor=gmax/Math.log(drawdat.max);rmax=185;//14;
 rlog_factor=rmax/Math.log(drawdat.max)}var canvasRenderBM=new Date;// sizes and radii of primitiva
 var bleed=1.1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
-var wx=drawdat.reso*canvasW/360*bleed,wy=drawdat.reso*canvasH/180*bleed,rx=drawdat.reso*canvasW/360/2*bleed,ry=drawdat.reso*canvasH/180/2*bleed;var i=-1,n=drawdat.draw.length,d,cx,cy,fc,gradient;// TODO keep only what is used
+var wx=drawdat.reso*canvasW/360*bleed,wy=drawdat.reso*canvasH/180*bleed,rx=drawdat.reso*canvasW/360/2*bleed,ry=drawdat.reso*canvasH/180/2*bleed;drawdat.wx=wx;drawdat.wy=wy;drawdat.rx=rx;drawdat.ry=ry;var i=-1,n=drawdat.draw.length,d,cx,cy,fc,gradient;// TODO keep only what is used
 mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);mapctx.scale(lastTransformState.scale,lastTransformState.scale);if(typeof clear=="number"){clearTile(clear)}while(++i<n){d=drawdat.draw[i];cx=d[0][0];cy=d[0][1];mapctx.fillStyle=//fc = 
 "rgb("+Math.floor(rmax-Math.floor(Math.log(d[1])*rlog_factor))+","+Math.floor(gmax-Math.floor(Math.log(d[1])*glog_factor))+","+Math.floor(bmax-Math.floor(d[1]*blog_factor))+")";//,"+
 //".85)";//((d[1]/drawdat.max)/4+0.6)+")";
@@ -1350,12 +1356,37 @@ mapctx.fillRect(cx,cy-wy,wx,wy)}if(highlight!==undefined){if(reso===undefined){r
 		ctx.arc(c[0]+rx,c[1]-ry,rx*2,0,TPI);
 		ctx.fill();*/
 mapctx.lineWidth=2/lastTransformState.scale;mapctx.strokeStyle="rgba(255,127,0,0.75)";//orange";
-mapctx.strokeRect(c[0],c[1]-wy,wx,wy)}console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date-canvasRenderBM)+"ms");mapctx.restore()}/////////////////////
+mapctx.strokeRect(c[0],c[1]-wy,wx,wy)}console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date-canvasRenderBM)+"ms");mapctx.restore()}function highlightCell(c){var x,y;var wx=drawdat.wx,wy=drawdat.wy,rx=drawdat.rx,ry=drawdat.ry;overctx.save();overctx.clearRect(0,0,canvasW,canvasH);/*if(c.constructor === Array) {
+		x = c[0];
+		y = c[1];
+	} else if (typeof c === "number") {*/
+if(c===false){return false}var p=index2canvasCoord(c);x=p[0];y=p[1];/*	} else {
+		console.warn("highlightCell: invalid first argument");
+		return false;
+	}*/
+overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);overctx.scale(lastTransformState.scale,lastTransformState.scale);// highlight cell rect
+overctx.fillStyle="rgba(255,130,0,0.7)";overctx.fillRect(x,y-wy,wx,wy);// glow circle
+/*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
+		gradient.addColorStop(0,fc+"0)");
+		gradient.addColorStop(0.6, fc+"0.4)");
+		gradient.addColorStop(0.7, fc+"1)");
+		gradient.addColorStop(1,fc+"1)");*/
+//ctx.fillStyle = gradient;
+var gradient=overctx.createRadialGradient(x+rx,y-ry,0,x+rx,y-ry,rx*3);gradient.addColorStop(0,"rgba(255,255,255,0.6");gradient.addColorStop(1,"rgba(255,255,255,0.1");overctx.fillStyle=gradient;//overctx.fillStyle = "rgba(200,200,255,0.6)";
+//overctx.strokeStyle = "rgba(0,0,0,1)";
+//overctx.fillRect(x,y,10,10);
+overctx.beginPath();overctx.ellipse(x+rx,y-ry,rx*2,ry*2,0,0,TPI);overctx.fill();//overctx.stroke();
+overctx.restore()}/////////////////////
 /// map utilities ///
 /////////////////////
+/***
+** coordinate calclations
+** and user interactions
+*/
 /**
 * returns current grid resolution*/
-function calcReso(){var rf=parseFloat($("#reso-slider").val());return 1/lastTransformState.scale*rf}/**
+function calcReso(){//var rf = parseFloat($("#reso-slider").val());
+return 1/lastTransformState.scale*resoFactor}/**
 * returns the current map bounds (rectangle of the currently visible map area)
 * as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
 function getBounds(){var tx=-lastTransformState.translate[0]/canvasW*360,ty=-lastTransformState.translate[1]/canvasH*180;var xmin=tx/lastTransformState.scale+C_WMIN,ymin=ty/lastTransformState.scale+C_HMIN,bth=M_BOUNDING_THRESHOLD/(lastTransformState.scale/2);var bounds=[{min:xmin-bth,max:xmin+(C_WMAX-C_WMIN)/lastTransformState.scale+bth},{min:-(ymin+(C_HMAX-C_HMIN)/lastTransformState.scale)-bth,max:-ymin+bth}];return bounds}/**
@@ -1364,8 +1395,9 @@ function getBounds(){var tx=-lastTransformState.translate[0]/canvasW*360,ty=-las
 function coord2index(longi,lati,reso){if(longi===C_WMAX)longi-=reso;// prevent 
 if(lati===C_HMAX)lati-=reso;// out of bounds cells
 return Math.floor(lati/reso)*((C_WMAX-C_WMIN)/reso)+Math.floor(longi/reso)}/**
-* returns the canvas rendering coordinates for a given index */
-function index2canvasCoord(i,reso){var cpr=(C_WMAX-C_WMIN)/reso;var rowpos=(i-cpr/2)%cpr;if(rowpos<0)rowpos+=cpr;rowpos-=cpr/2;var lbx=rowpos*reso+-C_WMIN,//+reso/2,
+* returns the canvas rendering coordinates for a given index 
+* (for the bottom left corner of the gridscells rect) */
+function index2canvasCoord(i,reso){if(reso===undefined){reso=drawdat.reso}var cpr=(C_WMAX-C_WMIN)/reso;var rowpos=(i-cpr/2)%cpr;if(rowpos<0)rowpos+=cpr;rowpos-=cpr/2;var lbx=rowpos*reso+-C_WMIN,//+reso/2,
 lby=Math.floor((+i+cpr/2)/cpr)*reso*-1+-C_HMIN;//+reso/2;
 // canvas normalization
 lbx=lbx/360*canvasW;lby=lby/180*canvasH;return[lbx,lby]}/**
@@ -1374,21 +1406,24 @@ function canvasCoord2geoCoord(x,y){var t=lastTransformState;return{x:-180+(-t.tr
 * clears the area of tile i on map canvas */
 function clearTile(i){var ppd=canvasW/(C_WMAX-C_WMIN);mapctx.clearRect(current_datsel.tile_width*i*ppd,0,// x, y
 current_datsel.tile_width*ppd,canvasH)}/**
+* returns the currently pointed at canvas coordinates */
+function cco(){var s=lastTransformState.scale;var x=d3.event.pageX-canvasL-drawdat.wx*s-M_HOVER_OFFSET.l*resoFactor;var y=d3.event.pageY-canvasT-drawdat.wy*s-M_HOVER_OFFSET.t*resoFactor;return[x,y]}/**
 * map tooltip */
 function canvasMouseMove(){if(drawdat===undefined){return false}// no drawing, no tooltip!
-var x=d3.event.pageX-canvasL;var y=d3.event.pageY-canvasT;//console.log(d3.event);
+var cc=cco();var x=cc[0],y=cc[1];//console.log(d3.event);
 //console.log('Position in canvas: ('+x+','+y+')');
 var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);var cell=cellmap[i];$("#hud").text("("+gc.x.toFixed(5)+", "+gc.y.toFixed(5)+")");if(cell!==undefined){/*console.log(" ~~~~");
 		console.log("index: "+i);
 		console.log("we have "+cellmap[i].length+" events here: ");
 		console.log(cellmap[i]);
 		console.log(" ~~~~");*/
-// display the info bubble
-clearTimeout(bubbleTimer);$("div#bubble").css("opacity","1").css("bottom",viewportH-d3.event.pageY+M_BUBBLE_OFFSET+"px").css("right",viewportW-d3.event.pageX+M_BUBBLE_OFFSET+"px").html(cell.length+" <em>"+current_setsel.strings.label+"</em><br>"+"<span>["+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+"]</span>")}else{// hide the info bubble
-clearTimeout(bubbleTimer);bubbleTimer=setTimeout(function(){$("div#bubble").css("opacity","0")},250)}}function canvasMouseClick(){// TODO copied from cabvasMouseMove, DRY?
+// hover highlight
+highlightCell(i);// display the info bubble
+clearTimeout(bubbleTimer);$("div#bubble").css("opacity","1").css("bottom",viewportH-d3.event.pageY+M_BUBBLE_OFFSET*lastTransformState.scale+"px").css("right",viewportW-d3.event.pageX+M_BUBBLE_OFFSET*lastTransformState.scale+"px").html(cell.length+" <em>"+current_setsel.strings.label+"</em><br>"+"<span>["+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+"]</span>")}else{// hide the info bubble
+highlightCell(false);clearTimeout(bubbleTimer);bubbleTimer=setTimeout(function(){$("div#bubble").css("opacity","0")},250)}}function canvasMouseClick(){// TODO copied from cabvasMouseMove, DRY?
 if(drawdat===undefined){return false}// no drawing, no info!
 var tb=$("#infolist");tb.html("");// clear the list
-var x=d3.event.pageX-canvasL;var y=d3.event.pageY-canvasT;var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);var cell=cellmap[i];if(cell!==undefined){drawPlot(true,undefined,undefined,i);// highlight cell
+var cc=cco();var x=cc[0],y=cc[1];var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);var cell=cellmap[i];if(cell!==undefined){drawPlot(true,undefined,undefined,i);// highlight cell
 //console.log(cell);
 // TODO failsafe for large arrays?
 $.each(cell,function(){//console.log('('+(this[0]-1)+')prev: '+current_datsel.props.members[this[0]-1]);
@@ -1447,7 +1482,7 @@ function updateChart(seriez){}//////////////////////
 /**
 * bind control handlers */
 function setupControlHandlers(){// build filter menu
-var fn=function(){setSetSel(this.value)};var filter=$("#filter");for(var i=0;i<gdata.length;i++){var fs=$("<fieldset>");fs.append("<legend>"+gdata[i].title+"</legend>");for(var j=0;j<gdata[i].datasets.length;j++){var b=$('<input type="radio" name="radio" value="'+j+'" />').on("change",fn);fs.append($("<label>"+gdata[i].datasets[j].strings.label+"</label>").prepend(b))}filter.append(fs)}$("#controls input[type='range']").on("input",function(){$(this).parent().next("input[type='text']").val(parseFloat($(this).val()).toFixed(1))});$("#zoom-slider").on("change",function(){transitTo(getZoomTransform($(this).val()))});$("#reso-slider").on("change",function(){genGrid()});$(window).resize(function(){viewportW=$(this).width();viewportH=$(this).height()});$("#export").click(function(){$(this).attr("disabled","disabled");exportSvg()})}/**
+var fn=function(){setSetSel(this.value)};var filter=$("#filter");for(var i=0;i<gdata.length;i++){var fs=$("<fieldset>");fs.append("<legend>"+gdata[i].title+"</legend>");for(var j=0;j<gdata[i].datasets.length;j++){var b=$('<input type="radio" name="radio" value="'+j+'" />').on("change",fn);fs.append($("<label>"+gdata[i].datasets[j].strings.label+"</label>").prepend(b))}filter.append(fs)}$("#controls input[type='range']").on("input",function(){$(this).parent().next("input[type='text']").val(parseFloat($(this).val()).toFixed(1))});$("#zoom-slider").on("change",function(){transitTo(getZoomTransform($(this).val()))});$("#reso-slider").on("change",function(){resoFactor=parseFloat($(this).val());genGrid()});$(window).resize(function(){viewportW=$(this).width();viewportH=$(this).height()});$("#export").click(function(){$(this).attr("disabled","disabled");exportSvg()})}/**
 * encodes current state of viz into url to make it shareable*/
 function urlifyState(){// TODO selected cells are note encoded yet
 // TODO properly encode selcted dataset (depends on data management module)

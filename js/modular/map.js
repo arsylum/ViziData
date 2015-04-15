@@ -2,6 +2,11 @@
 /// general map logic ///
 /////////////////////////
 /**
+** grid generation and 
+** drawing functions 
+*/
+
+/**
 * timeout wrapper*/
 function genGrid(reso, mAE, data) {
 	if(chart === undefined) { return 0; } // depend on timeline
@@ -232,6 +237,11 @@ function drawPlot(clear, newmap, reso, highlight) {
 		rx = ((drawdat.reso*canvasW)/360/2) * bleed,
 		ry = ((drawdat.reso*canvasH)/180/2) * bleed;
 
+	drawdat.wx = wx;
+	drawdat.wy = wy;
+	drawdat.rx = rx;
+	drawdat.ry = ry;
+
 	var i= -1, n = drawdat.draw.length, d, cx, cy, fc, gradient; // TODO keep only what is used
 
   	mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
@@ -286,4 +296,68 @@ function drawPlot(clear, newmap, reso, highlight) {
 
 	console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");
 	mapctx.restore();
+}
+
+
+function highlightCell(c) {
+
+
+	var x,y;
+
+	var wx = drawdat.wx,
+		wy = drawdat.wy,
+		rx = drawdat.rx,
+		ry = drawdat.ry;
+
+	overctx.save();
+
+	overctx.clearRect(0,0,canvasW,canvasH);
+
+	/*if(c.constructor === Array) {
+		x = c[0];
+		y = c[1];
+	} else if (typeof c === "number") {*/
+
+
+	if(c === false) { return false; }
+	var p = index2canvasCoord(c);
+	x = p[0];
+	y = p[1];
+/*	} else {
+		console.warn("highlightCell: invalid first argument");
+		return false;
+	}*/
+
+
+
+	overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
+  	overctx.scale(lastTransformState.scale, lastTransformState.scale);
+
+  	// highlight cell rect
+  	overctx.fillStyle = "rgba(255,130,0,0.7)";
+	overctx.fillRect(x,y-wy,wx,wy);
+
+	// glow circle
+	/*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
+		gradient.addColorStop(0,fc+"0)");
+		gradient.addColorStop(0.6, fc+"0.4)");
+		gradient.addColorStop(0.7, fc+"1)");
+		gradient.addColorStop(1,fc+"1)");*/
+		//ctx.fillStyle = gradient;
+	var gradient = overctx.createRadialGradient(x+rx,y-ry,0, x+rx, y-ry, rx*3);
+	gradient.addColorStop(0,"rgba(255,255,255,0.6");
+	gradient.addColorStop(1,"rgba(255,255,255,0.1");
+	overctx.fillStyle = gradient;
+
+	//overctx.fillStyle = "rgba(200,200,255,0.6)";
+	//overctx.strokeStyle = "rgba(0,0,0,1)";
+
+	//overctx.fillRect(x,y,10,10);
+	overctx.beginPath();
+	overctx.ellipse(x+rx,y-ry,rx*2,ry*2,0,0,TPI);
+	overctx.fill();
+	//overctx.stroke();
+	
+
+	overctx.restore();
 }

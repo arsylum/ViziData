@@ -1,11 +1,16 @@
 /////////////////////
 /// map utilities ///
 /////////////////////
+/***
+** coordinate calclations
+** and user interactions
+*/
+
 /**
 * returns current grid resolution*/
 function calcReso() {
-	var rf = parseFloat($("#reso-slider").val());
-	return (1/lastTransformState.scale)*rf;
+	//var rf = parseFloat($("#reso-slider").val());
+	return (1/lastTransformState.scale)*resoFactor;
 }
 
 /**
@@ -39,8 +44,10 @@ function coord2index(longi, lati, reso) {
 	return (Math.floor(lati/reso)*((C_WMAX-C_WMIN)/reso) + Math.floor(longi/reso));
 }
 /**
-* returns the canvas rendering coordinates for a given index */
+* returns the canvas rendering coordinates for a given index 
+* (for the bottom left corner of the gridscells rect) */
 function index2canvasCoord(i, reso) {
+	if(reso === undefined) { reso = drawdat.reso; }
 	var cpr = (C_WMAX-C_WMIN)/reso;
 
 	var rowpos = (i-cpr/2)%cpr;
@@ -77,14 +84,24 @@ function clearTile(i) {
 	);
 }
 
+/**
+* returns the currently pointed at canvas coordinates */
+function cco() {
+	var s = lastTransformState.scale;
+	var x = d3.event.pageX - canvasL - drawdat.wx*s - M_HOVER_OFFSET.l*resoFactor;
+	var y = d3.event.pageY - canvasT - drawdat.wy*s - M_HOVER_OFFSET.t*resoFactor;
+	return [x,y];
+}
+
 
 /**
 * map tooltip */
 function canvasMouseMove() {
 	if(drawdat === undefined) { return false; } // no drawing, no tooltip!
 
-	var x = d3.event.pageX - canvasL;
-	var y = d3.event.pageY - canvasT;
+	var cc = cco();
+	var x = cc[0],
+		y = cc[1];
 	//console.log(d3.event);
 	//console.log('Position in canvas: ('+x+','+y+')');
 	var gc = canvasCoord2geoCoord(x,y);
@@ -100,17 +117,20 @@ function canvasMouseMove() {
 		console.log(cellmap[i]);
 		console.log(" ~~~~");*/
 
+		// hover highlight
+		highlightCell(i);
+
 		// display the info bubble
 		clearTimeout(bubbleTimer);
 		$("div#bubble").css("opacity","1")
-			.css("bottom", (viewportH - d3.event.pageY + M_BUBBLE_OFFSET) + "px")
-			.css("right", (viewportW - d3.event.pageX + M_BUBBLE_OFFSET) + "px")
+			.css("bottom", (viewportH - d3.event.pageY + M_BUBBLE_OFFSET*lastTransformState.scale) + "px")
+			.css("right", (viewportW - d3.event.pageX + M_BUBBLE_OFFSET*lastTransformState.scale) + "px")
 			.html(cell.length +" <em>"+current_setsel.strings.label+"</em><br>"+
 				"<span>["+(gc.x.toFixed(2))+", "+(gc.y.toFixed(2))+"]</span>");
 
-		//TODO we can show more information now!
 	} else {
 		// hide the info bubble
+		highlightCell(false);
 		clearTimeout(bubbleTimer);
 		bubbleTimer = setTimeout(function() {
 			$("div#bubble").css("opacity", "0");
@@ -125,8 +145,9 @@ function canvasMouseClick() {
 	var tb = $("#infolist");
 	tb.html(""); // clear the list
 
-	var x = d3.event.pageX - canvasL;
-	var y = d3.event.pageY - canvasT;
+	var cc = cco();
+	var x = cc[0],
+		y = cc[1];
 
 	var gc = canvasCoord2geoCoord(x,y);
 	var i = coord2index(gc.x, gc.y, drawdat.reso);
