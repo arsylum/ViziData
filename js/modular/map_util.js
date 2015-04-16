@@ -132,7 +132,6 @@ function canvasMouseMove() {
 	} else {
 		// hide the info bubble
 		//highlightCell(false);
-		clearTimeout(bubbleTimer);
 		bubbleTimer = setTimeout(function() {
 			$("div#bubble").css("opacity", "0");
 		},250);

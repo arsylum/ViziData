@@ -1429,7 +1429,7 @@ highlightCell(i);$("#hud").text("("+gc.x.toFixed(5)+", "+gc.y.toFixed(5)+")");if
 // display the info bubble
 clearTimeout(bubbleTimer);$("div#bubble").css("opacity","1").css("bottom",viewportH-d3.event.pageY+drawdat.wy+M_BUBBLE_OFFSET+"px").css("right",viewportW-d3.event.pageX+drawdat.wy+M_BUBBLE_OFFSET*resoFactor+"px").html(cell.length+" <em>"+current_setsel.strings.label+"</em><br>"+"<span>["+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+"]</span>")}else{// hide the info bubble
 //highlightCell(false);
-clearTimeout(bubbleTimer);bubbleTimer=setTimeout(function(){$("div#bubble").css("opacity","0")},250)}}function canvasMouseClick(){// TODO copied from cabvasMouseMove, DRY?
+bubbleTimer=setTimeout(function(){$("div#bubble").css("opacity","0")},250)}}function canvasMouseClick(){// TODO copied from cabvasMouseMove, DRY?
 if(drawdat===undefined){return false}// no drawing, no info!
 var cc=cco();var x=cc[0],y=cc[1];var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);selectCell(i)}/**
 * select cell i and fill the infolist table */
