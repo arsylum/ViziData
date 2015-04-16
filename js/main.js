@@ -1193,7 +1193,7 @@ var M_BOUNDING_THRESHOLD=10,// grid clipping tolerance
 M_ZOOM_RANGE=[1,8],// zoom range (results in svg scale 2^(v-1))
 M_BUBBLE_OFFSET=10,// distance of map tooltip from pointer
 M_HOVER_OFFSET={// pointer selection offset
-l:-2,t:-2};// DATA
+l:0,t:0};// DATA
 var DATA_DIR="./data/",META_FILES=["humans.json"];var DEFAULT_DATASET=0;// dataset to load up initially
 var//ARR_UNDEFINED = null,	// undefined value
 ARR_M_LON=0,// longitude
@@ -1419,16 +1419,17 @@ function cco(){var s=lastTransformState.scale;var x=d3.event.pageX-canvasL-drawd
 function canvasMouseMove(){if(drawdat===undefined){return false}// no drawing, no tooltip!
 var cc=cco();var x=cc[0],y=cc[1];//console.log(d3.event);
 //console.log('Position in canvas: ('+x+','+y+')');
-var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);var cell=cellmap[i];$("#hud").text("("+gc.x.toFixed(5)+", "+gc.y.toFixed(5)+")");if(cell!==undefined){/*console.log(" ~~~~");
+var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);var cell=cellmap[i];// hover highlight
+highlightCell(i);$("#hud").text("("+gc.x.toFixed(5)+", "+gc.y.toFixed(5)+")");if(cell!==undefined){/*console.log(" ~~~~");
 		console.log("index: "+i);
 		console.log("we have "+cellmap[i].length+" events here: ");
 		console.log(cellmap[i]);
 		console.log(" ~~~~");*/
 //var p = index2canvasCoord(c);
-// hover highlight
-highlightCell(i);// display the info bubble
+// display the info bubble
 clearTimeout(bubbleTimer);$("div#bubble").css("opacity","1").css("bottom",viewportH-d3.event.pageY+drawdat.wy+M_BUBBLE_OFFSET+"px").css("right",viewportW-d3.event.pageX+drawdat.wy+M_BUBBLE_OFFSET*resoFactor+"px").html(cell.length+" <em>"+current_setsel.strings.label+"</em><br>"+"<span>["+gc.x.toFixed(2)+", "+gc.y.toFixed(2)+"]</span>")}else{// hide the info bubble
-highlightCell(false);clearTimeout(bubbleTimer);bubbleTimer=setTimeout(function(){$("div#bubble").css("opacity","0")},250)}}function canvasMouseClick(){// TODO copied from cabvasMouseMove, DRY?
+//highlightCell(false);
+clearTimeout(bubbleTimer);bubbleTimer=setTimeout(function(){$("div#bubble").css("opacity","0")},250)}}function canvasMouseClick(){// TODO copied from cabvasMouseMove, DRY?
 if(drawdat===undefined){return false}// no drawing, no info!
 var cc=cco();var x=cc[0],y=cc[1];var gc=canvasCoord2geoCoord(x,y);var i=coord2index(gc.x,gc.y,drawdat.reso);selectCell(i)}/**
 * select cell i and fill the infolist table */
@@ -1446,9 +1447,9 @@ var processLabels=function(data){//console.log(data);
 // TODO error handling
 $.each(data.entities,function(){var text=this.id;// + ' (no label)';
 if(this.labels!==undefined){// TODO
-if(this.labels.en!==undefined){// this sanity check is 
-if(this.labels.en.value!==undefined){// probably slightly overkill
-text=this.labels.en.value}}}$(qarray).filter('[href$="'+this.id+'"]').removeClass("q").text(text)})};var n=0,m=20;// query up to m labels simultaneously
+if(this.labels[lang]!==undefined){// this sanity check is 
+if(this.labels[lang].value!==undefined){// probably slightly overkill
+text=this.labels[lang].value}}}$(qarray).filter('[href$="'+this.id+'"]').removeClass("q").text(text)})};var n=0,m=20;// query up to m labels simultaneously
 var qpre="https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=",qsuf="&props=labels&languages="+lang+"&languagefallback=&callback=?";var i=-1,qstr=qpre;while(++i<qarray.length){if(n>0){qstr+="|"}qstr+=$(qarray[i]).attr("data-qid");if(++n>=m||i+1===qarray.length){// run a query, reset qstr
 qstr+=qsuf;$.getJSON(qstr,processLabels);qstr=qpre;n=0}}}/**
 * zoom or move the map */

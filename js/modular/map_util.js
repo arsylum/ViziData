@@ -108,6 +108,9 @@ function canvasMouseMove() {
 	var i = coord2index(gc.x, gc.y, drawdat.reso);
 	var cell = cellmap[i];
 
+	// hover highlight
+	highlightCell(i);
+
 	$("#hud").text('(' + gc.x.toFixed(5) + ', ' + gc.y.toFixed(5) + ')');
 
 	if(cell !== undefined) {
@@ -117,9 +120,6 @@ function canvasMouseMove() {
 		console.log(cellmap[i]);
 		console.log(" ~~~~");*/
 		//var p = index2canvasCoord(c);
-
-		// hover highlight
-		highlightCell(i);
 
 		// display the info bubble
 		clearTimeout(bubbleTimer);
@@ -131,7 +131,7 @@ function canvasMouseMove() {
 
 	} else {
 		// hide the info bubble
-		highlightCell(false);
+		//highlightCell(false);
 		clearTimeout(bubbleTimer);
 		bubbleTimer = setTimeout(function() {
 			$("div#bubble").css("opacity", "0");
@@ -232,9 +232,9 @@ function infolistScrollFkt() {
 		$.each(data.entities, function() {
 			var text = this.id;// + ' (no label)';
 			if(this.labels !== undefined) {						// TODO
-				if(this.labels.en !== undefined) {				// this sanity check is 
-					if(this.labels.en.value !== undefined) {	// probably slightly overkill
-						text = this.labels.en.value;
+				if(this.labels[lang] !== undefined) {				// this sanity check is 
+					if(this.labels[lang].value !== undefined) {	// probably slightly overkill
+						text = this.labels[lang].value;
 			}	}	}
 			$(qarray).filter('[href$="'+this.id+'"]').removeClass("q").text(text);
 		});
