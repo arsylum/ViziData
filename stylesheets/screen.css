@@ -298,9 +298,10 @@ html {
 body {
   padding: 0;
   height: 100%;
+  overflow: hidden;
 }
 
-/* line 74, ../sass/screen.scss */
+/* line 75, ../sass/screen.scss */
 .hover-tt {
   display: inline-block;
   padding: 0.1em 0.3em;
@@ -309,7 +310,7 @@ body {
   color: white;
 }
 
-/* line 82, ../sass/screen.scss */
+/* line 83, ../sass/screen.scss */
 menu {
   background: #E3E3E3;
   padding: 5px;
@@ -318,7 +319,7 @@ menu {
   -ms-border-radius: 8px;
   border-radius: 8px;
 }
-/* line 86, ../sass/screen.scss */
+/* line 87, ../sass/screen.scss */
 menu div {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -326,14 +327,14 @@ menu div {
   border-radius: 4px;
 }
 
-/* line 92, ../sass/screen.scss */
+/* line 93, ../sass/screen.scss */
 menu#timefilter {
   height: 25%;
   min-height: 140px;
   max-height: 280px;
   /*margin-left: ($left-row-width)-($controls-padding);*/
 }
-/* line 98, ../sass/screen.scss */
+/* line 99, ../sass/screen.scss */
 menu#timefilter #chart {
   background: white;
   /*height: $timeline-height;*/
@@ -341,26 +342,26 @@ menu#timefilter #chart {
   height: 100%;
   margin-left: 245px;
 }
-/* line 107, ../sass/screen.scss */
+/* line 108, ../sass/screen.scss */
 menu#timefilter #chart .summary .flotr-labels .flotr-grid-label {
   margin-top: -1.1em;
 }
-/* line 110, ../sass/screen.scss */
+/* line 111, ../sass/screen.scss */
 menu#timefilter #chart .summary .flotr-labels .last {
   right: 0;
   left: initial !important;
   text-align: right !important;
   margin-right: 4px;
 }
-/* line 120, ../sass/screen.scss */
+/* line 121, ../sass/screen.scss */
 menu#timefilter #chart .detail .flotr-labels div {
   margin-left: 4px;
 }
-/* line 123, ../sass/screen.scss */
+/* line 124, ../sass/screen.scss */
 menu#timefilter #chart .detail .flotr-labels .last {
   display: none;
 }
-/* line 127, ../sass/screen.scss */
+/* line 128, ../sass/screen.scss */
 menu#timefilter #chart .detail .flotr-mouse-value {
   background: rgba(0, 0, 0, 0.5) !important;
   opacity: 1 !important;
@@ -370,12 +371,12 @@ menu#timefilter #chart .detail .flotr-mouse-value {
   padding: 0.1em 0.3em !important;
   border-radius: 2px !important;
 }
-/* line 138, ../sass/screen.scss */
+/* line 139, ../sass/screen.scss */
 menu#timefilter #chart .detail .flotr-mouse-value em {
   color: #ffdb99;
   margin-right: .2em;
 }
-/* line 145, ../sass/screen.scss */
+/* line 146, ../sass/screen.scss */
 menu#timefilter #chart .range-tt {
   position: absolute;
   z-index: 9;
@@ -385,7 +386,7 @@ menu#timefilter #chart .range-tt {
   opacity: 0.1;
   transition: opacity 0.3s;
 }
-/* line 152, ../sass/screen.scss */
+/* line 153, ../sass/screen.scss */
 menu#timefilter #chart .range-tt:before, menu#timefilter #chart .range-tt:after {
   content: "";
   border-color: transparent rgba(0, 0, 0, 0.5);
@@ -399,44 +400,44 @@ menu#timefilter #chart .range-tt:before, menu#timefilter #chart .range-tt:after 
   z-index: 8;
   transition: all 0.3s;
 }
-/* line 165, ../sass/screen.scss */
+/* line 166, ../sass/screen.scss */
 menu#timefilter #chart .range-tt:before {
   border-right-width: 5px;
   left: -5px;
 }
-/* line 170, ../sass/screen.scss */
+/* line 171, ../sass/screen.scss */
 menu#timefilter #chart .range-tt:after {
   border-left-width: 5px;
   right: -5px;
 }
-/* line 175, ../sass/screen.scss */
+/* line 176, ../sass/screen.scss */
 menu#timefilter #chart .range-tt:hover:before, menu#timefilter #chart .range-tt.draggin:before {
   border-right-width: 10px;
   left: -10px;
 }
-/* line 179, ../sass/screen.scss */
+/* line 180, ../sass/screen.scss */
 menu#timefilter #chart .range-tt:hover:after, menu#timefilter #chart .range-tt.draggin:after {
   border-left-width: 10px;
   right: -10px;
 }
-/* line 183, ../sass/screen.scss */
+/* line 184, ../sass/screen.scss */
 menu#timefilter #chart .range-tt.draggin:before, menu#timefilter #chart .range-tt.draggin:after {
   border-color: transparent #f8d596;
 }
-/* line 187, ../sass/screen.scss */
+/* line 188, ../sass/screen.scss */
 menu#timefilter #chart .range-tt#range-tt-min {
   left: 263px;
 }
-/* line 190, ../sass/screen.scss */
+/* line 191, ../sass/screen.scss */
 menu#timefilter #chart .range-tt#range-tt-max {
   right: 18px;
 }
-/* line 197, ../sass/screen.scss */
+/* line 198, ../sass/screen.scss */
 menu#timefilter #chart:hover .range-tt {
   opacity: 1;
 }
 
-/* line 203, ../sass/screen.scss */
+/* line 204, ../sass/screen.scss */
 #sidebar {
   height: 100%;
   width: 250px;
@@ -444,30 +445,30 @@ menu#timefilter #chart:hover .range-tt {
   display: flex;
   flex-flow: column;
 }
-/* line 210, ../sass/screen.scss */
+/* line 211, ../sass/screen.scss */
 #sidebar > div, #sidebar > header {
   flex: 0 1 auto;
   overflow: auto;
 }
 
-/* line 216, ../sass/screen.scss */
+/* line 217, ../sass/screen.scss */
 #sidebar > menu {
   /*height: $filter-height;*/
   min-height: 280px;
 }
-/* line 220, ../sass/screen.scss */
+/* line 221, ../sass/screen.scss */
 #sidebar > menu div {
   /*height: 100-(2*($filter-padding));*/
   background: #F9FAFF;
   padding: 10px;
   margin-bottom: 5px;
 }
-/* line 226, ../sass/screen.scss */
+/* line 227, ../sass/screen.scss */
 #sidebar > menu div:last-child {
   margin-bottom: 0;
 }
 
-/* line 231, ../sass/screen.scss */
+/* line 232, ../sass/screen.scss */
 #sidebar > div {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -476,14 +477,14 @@ menu#timefilter #chart:hover .range-tt {
   border: 1px solid #ECECEC;
 }
 
-/* line 236, ../sass/screen.scss */
+/* line 237, ../sass/screen.scss */
 #filter {
   /*height: 100-(2*($filter-padding));d*/
   background: #F9FAFF;
   padding: 10px;
 }
 
-/* line 242, ../sass/screen.scss */
+/* line 243, ../sass/screen.scss */
 #legend, #stuff, #cellinfo {
   /*height: $legend-height;*/
   margin: 5px;
@@ -491,91 +492,91 @@ menu#timefilter #chart:hover .range-tt {
   background: #F9FAFF;
 }
 
-/* line 251, ../sass/screen.scss */
+/* line 252, ../sass/screen.scss */
 #stuff {
   font-size: .8em;
   line-height: 1em;
 }
 
-/* line 257, ../sass/screen.scss */
+/* line 258, ../sass/screen.scss */
 #cellinfo {
   flex: 1 1 auto !important;
   padding: 0;
   position: relative;
 }
-/* line 272, ../sass/screen.scss */
+/* line 273, ../sass/screen.scss */
 #cellinfo .table-wrapper {
   display: block;
   position: absolute;
   height: 100%;
   width: 100%;
 }
-/* line 278, ../sass/screen.scss */
+/* line 279, ../sass/screen.scss */
 #cellinfo .table-wrapper table {
   width: 100%;
   padding: 10px;
 }
-/* line 285, ../sass/screen.scss */
+/* line 286, ../sass/screen.scss */
 #cellinfo .table-wrapper table thead, #cellinfo .table-wrapper table tbody {
   width: 100%;
 }
-/* line 290, ../sass/screen.scss */
+/* line 291, ../sass/screen.scss */
 #cellinfo .table-wrapper table tr {
   width: 100%;
   display: flex;
   text-align: left;
   font-family: sans-serif;
 }
-/* line 296, ../sass/screen.scss */
+/* line 297, ../sass/screen.scss */
 #cellinfo .table-wrapper table tr td, #cellinfo .table-wrapper table tr th {
   margin: 0 10px;
   font-size: 0.8em;
 }
-/* line 300, ../sass/screen.scss */
+/* line 301, ../sass/screen.scss */
 #cellinfo .table-wrapper table tr td:first-child, #cellinfo .table-wrapper table tr th:first-child {
   float: left;
   width: 70%;
 }
-/* line 304, ../sass/screen.scss */
+/* line 305, ../sass/screen.scss */
 #cellinfo .table-wrapper table tr td:last-child, #cellinfo .table-wrapper table tr th:last-child {
   text-align: right;
   width: 30%;
 }
-/* line 310, ../sass/screen.scss */
+/* line 311, ../sass/screen.scss */
 #cellinfo .table-wrapper table tr td a, #cellinfo .table-wrapper table tr th a {
   color: #051373;
 }
-/* line 314, ../sass/screen.scss */
+/* line 315, ../sass/screen.scss */
 #cellinfo .table-wrapper table tr th {
   font-size: 1em;
   margin-top: 0.1em;
 }
-/* line 325, ../sass/screen.scss */
+/* line 326, ../sass/screen.scss */
 #cellinfo .table-wrapper table thead {
   font-size: 1.1em;
   font-weight: bold;
 }
-/* line 329, ../sass/screen.scss */
+/* line 330, ../sass/screen.scss */
 #cellinfo .table-wrapper table thead th:last-child {
   margin-right: 26px;
 }
-/* line 333, ../sass/screen.scss */
+/* line 334, ../sass/screen.scss */
 #cellinfo .table-wrapper table thead select {
   display: inline;
 }
-/* line 337, ../sass/screen.scss */
+/* line 338, ../sass/screen.scss */
 #cellinfo .table-wrapper table tbody {
   position: absolute;
   top: 1.4em;
   bottom: 0;
   overflow-y: scroll;
 }
-/* line 343, ../sass/screen.scss */
+/* line 344, ../sass/screen.scss */
 #cellinfo .table-wrapper table tbody tr {
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* line 351, ../sass/screen.scss */
+/* line 352, ../sass/screen.scss */
 #map {
   height: 74.6%;
   /*($filter-height)+($legend-height)-($timeline-height);*/
@@ -584,7 +585,7 @@ menu#timefilter #chart:hover .range-tt {
   /*+$map-margin;*/
   position: relative;
 }
-/* line 358, ../sass/screen.scss */
+/* line 359, ../sass/screen.scss */
 #map #hud {
   position: absolute;
   right: 8px;
@@ -592,12 +593,12 @@ menu#timefilter #chart:hover .range-tt {
   transition: opacity 0.2s;
   opacity: 0;
 }
-/* line 372, ../sass/screen.scss */
+/* line 373, ../sass/screen.scss */
 #map:hover #hud {
   opacity: 1;
 }
 
-/* line 377, ../sass/screen.scss */
+/* line 378, ../sass/screen.scss */
 .overlay {
   position: absolute;
   top: 0;
@@ -605,7 +606,7 @@ menu#timefilter #chart:hover .range-tt {
   pointer-events: none;
 }
 
-/* line 385, ../sass/screen.scss */
+/* line 386, ../sass/screen.scss */
 #bubble {
   position: absolute;
   bottom: 1337px;
@@ -627,7 +628,7 @@ menu#timefilter #chart:hover .range-tt {
   pointer-events: none;
 }
 
-/* line 400, ../sass/screen.scss */
+/* line 401, ../sass/screen.scss */
 #bubble > span,
 #legend span,
 #stuff span,
@@ -637,7 +638,7 @@ menu#timefilter #chart:hover .range-tt {
   font-family: sans-serif;
 }
 
-/* line 409, ../sass/screen.scss */
+/* line 410, ../sass/screen.scss */
 #sidebar header h1 {
   clear: both;
   font-family: sans-serif;
@@ -645,29 +646,29 @@ menu#timefilter #chart:hover .range-tt {
   margin: 15px 15px 5px;
   font-weight: bold;
 }
-/* line 416, ../sass/screen.scss */
+/* line 417, ../sass/screen.scss */
 #sidebar header h1 span {
   font-size: .5em;
 }
-/* line 421, ../sass/screen.scss */
+/* line 422, ../sass/screen.scss */
 #sidebar header #github_link {
   position: relative;
   float: left;
   width: 120px;
   margin: 0 15px;
 }
-/* line 427, ../sass/screen.scss */
+/* line 428, ../sass/screen.scss */
 #sidebar header #github_link img {
   float: left;
 }
-/* line 431, ../sass/screen.scss */
+/* line 432, ../sass/screen.scss */
 #sidebar header #github_link img[src*=logo] {
   transition: .5s;
   position: absolute;
   left: 100px;
   opacity: 0;
 }
-/* line 440, ../sass/screen.scss */
+/* line 441, ../sass/screen.scss */
 #sidebar header:hover #github_link img[src*=logo] {
   left: 38px;
   opacity: 1;
@@ -675,19 +676,19 @@ menu#timefilter #chart:hover .range-tt {
 
 /************
 *** Forms **/
-/* line 448, ../sass/screen.scss */
+/* line 449, ../sass/screen.scss */
 select, label {
   display: block;
 }
 
-/* line 453, ../sass/screen.scss */
+/* line 454, ../sass/screen.scss */
 #controls > label {
   line-height: 1.5em;
   margin: .5em 0;
   display: inline-block;
   width: 74%;
 }
-/* line 460, ../sass/screen.scss */
+/* line 461, ../sass/screen.scss */
 #controls input {
   display: inline-block;
   padding: 2%;
@@ -696,7 +697,7 @@ select, label {
   vertical-align: middle;
   width: 100%;
 }
-/* line 469, ../sass/screen.scss */
+/* line 470, ../sass/screen.scss */
 #controls input[type=text][readonly] {
   width: 14%;
   margin-left: 6%;
@@ -709,7 +710,7 @@ select, label {
 	height: 1px;
 	content: "";
 }*/
-/* line 485, ../sass/screen.scss */
+/* line 486, ../sass/screen.scss */
 button {
   width: 100%;
   border: 1px solid #ACACAC;
@@ -730,7 +731,7 @@ button {
   box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
 }
 
-/* line 496, ../sass/screen.scss */
+/* line 497, ../sass/screen.scss */
 button:hover {
   color: #ffffff;
   background: #BBBED1;
@@ -738,7 +739,7 @@ button:hover {
   /*@include box-shadow(0 -3px 3px -3px rgba(100, 0, 0, 0.8), 0 3px 3px -3px rgba(100, 0, 0, 0.8));*/
 }
 
-/* line 503, ../sass/screen.scss */
+/* line 504, ../sass/screen.scss */
 button[disabled] {
   background: #ECECEC;
   cursor: default;
@@ -779,12 +780,12 @@ button[disabled] {
 }*/
 /***********
 *** text **/
-/* line 543, ../sass/screen.scss */
+/* line 544, ../sass/screen.scss */
 #filter {
   line-height: 1.5em;
 }
 
-/* line 548, ../sass/screen.scss */
+/* line 549, ../sass/screen.scss */
 em {
   font-style: italic;
   color: #aa5500;
@@ -792,7 +793,7 @@ em {
 
 /************
 *** fancy **/
-/* line 557, ../sass/screen.scss */
+/* line 558, ../sass/screen.scss */
 menu > div {
   -moz-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
   -webkit-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
@@ -804,7 +805,7 @@ menu > div {
 }*/
 /****************
 *** technical **/
-/* line 568, ../sass/screen.scss */
+/* line 569, ../sass/screen.scss */
 #bubble {
   opacity: 0;
 }

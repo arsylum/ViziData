@@ -86,7 +86,8 @@ $(function(){
 /// on resize //
 ////////////////
 function onResize() {
-	// get viewport size
+
+	// get new viewport size
 	viewportW = $(window).width();
 	viewportH = $(window).height();
 
@@ -99,6 +100,7 @@ function onResize() {
 	$([mapcan.node(),overcan.node()]).attr("width", canvasW).attr("height", canvasH);
 	mapctx = mapcan.node().getContext("2d");
 	overctx = overcan.node().getContext("2d");
+
 	initChart();
 	genGrid();
 }

@@ -1258,7 +1258,7 @@ for(var i=0;i<META_FILES.length;i++){$.getJSON(DATA_DIR+META_FILES[i],function(d
 for(var j=0;j<gdata[mfc].datasets.length;j++){gdata[mfc].datasets[j].parent=gdata[mfc]}mfc++;if(mfc===META_FILES.length){console.log(" |BM| got all the meta files (took "+(new Date-bmMETA)+"ms)");setupControlHandlers();$(document).trigger("meta_files_ready")}})}});////////////////
 /// on resize //
 ////////////////
-function onResize(){// get viewport size
+function onResize(){// get new viewport size
 viewportW=$(window).width();viewportH=$(window).height();// set canvas dimensions
 canvasT=Math.floor($("#map").position().top);canvasL=Math.floor($("#sidebar").width());//doesen't change but is set here for code maintainability
 canvasW=Math.floor($("#map").width());canvasH=Math.floor($("#map").height());//d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
