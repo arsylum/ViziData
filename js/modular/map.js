@@ -202,7 +202,7 @@ function drawPlot(clear, newmap, reso) {
 		});
 		drawdat = {draw: draw, min: min, max: max, reso: reso};
 	}
-	if(clear) {
+	if(typeof clear !== "number") {
 		console.log("  ~ drawing "+drawdat.draw.length+" shapes");
 		console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);
 		console.log("  |BM| (dataset generation in "+(new Date()-uMBM)+"ms)");
@@ -249,7 +249,7 @@ function drawPlot(clear, newmap, reso) {
   	mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
   	mapctx.scale(lastTransformState.scale, lastTransformState.scale);
 
-  	if(typeof clear == "number") {
+  	if(typeof clear === "number") {
   		clearTile(clear);
   	}
 

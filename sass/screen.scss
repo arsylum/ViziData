@@ -20,7 +20,8 @@ $highlight-color: #aa5500;
 $widget-tt-bg: rgba(0,0,0,.5);
 $widget-tt-margin: 3px;
 $widget-tt-padding: .1em .3em;
-$range-tt-arrow-length: 10px;
+$range-tt-arrow-length: 16px;
+$range-tt-arrow-distance: 5px;
 
 
 /************
@@ -103,6 +104,11 @@ menu#timefilter {
 		height: 100%;
 		margin-left: ($left-row-width)-($controls-padding);
 
+		* {
+			// prevent flickering highlights on interaction
+			user-select: none;
+		}
+
 
 		.summary .flotr-labels {
 			.flotr-grid-label {
@@ -141,6 +147,9 @@ menu#timefilter {
 					margin-right: .2em;
 				}
 			}
+			&:active {
+				cursor: ew-resize;
+			}
 		}
 
 		.range-tt {
@@ -148,10 +157,10 @@ menu#timefilter {
 			z-index: 9;
 			top: ($controls-padding + $widget-tt-margin);
 			color: rgb(255, 219, 153);
-			cursor: ew-resize;
 
-			&:before, &:after {
-				content: "";
+			//&:before, &:after {
+			.arrow {
+				//content: "";
 				border-color: rgba(0,0,0,0) $widget-tt-bg;
 				border-style: solid;
 				border-width: 0.5em 0 0.5em 0;
@@ -163,40 +172,52 @@ menu#timefilter {
 				z-index: 8;
 				transition: all 0.3s;
 			}
-			&:before {
+			.arrow-left {
 				//border-width: 0.5em 0.75em 0.5em 0;
 				border-right-width: $range-tt-arrow-length/2;
 				left: -$range-tt-arrow-length/2;
+				cursor: w-resize;
 			}
-			&:after {
+			.arrow-right {
 				//border-width: 0.5em 0 0.5em 0.75em;
 				border-left-width: $range-tt-arrow-length/2;
 				right: -$range-tt-arrow-length/2;
+				cursor: e-resize;
 			}
-			&:hover:before, &.draggin:before {
-				border-right-width: $range-tt-arrow-length;
-				left: -$range-tt-arrow-length;
-			}
-			&:hover:after, &.draggin:after {
-				border-left-width: $range-tt-arrow-length;
-				right: -$range-tt-arrow-length;
-			}
-			&.draggin:before, &.draggin:after {
+			//&:hover:before, &.draggin:before {
+			// &.hintin .arrow-left, &:hover .arrow-left {
+			// 	border-right-width: $range-tt-arrow-length;
+			// 	left: -$range-tt-arrow-length - $range-tt-arrow-distance;
+			// }
+			// //&:hover:after, &.draggin:after {
+			// &.hintin .arrow-right, &:hover .arrow-right {
+			// 	border-left-width: $range-tt-arrow-length;
+			// 	right: -$range-tt-arrow-length - $range-tt-arrow-distance;
+			// }
+			//&.draggin:before, &.draggin:after {
+			.arrow:hover {
 				border-color: rgba(0,0,0,0) rgb(248, 213, 150);
 			}
 
 			&#range-tt-min {
-				left: $left-row-width + $widget-tt-margin + $range-tt-arrow-length;
+				left: $left-row-width + $widget-tt-margin + $range-tt-arrow-length + $range-tt-arrow-distance;
 			}
 			&#range-tt-max {
-				right: $controls-padding + $widget-tt-margin + $range-tt-arrow-length;
+				right: $controls-padding + $widget-tt-margin + $range-tt-arrow-length + $range-tt-arrow-distance;
 			}
 
-			opacity: 0.1;
-			transition: opacity 0.3s;
+			//opacity: 0.1;
+			//transition: opacity 0.3s;
 		}
 		&:hover .range-tt {
-			opacity: 1;
+			.arrow-left {
+				border-right-width: $range-tt-arrow-length;
+				left: -$range-tt-arrow-length - $range-tt-arrow-distance;
+			}
+			.arrow-right {
+				border-left-width: $range-tt-arrow-length;
+				right: -$range-tt-arrow-length - $range-tt-arrow-distance;
+			}
 		}
 	}
 }

@@ -73,7 +73,7 @@ function initChart() {
 	        	x : {
 	          		min : 1500,
 	          		max : 2014
-    	}  	}   };
+    	}  	}, fmin: 0, fmax: 0   };
 	}
 
     var selCallback = function() { // callback function for selection change
@@ -82,8 +82,8 @@ function initChart() {
     		min: range.min,
     		max: range.max
     	};
-    	$("#range-tt-min").text(range.min);
-    	$("#range-tt-max").text(range.max);
+    	$("#range-tt-min>div").text(range.min);
+    	$("#range-tt-max>div").text(range.max);
 		genGrid();
 	};
 
@@ -211,16 +211,34 @@ function initChart() {
 * sets or changes the time selection */
 function changeTimeSel(min,max,relative) {
 	if(relative === undefined) { relative = true; }
+
+	var sel = chart.components[2].api.flotr.selection;
 	if(relative) {
-		min += timeSel.data.x.min;
-		max += timeSel.data.x.max;
+
+		timeSel.fmin += min - Math.floor(min);
+		timeSel.fmax += max - Math.floor(max);
+
+		min = Math.floor(min + timeSel.data.x.min + Math.floor(timeSel.fmin));
+		max = Math.floor(max + timeSel.data.x.max + Math.floor(timeSel.fmax));
+
+		timeSel.fmin -= Math.floor(timeSel.fmin);
+		timeSel.fmax -= Math.floor(timeSel.fmax);
 	}
-	timeSel = {
-      	data : {
-        	x : {
-          		min : min,
-          		max : max
-	}  	}   };
+
+	if(min >= max) { return false; }
+	if(max > current_setsel.max) { return false; }
+	if(min < current_setsel.min) { return false; }
+
+	timeSel.data.x = {
+		min: min,
+		max: max
+	};
+
+	if(min !== current_setsel.min || max !== current_setsel.max) {
+		sel.selecting = true;
+	}
+	sel.setSelection({x1: min, x2: max});
+
 }
 
 
@@ -232,8 +250,8 @@ function getTimeSelection() {
 
 	if(sel.selecting !== false) {
 		cAE = sel.getArea();
-		cAE.min = parseInt(cAE.x1);
-		cAE.max = parseInt(cAE.x2);
+		cAE.min = Math.round(cAE.x1);
+		cAE.max = Math.round(cAE.x2);
 	} else {
 		cAE = {
 			min: min,
@@ -250,29 +268,61 @@ function getTimeSelection() {
 
 function appendTimelineRangeTips() {
 	var cont = $(
-		'<div id="range-tt-min" class="range-tt hover-tt"></div>' +
-		'<div id="range-tt-max" class="range-tt hover-tt"></div>'); //.hide();
+		'<div id="range-tt-min" class="range-tt hover-tt">' +
+			'<span class="arrow arrow-left"></span>' + 
+			'<div></div>' +
+			'<span class="arrow arrow-right"></span>' +
+		'</div>' +
+		'<div id="range-tt-max" class="range-tt hover-tt">' +
+			'<span class="arrow arrow-left"></span>' + 
+			'<div></div>' +
+			'<span class="arrow arrow-right"></span>' +
+		'</div>'); //.hide();
 	$("#chart").append(cont);
 
-/*	$("#chart .detail").on("mouseenter", function() {
-		$(".range-tt").addClass("hintin");
-	}).on("mouseleave", function() {
-		$(".range-tt").removeClass("hintin");
-	});*/
+	// $("#chart .detail").on("mouseenter", function() {
+	// 	$(".range-tt").addClass("hintin");
+	// }).on("mouseleave", function() {
+	// 	$(".range-tt").removeClass("hintin");
+	// });
+
+
+	// change interval limits with arrows
+	var repeatTimeout, repeatInterval;
+	$(".range-tt .arrow").on("mousedown", function() {
+
+		//allow_redraw = false;
+		var min = ($(this).parent().attr("id") === "range-tt-min" ?
+			($(this).hasClass("arrow-left") ? -1 : +1 ) :
+			0);
+		var max = ($(this).parent().attr("id") === "range-tt-max" ?
+			($(this).hasClass("arrow-left") ? -1 : +1 ) :
+			0);
+		changeTimeSel(min,max);
+
+		repeatTimeout = setTimeout(function() {
+			repeatInterval = setInterval(function() {
+				changeTimeSel(min,max);
+			}, 100);
+		}, 100);
+	}).on("mouseup", function() {
+		clearTimeout(repeatTimeout);
+		clearInterval(repeatInterval);
+		//$("#freezer>input").trigger("change");
+	});
+
+
+	// drag behavior on detail view
+	var stepSize;
 	var drag = d3.behavior.drag()
         .on("drag", function(u,i) {
-        	if(i===0) { changeTimeSel(d3.event.dx,0); }
-        		 else { changeTimeSel(0, d3.event.dx);}
-            summary.trigger("select", timeSel);
-
+            changeTimeSel(-d3.event.dx*stepSize, -d3.event.dx*stepSize);
         }).on("dragstart", function() {
-        	d3.select(this).classed("draggin",true);
-        	allow_redraw = false;
+        	stepSize = (timeSel.data.x.max - timeSel.data.x.min) / $("#chart").width();
         }).on("dragend", function() {
-        	d3.select(this).classed("draggin", false);
-        	$("#freezer>input").trigger("change");
+        	//$("#freezer>input").trigger("change");
         });
-    d3.selectAll("#chart .range-tt").call(drag);
+    d3.selectAll("#chart .detail").call(drag);
 }
 
 
