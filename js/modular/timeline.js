@@ -67,14 +67,14 @@ function initChart() {
 		summaryH = Math.floor(container.height() * (1/3)); // - connectionH;
 
 	//var initSelection = {	// default initial selection
-	if(timeSel === undefined) {
+	/*if(timeSel === undefined) { is set in statifyUrl()
 		timeSel = {
 	      	data : {		// TODO this could go into dataset config options
 	        	x : {
 	          		min : 1500,
 	          		max : 2014
     	}  	}, fmin: 0, fmax: 0   };
-	}
+	}*/
 
     var selCallback = function() { // callback function for selection change
     	var range = getTimeSelection();

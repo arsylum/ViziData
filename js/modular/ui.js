@@ -47,14 +47,15 @@ function setupControlHandlers() {
 
 	// label language
 	// TODO get full list from..where?
-	var langs = ["en", "de"];
+	var langs = langCodes;
 	for(i = 0; i<langs.length; i++) {
-		$("#langsel").append($('<option value="'+langs[i]+'">'+
-			langs[i]+'</option>'));
+		$("#langsel").append($('<option value="'+langs[i]+'">' + 
+			langs[i] + '</option>'));
 	}
 	$("#langsel").on("change", function() {
 		$("#infolist a").addClass("q");
 		$("#infolist").trigger("scroll");
+		urlifyState();
 	});
 }
 
@@ -64,8 +65,20 @@ function urlifyState() {
 	// TODO selected cells are note encoded yet
 	// TODO properly encode selcted dataset (depends on data management module)
 	var setsel = $("#filter input[type='radio']:checked").val();
+	// selected dataset
 	var hash = "d="+setsel;
+	// item label language
+	hash += "&l=" + $("#langsel").val();
+	// timeline selection
+	var time = getTimeSelection();
+	hash += "&e=" + time.min + "_" + time.max;
+	// grid resolution
+	hash += "&g=" + resoFactor;
+	// map transformation
 	hash += "&t=" + lastTransformState.translate[0] + "_" + lastTransformState.translate[1] + "&s=" + lastTransformState.scale;
+	// selected cell
+	hash += "&c=" + selectedCell;
+
 	window.location.hash = hash;
 }
 
@@ -73,7 +86,9 @@ function urlifyState() {
 * restore the url encoded viz state */
 function statifyUrl() {
 	var hash = window.location.hash;
-	if (hash === "") { return false; }
+	//if (hash === "") { return false; }
+	var labellang;
+	var timesel;
 
 	var ds = 0;
 	hash = hash.substring(1).split("&");
@@ -81,24 +96,56 @@ function statifyUrl() {
 		var key = hash[i].substring(0,1);
 		var val = hash[i].substring(2);
 		switch(key) {
-			case "d":
+			case "d": // dataset selection
 				ds = parseInt(val);
 				break;
-			case "t":
+			case "l": // item label language
+				labellang = val;
+				break;
+			case "e": // time selection (envision)
+				var e = val.split("_");
+				timesel = { min: parseInt(e[0]), max: parseInt(e[1]) };
+				break;
+			case "g": // grid resolution
+				$("#reso-slider").val(parseFloat(val)).trigger("input").trigger("change");
+				break;
+			case "t": // map translation
 				var t = val.split("_");
 				lastTransformState.translate = [parseFloat(t[0]),parseFloat(t[1])];
 				break;
-			case "s":
+			case "s": // map scale
 				lastTransformState.scale = parseFloat(val);
 				break;
+			case "c": // selected cell
+				selectedCell = parseFloat(val);
+				break;
 			default:
-				console.warn("statifyUrl(): discarded unrecognized parameter '"+ hash[i].substring(0,1) + "' in url pattern");
+				console.warn("statifyUrl(): discarded unrecognized parameter '"+ key + "' in url pattern");
 		}
 	}
 
+	// label language
+	if(labellang === undefined) { labellang = DEFAULT_LABELLANG; }
+	$("#langsel").val(labellang);
+
+	// time selection
+	if(timesel === undefined) {
+		// TODO store default values somewhere (in dataset?)
+		timesel = { min: 1500, max: 2014 };
+	}
+	timeSel = {
+	      	data : {		// TODO this could go into dataset config options
+	        	x : {
+	          		min : timesel.min,
+	          		max : timesel.max
+    	}  	}, fmin: 0, fmax: 0   };
+
+	// recreate map state
 	zoombh.scale(lastTransformState.scale);
 	zoombh.translate(lastTransformState.translate);
+	$("#ctrl-zoom>input").val((Math.log(lastTransformState.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
+	// select dataset
 	if($("#filter input").get(ds) === undefined) { return false; }
 	$("#filter input")[ds].click();
 	return true;

@@ -157,7 +157,9 @@ function canvasMouseClick() {
 function selectCell(i) {
 	if(i === undefined) { i = selectedCell; }
 	if(i === false) {
+		selectedCell = false;
 		highlightCell(false);
+		urlifyState();
 		return false;
 	}
 	
@@ -197,6 +199,7 @@ function selectCell(i) {
 		selectedCell = false;
 		highlightCell(false);
 	}
+	urlifyState();
 }
 
 /**

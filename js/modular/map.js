@@ -91,7 +91,7 @@ function generateGrid(reso, mAE, data) {
 			//$("#export").removeAttr("disabled");
 
 			selectCell();
-			urlifyState();
+			//urlifyState(); // is always called in selectCell
 
 			console.log("\\~~ grid generation complete~~/ ");
 		};

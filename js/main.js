@@ -6485,9 +6485,10 @@ M_HOVER_OFFSET = {
 // DATA
 var DATA_DIR = "./data/", META_FILES = [ "humans.json" ];
 
-var DEFAULT_DATASET = 0;
+var DEFAULT_DATASET = 0, // dataset to load up initially
+DEFAULT_LABELLANG = "en";
 
-// dataset to load up initially
+// default language for item labels
 var //ARR_UNDEFINED = null,	// undefined value
 ARR_M_LON = 0, // longitude
 ARR_M_LAT = 1, // latitude
@@ -6537,6 +6538,9 @@ var viewportH, viewportW;
 var mapcan, mapctx, overcan, overctx, canvasW, canvasH, canvasT, canvasL;
 
 var lastTransformState;
+
+// remember map scaling (only redraw on changes)
+var langCodes = [ "aa", "ab", "ace", "aeb", "af", "ak", "aln", "als", "am", "an", "ang", "anp", "ar", "arc", "arn", "arq", "ary", "arz", "as", "ast", "av", "avk", "ay", "az", "azb", "ba", "bar", "bbc", "bbc-latn", "bcc", "bcl", "be", "be-tarask", "be-x-old", "bg", "bh", "bho", "bi", "bjn", "bm", "bn", "bo", "bpy", "bqi", "br", "brh", "bs", "bug", "bxr", "ca", "cbk-zam", "cdo", "ce", "ceb", "ch", "cho", "chr", "chy", "ckb", "co", "cps", "cr", "crh-cyrl", "crh-latn", "cs", "csb", "cu", "cv", "cy", "da", "de", "de-at", "de-ch", "de-formal", "diq", "dsb", "dtp", "dv", "dz", "ee", "egl", "el", "eml", "en", "en-ca", "en-gb", "eo", "es", "et", "eu", "ext", "fa", "ff", "fi", "fit", "fiu-vro", "fj", "fo", "fr", "frc", "frp", "frr", "fur", "fy", "ga", "gag", "gan", "gan-hans", "gan-hant", "gd", "gl", "glk", "gn", "gom-latn", "got", "grc", "gsw", "gu", "gv", "ha", "hak", "haw", "he", "hi", "hif", "hif-latn", "hil", "ho", "hr", "hrx", "hsb", "ht", "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", "ik", "ike-cans", "ike-latn", "ilo", "inh", "io", "is", "it", "iu", "ja", "jam", "jbo", "jut", "jv", "ka", "kaa", "kab", "kbd", "kbd-cyrl", "kg", "khw", "ki", "kiu", "kj", "kk", "kk-arab", "kk-cn", "kk-cyrl", "kk-kz", "kk-latn", "kk-tr", "kl", "km", "kn", "ko", "ko-kp", "koi", "kr", "krc", "kri", "krj", "ks", "ks-arab", "ks-deva", "ksh", "ku", "ku-arab", "ku-latn", "kv", "kw", "ky", "la", "lad", "lb", "lbe", "lez", "lfn", "lg", "li", "lij", "liv", "lmo", "ln", "lo", "loz", "lrc", "lt", "ltg", "lus", "lv", "lzh", "lzz", "mai", "map-bms", "mdf", "mg", "mh", "mhr", "mi", "min", "mk", "ml", "mn", "mo", "mr", "mrj", "ms", "mt", "mus", "mwl", "my", "myv", "mzn", "na", "nah", "nan", "nap", "nb", "nds", "nds-nl", "ne", "new", "ng", "niu", "nl", "nl-informal", "nn", "no", "nov", "nrm", "nso", "nv", "ny", "oc", "om", "or", "os", "ota", "pa", "pag", "pam", "pap", "pcd", "pdc", "pdt", "pfl", "pi", "pih", "pl", "pms", "pnb", "pnt", "prg", "ps", "pt", "pt-br", "qu", "qug", "rgn", "rif", "rm", "rmy", "rn", "ro", "roa-tara", "ru", "rue", "rup", "ruq", "ruq-cyrl", "ruq-latn", "rw", "rwr", "sa", "sah", "sat", "sc", "scn", "sco", "sd", "sdc", "se", "sei", "sg", "sgs", "sh", "shi", "shi-latn", "shi-tfng", "si", "simple", "sk", "sl", "sli", "sm", "sma", "sn", "so", "sq", "sr", "sr-ec", "sr-el", "srn", "ss", "st", "stq", "su", "sv", "sw", "szl", "ta", "tcy", "te", "tet", "tg", "tg-cyrl", "tg-latn", "th", "ti", "tk", "tl", "tly", "tn", "to", "tokipona", "tpi", "tr", "tru", "ts", "tt", "tt-cyrl", "tt-latn", "tum", "tw", "ty", "tyv", "udm", "ug", "ug-arab", "ug-latn", "uk", "ur", "uz", "ve", "vec", "vep", "vi", "vls", "vmf", "vo", "vot", "vro", "wa", "war", "wo", "wuu", "xal", "xh", "xmf", "yi", "yo", "yue", "za", "zea", "zh", "zh-cn", "zh-hans", "zh-hant", "zh-hk", "zh-min-nan", "zh-mo", "zh-my", "zh-sg", "zh-tw", "zu" ];
 
 ///////////////////
 /// entry point ///
@@ -6737,7 +6741,7 @@ function generateGrid(reso, mAE, data) {
             "we have registered a total of<br>" + "<em>" + count + " " + data.parent.label + "</em><br>" + "that <em>" + data.strings.term + "</em><br>" + "between <em>" + cAE.min + "</em> and <em>" + cAE.max + "</em>");
             //$("#export").removeAttr("disabled");
             selectCell();
-            urlifyState();
+            //urlifyState(); // is always called in selectCell
             console.log("\\~~ grid generation complete~~/ ");
         };
         var iterate = function(offset) {
@@ -7137,7 +7141,9 @@ function selectCell(i) {
         i = selectedCell;
     }
     if (i === false) {
+        selectedCell = false;
         highlightCell(false);
+        urlifyState();
         return false;
     }
     var tb = $("#infolist");
@@ -7163,6 +7169,7 @@ function selectCell(i) {
         selectedCell = false;
         highlightCell(false);
     }
+    urlifyState();
 }
 
 /**
@@ -7298,19 +7305,14 @@ function initChart() {
     var containerW = container.width(), detailH = Math.floor(container.height() * (2 / 3)) - connectionH, summaryH = Math.floor(container.height() * (1 / 3));
     // - connectionH;
     //var initSelection = {	// default initial selection
-    if (timeSel === undefined) {
-        timeSel = {
-            data: {
-                // TODO this could go into dataset config options
-                x: {
-                    min: 1500,
-                    max: 2014
-                }
-            },
-            fmin: 0,
-            fmax: 0
-        };
-    }
+    /*if(timeSel === undefined) { is set in statifyUrl()
+		timeSel = {
+	      	data : {		// TODO this could go into dataset config options
+	        	x : {
+	          		min : 1500,
+	          		max : 2014
+    	}  	}, fmin: 0, fmax: 0   };
+	}*/
     var selCallback = function() {
         // callback function for selection change
         var range = getTimeSelection();
@@ -7554,13 +7556,14 @@ function setupControlHandlers() {
     });
     // label language
     // TODO get full list from..where?
-    var langs = [ "en", "de" ];
+    var langs = langCodes;
     for (i = 0; i < langs.length; i++) {
         $("#langsel").append($('<option value="' + langs[i] + '">' + langs[i] + "</option>"));
     }
     $("#langsel").on("change", function() {
         $("#infolist a").addClass("q");
         $("#infolist").trigger("scroll");
+        urlifyState();
     });
 }
 
@@ -7570,8 +7573,19 @@ function urlifyState() {
     // TODO selected cells are note encoded yet
     // TODO properly encode selcted dataset (depends on data management module)
     var setsel = $("#filter input[type='radio']:checked").val();
+    // selected dataset
     var hash = "d=" + setsel;
+    // item label language
+    hash += "&l=" + $("#langsel").val();
+    // timeline selection
+    var time = getTimeSelection();
+    hash += "&e=" + time.min + "_" + time.max;
+    // grid resolution
+    hash += "&g=" + resoFactor;
+    // map transformation
     hash += "&t=" + lastTransformState.translate[0] + "_" + lastTransformState.translate[1] + "&s=" + lastTransformState.scale;
+    // selected cell
+    hash += "&c=" + selectedCell;
     window.location.hash = hash;
 }
 
@@ -7579,9 +7593,9 @@ function urlifyState() {
 * restore the url encoded viz state */
 function statifyUrl() {
     var hash = window.location.hash;
-    if (hash === "") {
-        return false;
-    }
+    //if (hash === "") { return false; }
+    var labellang;
+    var timesel;
     var ds = 0;
     hash = hash.substring(1).split("&");
     for (var i = 0; i < hash.length; ++i) {
@@ -7589,24 +7603,78 @@ function statifyUrl() {
         var val = hash[i].substring(2);
         switch (key) {
           case "d":
+            // dataset selection
             ds = parseInt(val);
             break;
 
+          case "l":
+            // item label language
+            labellang = val;
+            break;
+
+          case "e":
+            // time selection (envision)
+            var e = val.split("_");
+            timesel = {
+                min: parseInt(e[0]),
+                max: parseInt(e[1])
+            };
+            break;
+
+          case "g":
+            // grid resolution
+            $("#reso-slider").val(parseFloat(val)).trigger("input").trigger("change");
+            break;
+
           case "t":
+            // map translation
             var t = val.split("_");
             lastTransformState.translate = [ parseFloat(t[0]), parseFloat(t[1]) ];
             break;
 
           case "s":
+            // map scale
             lastTransformState.scale = parseFloat(val);
             break;
 
+          case "c":
+            // selected cell
+            selectedCell = parseFloat(val);
+            break;
+
           default:
-            console.warn("statifyUrl(): discarded unrecognized parameter '" + hash[i].substring(0, 1) + "' in url pattern");
+            console.warn("statifyUrl(): discarded unrecognized parameter '" + key + "' in url pattern");
         }
     }
+    // label language
+    if (labellang === undefined) {
+        labellang = DEFAULT_LABELLANG;
+    }
+    $("#langsel").val(labellang);
+    // time selection
+    if (timesel === undefined) {
+        // TODO store default values somewhere (in dataset?)
+        timesel = {
+            min: 1500,
+            max: 2014
+        };
+    }
+    timeSel = {
+        data: {
+            // TODO this could go into dataset config options
+            x: {
+                min: timesel.min,
+                max: timesel.max
+            }
+        },
+        fmin: 0,
+        fmax: 0
+    };
+    // recreate map state
     zoombh.scale(lastTransformState.scale);
     zoombh.translate(lastTransformState.translate);
+    $("#ctrl-zoom>input").val((Math.log(lastTransformState.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
+    // select dataset
     if ($("#filter input").get(ds) === undefined) {
         return false;
     }
