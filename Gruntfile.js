@@ -28,24 +28,33 @@ module.exports = function(grunt) {
         }
       }
     },
+    ///////////////
+    // AUTOPREFIX
+    autoprefixer: {
+      screen: {
+        src: 'stylesheets/screen.css',
+        dest: 'stylesheets/screen.css'
+      }
+    },
     //////////
     // WATCH
     watch: {
       compass: {
         files: 'sass/*.scss',
-        tasks: 'compass'
+        tasks: ['compass','autoprefixer:screen']
       },
       uglify: {
         files: 'js/modular/*.js',
-        tasks: 'uglify'
+        tasks: ['uglify']
       }
     }
   });
 
-  // Load the plugin that provides the "uglify" task.
+
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-compass');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-autoprefixer');
 
   // Default task(s).
   grunt.registerTask('default', ['watch']);
