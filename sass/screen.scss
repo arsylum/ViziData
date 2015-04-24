@@ -275,12 +275,29 @@ menu#timefilter {
 	line-height: 1em;
 }
 
-#cellinfo {
+#sidebar #cellinfo-desc {
+	@extend #legend;
+	margin: (-$controls-padding+2) ($controls-padding) (-$controls-padding) ($controls-padding);
+	border-bottom: none;
+	border-radius: ($outer-border-radius/2) ($outer-border-radius/2) 0 0;
+	padding: 0;
+	min-height: ($outer-border-radius/2);
+	&>div {
+		padding: $box-padding;
+		padding-bottom: $box-padding/2;
+		display: none; // hide initially
+	}
+}
+
+#sidebar #cellinfo {
 	@extend #legend;
 	flex: 1 1 auto !important;
 	padding: 0;
 	//display: flex;
 	//flex-flow: column;
+
+	border-top: none;
+	border-radius: 0 0 ($outer-border-radius/2) ($outer-border-radius/2);
 
 	position: relative;
 
@@ -295,6 +312,7 @@ menu#timefilter {
 		position: absolute;
 		height: 100%;
 		width: 100%;
+		overflow: hidden;
 
 		table {
 			//flex: 1 1 auto;
@@ -335,6 +353,7 @@ menu#timefilter {
 		    	th {
 		    		font-size: 1em;
 		    		margin-top: 0.1em;
+		    		white-space: nowrap;
 		    	}
 			}
 			
@@ -353,6 +372,8 @@ menu#timefilter {
 
 				select {
 					display: inline;
+					vertical-align: middle;
+					font-size: 0.6em;
 				}
 			}
 			tbody {
@@ -362,7 +383,18 @@ menu#timefilter {
 				overflow-y: scroll;
 				//float: left;
 				tr {
-					border-bottom: 1px solid rgba(0,0,0,0.06);
+					border-bottom: 1px solid rgba(0,0,0,0.1);
+					padding: 0.02em 0;
+				}
+				a {
+					text-decoration: none;
+					&:hover {
+						text-decoration: underline;
+					}
+				}
+				em { // loading text
+					display: block;
+					margin: .5em 10px;
 				}
 			}
 		}

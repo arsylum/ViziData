@@ -165,37 +165,48 @@ function selectCell(i) {
 	
 	var tb = $("#infolist");
 	tb.html(""); // clear the list
-	$("#legend div:last-child").remove();
+	//$("#legend div:last-child").remove();
 
 	var cell = cellmap[i];
 
 	if(cell !== undefined) {
-		//drawPlot(true, undefined, undefined, i); // highlight cell
-		var p = index2canvasCoord(i);
-		p = canvasCoord2geoCoord(p[0] + drawdat.rx ,p[1] + drawdat.ry);
-		var x = (p.x).toFixed(2),
-			y = (p.y).toFixed(2);
+		$("#cellinfo-desc>div").show();
+		var timeout = 0;
+		if(cell.length > 100) {
+			$("#cellinfo-desc>div").html("<em>assembling list...</em>");
+			//tb.html("<em>assembling list...</em>");
+			timeout = 5;
+		}
+		setTimeout(function() {
+			//drawPlot(true, undefined, undefined, i); // highlight cell
+			var p = index2canvasCoord(i);
+			p = canvasCoord2geoCoord(p[0] + drawdat.rx ,p[1] + drawdat.ry);
+			var x = (p.x).toFixed(2),
+				y = (p.y).toFixed(2);
 
-		highlightCell(i,true);
-		//console.log(cell);
-		// TODO recursive timeouts for large arrays (around >5000)
-		$.each(cell, function() {
-			var q = current_datsel.props.members[this[0]];
-			tb.append("<tr>"+
-				"<td><a class=\"q\" href=\"https://www.wikidata.org/wiki/"+q+"\" data-qid=\""+q+"\" target=\"wikidata\">"+q+"</a></td>"+
-				"<td>"+this[1]+"</td>"+
-			"</tr>");
-		});
+			highlightCell(i,true);
+			//console.log(cell);
+			tb.html("");
+			// TODO recursive timeouts for large arrays (around >5000)
+			$.each(cell, function() {
+				var q = current_datsel.props.members[this[0]];
+				tb.append("<tr>"+
+					"<td><a class=\"q\" href=\"https://www.wikidata.org/wiki/"+q+"\" data-qid=\""+q+"\" target=\"wikidata\">"+q+"</a></td>"+
+					"<td>"+this[1]+"</td>"+
+				"</tr>");
+			});
 
 
-		$("#legend").append($("<div><hr>"+
-		"the <em>selected cell</em> <span>at "+
-		"("+ x +", "+ y +")</span> "+
-		"contains <em>"+cell.length+"</em> of them:</div>"));
+			$("#cellinfo-desc>div").html(
+				"the <em>selected cell</em> <span>at "+
+				"("+ x +", "+ y +")</span> "+
+				"contains <em>"+cell.length+"</em> of them:");
 
-		tb.trigger("scroll");
+			tb.trigger("scroll");
+		}, timeout);
 
 	} else {
+		$("#cellinfo-desc>div").hide();
 		selectedCell = false;
 		highlightCell(false);
 	}
