@@ -201,7 +201,7 @@ function drawPlot(clear, newmap, reso) {
 		});
 		drawdat = {draw: draw, min: min, max: max, reso: reso};
 	}
-	if(typeof clear !== "number") {
+	if(typeof clear !== "number" && newmap !== undefined) {
 		console.log("  ~ drawing "+drawdat.draw.length+" shapes");
 		console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);
 		console.log("  |BM| (dataset generation in "+(new Date()-uMBM)+"ms)");
@@ -231,7 +231,7 @@ function drawPlot(clear, newmap, reso) {
 	var canvasRenderBM = new Date();
 
 	// sizes and radii of primitiva
-	var bleed = 1.1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
+	var bleed = 1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
 	var wx = ((drawdat.reso*canvasW)/360) * bleed,
 		wy = ((drawdat.reso*canvasH)/180) * bleed, 
 		//rx = ((drawdat.reso*canvasW)/360/2) * bleed,
