@@ -6482,6 +6482,11 @@ M_HOVER_OFFSET = {
     t: 0
 };
 
+// color scale
+var M_COLOR_SCALE = [ // provided by colorbrewer2.org
+"rgb(255,255,217)", // http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
+"rgb(237,248,177)", "rgb(199,233,180)", "rgb(127,205,187)", "rgb(65,182,196)", "rgb(29,145,192)", "rgb(34,94,168)", "rgb(37,52,148)", "rgb(8,29,88)" ];
+
 // DATA
 var DATA_DIR = "./data/", META_FILES = [ "humans.json" ];
 
@@ -6511,7 +6516,8 @@ zoombh;
 
 // zoomBehavior
 var allow_redraw = true, colorize = false, //true,
-currentGenGrid = 0, // genGrid cancelation with newer calls
+colorScale, // color scaling function
+mutexGenGrid = 0, // genGrid mutex (0: free, 1: looping, -1: kill loop)
 redrawTimer, // genGrid
 bubbleTimer, // hide map tooltip bubble
 boundsTimer, // forceBounds
@@ -6591,6 +6597,11 @@ $(function() {
 			.call(zoombh)
 			.append("g")
 				.attr("id","heatlayer");*/
+    // setup color scale
+    // todo probably should have it's own function/segment somewhere
+    //var domain =
+    for (var i = 0; i < M_COLOR_SCALE.length; i++) {}
+    colorScale = d3.scale.log().range(M_COLOR_SCALE);
     // Load default dataset once ready
     $(document).on("meta_files_ready", function() {
         current_datsel = gdata[0];
@@ -6667,7 +6678,6 @@ function genGrid(reso, mAE, data) {
 * Generate data grid for the map
 * parameters optional */
 function generateGrid(reso, mAE, data) {
-    /// TODO poperly use global tilemap 
     if (!allow_redraw) {
         return false;
     }
@@ -6681,35 +6691,19 @@ function generateGrid(reso, mAE, data) {
     if (reso === undefined) {
         reso = calcReso();
     }
-    currentGenGrid++;
-    var thisGenGrid = currentGenGrid;
-    $("#legend").html("<em>massive calculations...</em>");
-    setTimeout(function() {
+    /// main function body
+    var worker = function() {
         //timeout for dom redraw
         console.log("/~~ generating new grid with resolution " + reso + " ~~\\");
         var bms = new Date();
+        var progBM = "";
         console.log("  ~ start iterating data");
         var count = 0;
         cellmap = {};
         // reset cellmap
         /// calculate everything we can outside the loop for performance
+        setColorScale(reso);
         // get axisExtremes
-        /*var cAE = chart.xAxis[0].getExtremes();
-		cAE.min = new Date(cAE.min).getFullYear();
-		cAE.max = new Date(cAE.max).getFullYear();*
-		// TODO doesn't look very sane
-		var cAE;
-		var sel = chart.components[2].api.flotr.selection;
-		if(sel.selecting !== false) {
-			cAE = chart.components[2].api.flotr.selection.getArea();
-			cAE.min = parseInt(cAE.x1);
-			cAE.max = parseInt(cAE.x2);
-		} else {
-			cAE = {
-				min: data.min,
-				max: data.max
-			};
-		}*/
         var cAE = getTimeSelection();
         // boundary enforcement
         if (mAE[0].min < C_WMIN) {
@@ -6724,6 +6718,7 @@ function generateGrid(reso, mAE, data) {
         if (mAE[1].max > C_HMAX) {
             mAE[1].max = C_HMAX;
         }
+        // min and max tile
         var tMin = 0;
         while (mAE[0].min > C_WMIN + (tMin + 1) * data.parent.tile_width) {
             tMin++;
@@ -6733,22 +6728,27 @@ function generateGrid(reso, mAE, data) {
             tMax++;
         }
         console.log("  # will iterate over tiles " + tMin + " to " + tMax);
+        /// finish
         var finish = function() {
+            console.log("  |BM| progressive drawing(ms): " + progBM);
             console.log("  |BM| iteration complete (" + (new Date() - bms) + "ms)");
             drawPlot(true, cellmap, reso);
             console.log("  |BM| finished genGrid (total of " + (new Date() - bms) + "ms)");
             $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
             "we have registered a total of<br>" + "<em>" + count + " " + data.parent.label + "</em><br>" + "that <em>" + data.strings.term + "</em><br>" + "between <em>" + cAE.min + "</em> and <em>" + cAE.max + "</em>");
-            //$("#export").removeAttr("disabled");
             selectCell();
             //urlifyState(); // is always called in selectCell
             console.log("\\~~ grid generation complete~~/ ");
+            mutexGenGrid = 0;
         };
+        /// iterate & aggregate over a single tile
         var iterate = function(offset) {
-            if (thisGenGrid < currentGenGrid) {
+            if (mutexGenGrid === -1) {
+                // cancel loop
+                mutexGenGrid = 0;
+                // if new function call
                 return 0;
             }
-            // cancel loop if newer genGrid is running
             var cellmapprog = {}, l, a, ti, i;
             if (!renderRTL) {
                 i = tMin + offset;
@@ -6780,7 +6780,7 @@ function generateGrid(reso, mAE, data) {
                     }
                 }
                 // draw each tile after aggregating
-                drawPlot(i, cellmapprog, reso);
+                progBM += drawPlot(i, cellmapprog, reso) + ",";
                 setTimeout(function() {
                     iterate(++offset);
                 }, 1);
@@ -6790,7 +6790,21 @@ function generateGrid(reso, mAE, data) {
             }
         };
         iterate(0);
-    }, 1);
+    };
+    // set it all in motion - if no other generation is running
+    if (mutexGenGrid === 1) {
+        mutexGenGrid = -1;
+    }
+    var goOn = function() {
+        if (mutexGenGrid !== 0) {
+            setTimeout(goOn, 10);
+        } else {
+            mutexGenGrid = 1;
+            $("#legend").html("<em>massive calculations...</em>");
+            setTimeout(worker, 1);
+        }
+    };
+    goOn();
 }
 
 ///////////////
@@ -6860,28 +6874,24 @@ function drawPlot(clear, newmap, reso) {
         console.log("  |BM| (dataset generation in " + (new Date() - uMBM) + "ms)");
     }
     // color defs
-    /// TODO color calculation is buggy
-    // (using hsl model might be good idea)
-    var rmax, gmax, bmax, rlog_factorm, glog_factor, blog_factor;
-    if (colorize) {
-        rmax = current_setsel.colorScale.min[0];
-        rlog_factor = (rmax - current_setsel.colorScale.max[0]) / Math.log(drawdat.max);
-        gmax = current_setsel.colorScale.min[1];
-        glog_factor = (gmax - current_setsel.colorScale.max[1]) / Math.log(drawdat.max);
-        bmax = current_setsel.colorScale.min[2];
-        blog_factor = (bmax - current_setsel.colorScale.max[2]) / Math.log(drawdat.max);
-    } else {
-        bmax = 255;
-        //215;
-        blog_factor = bmax / drawdat.max;
-        //Math.log(drawdat.max);
-        gmax = 235;
-        //205;
-        glog_factor = gmax / Math.log(drawdat.max);
-        rmax = 185;
-        //14;
-        rlog_factor = rmax / Math.log(drawdat.max);
-    }
+    /*// TODO color calculation is buggy
+		// (using hsl model might be good idea)
+	var rmax, gmax, bmax, rlog_factorm, glog_factor, blog_factor;
+	if(colorize) {
+		rmax = current_setsel.colorScale.min[0];
+		rlog_factor = (rmax-current_setsel.colorScale.max[0])/Math.log(drawdat.max);
+		gmax = current_setsel.colorScale.min[1];
+		glog_factor = (gmax-current_setsel.colorScale.max[1])/Math.log(drawdat.max);
+		bmax = current_setsel.colorScale.min[2];
+		blog_factor = (bmax-current_setsel.colorScale.max[2])/Math.log(drawdat.max);
+	} else {
+		bmax = 255; //215;
+		blog_factor = bmax/drawdat.max;//Math.log(drawdat.max);
+		gmax = 235; //205;
+		glog_factor = gmax/Math.log(drawdat.max);
+		rmax = 185;//14;
+		rlog_factor = rmax/Math.log(drawdat.max);
+	}*/
     var canvasRenderBM = new Date();
     // sizes and radii of primitiva
     var bleed = 1.1;
@@ -6905,9 +6915,12 @@ function drawPlot(clear, newmap, reso) {
         cx = d[0][0];
         cy = d[0][1];
         mapctx.fillStyle = //fc = 
-        "rgb(" + Math.floor(rmax - Math.floor(Math.log(d[1]) * rlog_factor)) + "," + Math.floor(gmax - Math.floor(Math.log(d[1]) * glog_factor)) + "," + Math.floor(bmax - Math.floor(d[1] * blog_factor)) + ")";
-        //,"+
-        //".85)";//((d[1]/drawdat.max)/4+0.6)+")";
+        /*"rgb("+
+			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
+			Math.floor(gmax -Math.floor(Math.log(d[1])*glog_factor))+","+
+			Math.floor(bmax -Math.floor(d[1]*blog_factor))+")";//,"+
+			//".85)";//((d[1]/drawdat.max)/4+0.6)+")";*/
+        colorScale(d[1]);
         /*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
 		gradient.addColorStop(0,fc+"0)");
 		gradient.addColorStop(0.6, fc+"0.4)");
@@ -6930,16 +6943,17 @@ function drawPlot(clear, newmap, reso) {
 		mapctx.strokeStyle = "rgba(255,127,0,0.75)"; //orange";
 		mapctx.strokeRect(c[0],c[1]-wy,wx,wy);
 	}*/
-    console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - canvasRenderBM) + "ms");
+    if (typeof clear !== "number") {
+        console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - canvasRenderBM) + "ms");
+    }
     mapctx.restore();
+    // todo - return benchmark
+    return new Date() - canvasRenderBM;
 }
 
-function highlightCell(c, select) {
+function highlightCell(c) {
     var x, y, p;
     var wx = drawdat.wx, wy = drawdat.wy, rx = drawdat.rx, ry = drawdat.ry;
-    if (select === true) {
-        selectedCell = c;
-    }
     overctx.save();
     overctx.clearRect(0, 0, canvasW, canvasH);
     overctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
@@ -6969,11 +6983,9 @@ function highlightCell(c, select) {
         overctx.restore();
         return false;
     }
-    if (select !== true) {
-        p = index2canvasCoord(c);
-        x = p[0];
-        y = p[1];
-    }
+    p = index2canvasCoord(c);
+    x = p[0];
+    y = p[1];
     /*	} else {
 		console.warn("highlightCell: invalid first argument");
 		return false;
@@ -7152,6 +7164,7 @@ function selectCell(i) {
     //$("#legend div:last-child").remove();
     var cell = cellmap[i];
     if (cell !== undefined) {
+        selectedCell = i;
         $("#cellinfo-desc>div").show();
         var timeout = 0;
         if (cell.length > 100) {
@@ -7257,6 +7270,22 @@ function zoom() {
         //forceBounds();
         genGrid();
     }
+}
+
+/**
+* determine proper color scale based on current reso*/
+function setColorScale(r) {
+    if (r === undefined) {
+        r = calcReso();
+    }
+    // values determined experimentally for now
+    // TODO find a way to automate this
+    var max = 15e3 * r, n = M_COLOR_SCALE.length, domain = [ 1 ];
+    var e = Math.log(max);
+    for (var i = 1; i < n; i++) {
+        domain.push(Math.floor(Math.pow(Math.E, e / n * i)));
+    }
+    colorScale.domain(domain);
 }
 
 ////////////////

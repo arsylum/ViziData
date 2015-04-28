@@ -51,6 +51,16 @@ $(function(){
 			.append("g")
 				.attr("id","heatlayer");*/
 
+	// setup color scale
+	// todo probably should have it's own function/segment somewhere
+	//var domain =
+	for(var i = 0; i< M_COLOR_SCALE.length; i++) {
+
+	}
+	colorScale = d3.scale.log()
+		//.domain([0,1,2,3,4,5,6,7,8])
+		.range(M_COLOR_SCALE);
+
 
 	// Load default dataset once ready
 	$(document).on("meta_files_ready", function() {

@@ -170,6 +170,7 @@ function selectCell(i) {
 	var cell = cellmap[i];
 
 	if(cell !== undefined) {
+		selectedCell = i;
 		$("#cellinfo-desc>div").show();
 		var timeout = 0;
 		if(cell.length > 100) {
@@ -288,6 +289,23 @@ function zoom() {
 	}
 }
 
+/**
+* determine proper color scale based on current reso*/
+function setColorScale(r) {
+	if(r === undefined) { r= calcReso(); }
+	// values determined experimentally for now
+	// TODO find a way to automate this
+
+	var max = 15000 * r,
+		n = M_COLOR_SCALE.length,
+		domain = [1];
+	var e = Math.log(max);
+
+	for(var i = 1; i < n; i++) {
+		domain.push(Math.floor(Math.pow(Math.E, (e/n)*i)));
+	}
+	colorScale.domain(domain);
+}
 
 ////
 /// TODO issue #1

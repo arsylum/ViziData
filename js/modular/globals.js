@@ -22,6 +22,17 @@ var M_BOUNDING_THRESHOLD = 10,	// grid clipping tolerance
 		l: 0, 
 		t: 0
 	};
+// color scale
+var M_COLOR_SCALE = [	// provided by colorbrewer2.org
+	'rgb(255,255,217)', // http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
+	'rgb(237,248,177)',
+	'rgb(199,233,180)',
+	'rgb(127,205,187)',
+	'rgb(65,182,196)',
+	'rgb(29,145,192)',
+	'rgb(34,94,168)',
+	'rgb(37,52,148)',
+	'rgb(8,29,88)'];
 
 // DATA
 var DATA_DIR = "./data/",
@@ -53,7 +64,8 @@ var chart,		// Timeline / dataLine
 
 var allow_redraw = true,
 	colorize = false, //true,
-	currentGenGrid = 0, // genGrid cancelation with newer calls
+	colorScale, // color scaling function
+	mutexGenGrid = 0, // genGrid mutex (0: free, 1: looping, -1: kill loop)
 	redrawTimer, // genGrid
 	bubbleTimer, // hide map tooltip bubble
 	boundsTimer, // forceBounds

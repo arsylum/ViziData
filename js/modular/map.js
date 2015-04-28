@@ -21,44 +21,27 @@ function genGrid(reso, mAE, data) {
 * parameters optional */
 function generateGrid(reso, mAE, data) {
 
-	/// TODO poperly use global tilemap 
-
 	if(!allow_redraw) { return false; }
 	if(data === undefined) { data = current_setsel; } // todo dynamic from filter?
 	if( mAE === undefined) {  mAE = getBounds(); }
 	if(reso === undefined) { reso = calcReso(); }
 
 
-	currentGenGrid++;
-	var thisGenGrid = currentGenGrid;
-
-	$("#legend").html("<em>massive calculations...</em>");
-	setTimeout(function() { //timeout for dom redraw
+	/// main function body
+	var worker = function() { //timeout for dom redraw
+		
 		console.log("/~~ generating new grid with resolution "+reso+" ~~\\");
 		var bms = new Date();
+		var progBM = '';
 		console.log("  ~ start iterating data");
 
 		var count = 0;
 		cellmap = {}; // reset cellmap
 
 		/// calculate everything we can outside the loop for performance
+		setColorScale(reso);
+
 		// get axisExtremes
-		/*var cAE = chart.xAxis[0].getExtremes();
-		cAE.min = new Date(cAE.min).getFullYear();
-		cAE.max = new Date(cAE.max).getFullYear();*
-		// TODO doesn't look very sane
-		var cAE;
-		var sel = chart.components[2].api.flotr.selection;
-		if(sel.selecting !== false) {
-			cAE = chart.components[2].api.flotr.selection.getArea();
-			cAE.min = parseInt(cAE.x1);
-			cAE.max = parseInt(cAE.x2);
-		} else {
-			cAE = {
-				min: data.min,
-				max: data.max
-			};
-		}*/
 		var cAE = getTimeSelection();
 
 		// boundary enforcement
@@ -67,6 +50,7 @@ function generateGrid(reso, mAE, data) {
 		if(mAE[1].min < C_HMIN) { mAE[1].min = C_HMIN; }
 		if(mAE[1].max > C_HMAX) { mAE[1].max = C_HMAX; }
 
+		// min and max tile
 		var tMin = 0;
 		while(mAE[0].min > (C_WMIN+(tMin+1)*data.parent.tile_width)) {
 			tMin++;
@@ -77,7 +61,9 @@ function generateGrid(reso, mAE, data) {
 		}
 		console.log("  # will iterate over tiles "+tMin+" to "+tMax);
 
+		/// finish
 		var finish = function() {
+			console.log("  |BM| progressive drawing(ms): " + progBM);
 			console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
 			drawPlot(true, cellmap, reso);
 			console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
@@ -88,16 +74,20 @@ function generateGrid(reso, mAE, data) {
 				"<em>"+count+" "+data.parent.label+"</em><br>"+
 				"that <em>"+data.strings.term+"</em><br>"+
 				"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
-			//$("#export").removeAttr("disabled");
 
 			selectCell();
 			//urlifyState(); // is always called in selectCell
 
 			console.log("\\~~ grid generation complete~~/ ");
+			mutexGenGrid = 0;
 		};
 
+		/// iterate & aggregate over a single tile
 		var iterate = function(offset) {
-			if(thisGenGrid < currentGenGrid) { return 0; } // cancel loop if newer genGrid is running
+			if(mutexGenGrid === -1) {	// cancel loop
+				mutexGenGrid = 0;		// if new function call
+				return 0;				// has been made
+			}
 			var cellmapprog = {}, l, a, ti, i;
 			if(!renderRTL) { i = tMin + offset; }
 					  else { i = tMax - offset; }
@@ -112,14 +102,13 @@ function generateGrid(reso, mAE, data) {
 								if(cellmap[ti] === undefined) {	cellmap[ti] = []; }			// aggregate it on the grid
 								cellmap[ti].push([a[ARR_M_I],j]);
 								cellmapprog[ti] = cellmap[ti];
-
 								count++;
 							}
 						}
 					}
 				}
 				// draw each tile after aggregating
-				drawPlot(i, cellmapprog, reso);
+				progBM += drawPlot(i, cellmapprog, reso) +',';
 				setTimeout(function() {
 					iterate(++offset);
 				},1);
@@ -128,8 +117,18 @@ function generateGrid(reso, mAE, data) {
 			}
 		};
 		iterate(0);
+	};
 
-	},1);
+	// set it all in motion - if no other generation is running
+	if(mutexGenGrid === 1) { mutexGenGrid = -1;	}
+	var goOn = function() {
+		if(mutexGenGrid !== 0) { setTimeout(goOn,10); }
+		else {
+			mutexGenGrid = 1;
+			$("#legend").html("<em>massive calculations...</em>");
+			setTimeout(worker,1);
+	}	};
+	goOn();
 }
 
 
@@ -209,7 +208,7 @@ function drawPlot(clear, newmap, reso) {
 	}
 
 	// color defs
-	/// TODO color calculation is buggy
+	/*// TODO color calculation is buggy
 		// (using hsl model might be good idea)
 	var rmax, gmax, bmax, rlog_factorm, glog_factor, blog_factor;
 	if(colorize) {
@@ -226,7 +225,8 @@ function drawPlot(clear, newmap, reso) {
 		glog_factor = gmax/Math.log(drawdat.max);
 		rmax = 185;//14;
 		rlog_factor = rmax/Math.log(drawdat.max);
-	}
+	}*/
+	
 
 	var canvasRenderBM = new Date();
 
@@ -259,11 +259,12 @@ function drawPlot(clear, newmap, reso) {
 		cy = d[0][1];
 		mapctx.fillStyle = 
 		//fc = 
-		"rgb("+
+		/*"rgb("+
 			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
 			Math.floor(gmax -Math.floor(Math.log(d[1])*glog_factor))+","+
 			Math.floor(bmax -Math.floor(d[1]*blog_factor))+")";//,"+
-			//".85)";//((d[1]/drawdat.max)/4+0.6)+")";
+			//".85)";//((d[1]/drawdat.max)/4+0.6)+")";*/
+		colorScale(d[1]);
 
 		/*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
 		gradient.addColorStop(0,fc+"0)");
@@ -296,12 +297,16 @@ function drawPlot(clear, newmap, reso) {
 		mapctx.strokeRect(c[0],c[1]-wy,wx,wy);
 	}*/
 
-	console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");
+	if(typeof clear !== "number") {
+		console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");
+	}
 	mapctx.restore();
+	// todo - return benchmark
+	return (new Date()-canvasRenderBM);
 }
 
 
-function highlightCell(c, select) {
+function highlightCell(c) {
 
 	var x,y,p;
 
@@ -310,9 +315,6 @@ function highlightCell(c, select) {
 		rx = drawdat.rx,
 		ry = drawdat.ry;
 
-	if(select === true) {
-		selectedCell = c;
-	}
 
 	overctx.save();
 	overctx.clearRect(0,0,canvasW,canvasH);
@@ -321,7 +323,6 @@ function highlightCell(c, select) {
   	overctx.scale(lastTransformState.scale, lastTransformState.scale);
 
 	
-
 	if(selectedCell !== false) {
   		p = index2canvasCoord(selectedCell);
   		x = p[0];
@@ -351,11 +352,10 @@ function highlightCell(c, select) {
 		return false; 
 	}
 	
-	if(select !== true) {
-		p = index2canvasCoord(c);
-		x = p[0];
-		y = p[1];
-	}
+	p = index2canvasCoord(c);
+	x = p[0];
+	y = p[1];
+
 /*	} else {
 		console.warn("highlightCell: invalid first argument");
 		return false;
