@@ -281,6 +281,10 @@ function zoom() {
 		d3.event.translate[1] !== lastTransformState.translate[1] ||
 		d3.event.scale !== lastTransformState.scale) {
 
+		if(d3.event.scale !== lastTransformState.scale) {
+			filledTiles = [9999];
+		}
+
 		renderRTL = (d3.event.translate[0] < lastTransformState.translate[0]);		
 		lastTransformState = d3.event;
 		

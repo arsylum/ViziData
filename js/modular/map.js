@@ -60,6 +60,7 @@ function generateGrid(reso, mAE, data) {
 			tMax++;
 		}
 		console.log("  # will iterate over tiles "+tMin+" to "+tMax);
+		
 
 		/// finish
 		var finish = function() {
@@ -67,6 +68,8 @@ function generateGrid(reso, mAE, data) {
 			console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
 			drawPlot(true, cellmap, reso);
 			console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
+
+			filledTiles = [tMin+1,tMax-1];
 
 			$("#legend").html("<em>inside the visible area</em><br>"+
 				//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
@@ -107,8 +110,10 @@ function generateGrid(reso, mAE, data) {
 						}
 					}
 				}
-				// draw each tile after aggregating
-				progBM += drawPlot(i, cellmapprog, reso) +',';
+				// draw each tile after aggregating (if not already drawn)
+				if(i < filledTiles[0] || i > filledTiles[1]) {
+					progBM += drawPlot(i, cellmapprog, reso) +',';
+				}
 				setTimeout(function() {
 					iterate(++offset);
 				},1);

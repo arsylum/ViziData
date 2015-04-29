@@ -6540,6 +6540,7 @@ chartdat = [], // timeline rendering data
 timeSel, // current timeline selection
 cellmap, // latest generated tilemap
 drawdat, // latest generated drawing data
+filledTiles = [ 9999 ], // don't need to draw whats already there [min,max]
 selectedCell = false, // currently selected cell
 renderRTL = false, // flag for tile iteration direction
 resoFactor;
@@ -6742,6 +6743,7 @@ function generateGrid(reso, mAE, data) {
             console.log("  |BM| iteration complete (" + (new Date() - bms) + "ms)");
             drawPlot(true, cellmap, reso);
             console.log("  |BM| finished genGrid (total of " + (new Date() - bms) + "ms)");
+            filledTiles = [ tMin + 1, tMax - 1 ];
             $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
             "we have registered a total of<br>" + "<em>" + count + " " + data.parent.label + "</em><br>" + "that <em>" + data.strings.term + "</em><br>" + "between <em>" + cAE.min + "</em> and <em>" + cAE.max + "</em>");
             selectCell();
@@ -6787,8 +6789,10 @@ function generateGrid(reso, mAE, data) {
                         }
                     }
                 }
-                // draw each tile after aggregating
-                progBM += drawPlot(i, cellmapprog, reso) + ",";
+                // draw each tile after aggregating (if not already drawn)
+                if (i < filledTiles[0] || i > filledTiles[1]) {
+                    progBM += drawPlot(i, cellmapprog, reso) + ",";
+                }
                 setTimeout(function() {
                     iterate(++offset);
                 }, 1);
@@ -7271,6 +7275,9 @@ function infolistScrollFkt() {
 * zoom or move the map */
 function zoom() {
     if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
+        if (d3.event.scale !== lastTransformState.scale) {
+            filledTiles = [ 9999 ];
+        }
         renderRTL = d3.event.translate[0] < lastTransformState.translate[0];
         lastTransformState = d3.event;
         $("#ctrl-zoom>input").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
