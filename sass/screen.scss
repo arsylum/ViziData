@@ -525,6 +525,47 @@ select, label{
 		text-align: center;
 	}
 
+	input[type=range] {
+		-webkit-appearance: none;
+	}
+
+	input[type=range]::-webkit-slider-runnable-track {
+    height: 2px;
+    background: $control-bg-color;
+    border: none;
+    border-radius: 1px;
+	}
+
+	input[type=range]::-webkit-slider-thumb {
+	    -webkit-appearance: none;
+	    border: none;
+	    height: 16px;
+	    width: 16px;
+	    border-radius: 8px;
+	    background: #a9a9a9;
+	    margin-top: -7px;
+	    transition: background 0.4s;
+	}
+
+	input[type=range]:active::-webkit-slider-thumb,
+	input[type=range]:hover::-webkit-slider-thumb {
+		background: #aa5500;
+		cursor: pointer;
+	}
+
+	input[type=range]:disabled::-webkit-slider-thumb {
+		background: #d8d8d8;
+		cursor: default;
+	}
+
+	input[type=range]:focus {
+	    outline: none;
+	}
+
+	input[type=range]:active::-webkit-slider-runnable-track {
+	    background: #ccc;
+	}
+
 }
 
 

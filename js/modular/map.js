@@ -308,7 +308,8 @@ function drawPlot(clear, newmap, reso) {
 
 function highlightCell(c) {
 
-	var x,y,p;
+	var x,y,p,
+		linewidth = 2;
 
 	var wx = drawdat.wx,
 		wy = drawdat.wy,
@@ -332,12 +333,12 @@ function highlightCell(c) {
 		overctx.fillRect(x,y-wy,wx,wy);
 
 		overctx.strokeStyle = "rgba(255,255,255,0.4)";
-		overctx.lineWidth = 3/lastTransformState.scale*2;
+		overctx.lineWidth = 3/lastTransformState.scale * linewidth;
 		overctx.beginPath();
 		overctx.ellipse(x+rx,y-ry,rx*1.5,ry*1.5,0,0,TPI);
 		overctx.stroke();
-		overctx.strokeStyle = "rgba(0,0,0,0.4)";
-		overctx.lineWidth = 1/lastTransformState.scale;
+		overctx.strokeStyle = "rgba(0,0,0,0.5)";
+		overctx.lineWidth = 1/lastTransformState.scale * linewidth;
 		overctx.beginPath();
 		overctx.ellipse(x+rx,y-ry,rx*1.5,ry*1.5,0,0,TPI);
 		overctx.stroke();

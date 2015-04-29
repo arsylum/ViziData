@@ -23,7 +23,7 @@ var M_BOUNDING_THRESHOLD = 10,	// grid clipping tolerance
 		t: 0
 	};
 // color scale
-var M_COLOR_SCALE = [	// provided by colorbrewer2.org
+var M_COLOR_SCALE = /*[	// provided by colorbrewer2.org
 	'rgb(255,255,217)', // http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
 	'rgb(237,248,177)',
 	'rgb(199,233,180)',
@@ -32,7 +32,8 @@ var M_COLOR_SCALE = [	// provided by colorbrewer2.org
 	'rgb(29,145,192)',
 	'rgb(34,94,168)',
 	'rgb(37,52,148)',
-	'rgb(8,29,88)'];
+	'rgb(8,29,88)'];*/
+	['rgb(255,255,204)','rgb(255,237,160)','rgb(254,217,118)','rgb(254,178,76)','rgb(253,141,60)','rgb(252,78,42)','rgb(227,26,28)','rgb(189,0,38)','rgb(128,0,38)'];
 
 // DATA
 var DATA_DIR = "./data/",

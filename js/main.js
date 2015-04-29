@@ -6483,9 +6483,17 @@ M_HOVER_OFFSET = {
 };
 
 // color scale
-var M_COLOR_SCALE = [ // provided by colorbrewer2.org
-"rgb(255,255,217)", // http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
-"rgb(237,248,177)", "rgb(199,233,180)", "rgb(127,205,187)", "rgb(65,182,196)", "rgb(29,145,192)", "rgb(34,94,168)", "rgb(37,52,148)", "rgb(8,29,88)" ];
+var M_COLOR_SCALE = /*[	// provided by colorbrewer2.org
+	'rgb(255,255,217)', // http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
+	'rgb(237,248,177)',
+	'rgb(199,233,180)',
+	'rgb(127,205,187)',
+	'rgb(65,182,196)',
+	'rgb(29,145,192)',
+	'rgb(34,94,168)',
+	'rgb(37,52,148)',
+	'rgb(8,29,88)'];*/
+[ "rgb(255,255,204)", "rgb(255,237,160)", "rgb(254,217,118)", "rgb(254,178,76)", "rgb(253,141,60)", "rgb(252,78,42)", "rgb(227,26,28)", "rgb(189,0,38)", "rgb(128,0,38)" ];
 
 // DATA
 var DATA_DIR = "./data/", META_FILES = [ "humans.json" ];
@@ -6952,7 +6960,7 @@ function drawPlot(clear, newmap, reso) {
 }
 
 function highlightCell(c) {
-    var x, y, p;
+    var x, y, p, linewidth = 2;
     var wx = drawdat.wx, wy = drawdat.wy, rx = drawdat.rx, ry = drawdat.ry;
     overctx.save();
     overctx.clearRect(0, 0, canvasW, canvasH);
@@ -6965,12 +6973,12 @@ function highlightCell(c) {
         overctx.fillStyle = "rgba(255,120,0,0.8)";
         overctx.fillRect(x, y - wy, wx, wy);
         overctx.strokeStyle = "rgba(255,255,255,0.4)";
-        overctx.lineWidth = 3 / lastTransformState.scale * 2;
+        overctx.lineWidth = 3 / lastTransformState.scale * linewidth;
         overctx.beginPath();
         overctx.ellipse(x + rx, y - ry, rx * 1.5, ry * 1.5, 0, 0, TPI);
         overctx.stroke();
-        overctx.strokeStyle = "rgba(0,0,0,0.4)";
-        overctx.lineWidth = 1 / lastTransformState.scale;
+        overctx.strokeStyle = "rgba(0,0,0,0.5)";
+        overctx.lineWidth = 1 / lastTransformState.scale * linewidth;
         overctx.beginPath();
         overctx.ellipse(x + rx, y - ry, rx * 1.5, ry * 1.5, 0, 0, TPI);
         overctx.stroke();
