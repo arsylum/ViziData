@@ -6483,8 +6483,8 @@ M_HOVER_OFFSET = {
 };
 
 // color scale
-var M_COLOR_SCALE = /*[	// provided by colorbrewer2.org
-	'rgb(255,255,217)', // http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
+var M_COLOR_SCALE = [ // provided by colorbrewer2.org
+/*'rgb(248,251,207)', // http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
 	'rgb(237,248,177)',
 	'rgb(199,233,180)',
 	'rgb(127,205,187)',
@@ -6493,7 +6493,7 @@ var M_COLOR_SCALE = /*[	// provided by colorbrewer2.org
 	'rgb(34,94,168)',
 	'rgb(37,52,148)',
 	'rgb(8,29,88)'];*/
-[ "rgb(255,255,204)", "rgb(255,237,160)", "rgb(254,217,118)", "rgb(254,178,76)", "rgb(253,141,60)", "rgb(252,78,42)", "rgb(227,26,28)", "rgb(189,0,38)", "rgb(128,0,38)" ];
+"#ccddff", "#aacc66", "#aa6611", "#800", "#300" ];
 
 // DATA
 var DATA_DIR = "./data/", META_FILES = [ "humans.json" ];
@@ -7289,9 +7289,9 @@ function setColorScale(r) {
     }
     // values determined experimentally for now
     // TODO find a way to automate this
-    var max = 15e3 * r, n = M_COLOR_SCALE.length, domain = [ 1 ];
+    var max = 15e3 * r, n = M_COLOR_SCALE.length - 1, domain = [ 1 ];
     var e = Math.log(max);
-    for (var i = 1; i < n; i++) {
+    for (var i = 1; i <= n; i++) {
         domain.push(Math.floor(Math.pow(Math.E, e / n * i)));
     }
     colorScale.domain(domain);
@@ -7301,6 +7301,14 @@ function setColorScale(r) {
 /// timeline ///
 ////////////////
 function genChart(data) {
+    var benchmark_chart = new Date();
+    updateChartData(data);
+    initChart();
+    console.log("  |BM| chart creation complete (total of " + (new Date() - benchmark_chart) + "ms)");
+    console.log("\\~~ finished generating chart ~~/ ");
+}
+
+function updateChartData(data) {
     if (data === undefined) {
         data = current_setsel;
     }
@@ -7335,9 +7343,6 @@ function genChart(data) {
     //chartdat.push([x,y]);
     chartdat[0] = [ x, y ];
     console.log("  |BM| iterating and sorting finished (took " + (new Date() - benchmark_chart) + "ms)");
-    initChart();
-    console.log("  |BM| chart creation complete (total of " + (new Date() - benchmark_chart) + "ms");
-    console.log("\\~~ finished generating chart ~~/ ");
 }
 
 function initChart() {

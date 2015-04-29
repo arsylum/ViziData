@@ -2,10 +2,21 @@
 /// timeline ///
 ////////////////
 function genChart(data){
+
+	var benchmark_chart = new Date();
+
+	updateChartData(data);
+	initChart();
+
+	console.log("  |BM| chart creation complete (total of "+(new Date()-benchmark_chart)+"ms)");
+	console.log("\\~~ finished generating chart ~~/ ");
+}
+
+
+function updateChartData(data) {
 	if(data === undefined) { data = current_setsel; } // TODO
 
 	console.log("/~~ generating chart data ~~\\ ");
-
 	var benchmark_chart = new Date();
 
 	////
@@ -37,18 +48,12 @@ function genChart(data){
 		}
 	}
 	
-
 	//chartdat.push([x,y]);
 	chartdat[0] = [x,y];
 
 	console.log("  |BM| iterating and sorting finished (took "+(new Date()-benchmark_chart)+"ms)");
 
-	initChart();
-
-	console.log("  |BM| chart creation complete (total of "+(new Date()-benchmark_chart)+"ms");
-	console.log("\\~~ finished generating chart ~~/ ");
 }
-
 
 
 

@@ -300,11 +300,11 @@ function setColorScale(r) {
 	// TODO find a way to automate this
 
 	var max = 15000 * r,
-		n = M_COLOR_SCALE.length,
+		n = M_COLOR_SCALE.length - 1,
 		domain = [1];
 	var e = Math.log(max);
 
-	for(var i = 1; i < n; i++) {
+	for(var i = 1; i <= n; i++) {
 		domain.push(Math.floor(Math.pow(Math.E, (e/n)*i)));
 	}
 	colorScale.domain(domain);
