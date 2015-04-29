@@ -6965,7 +6965,7 @@ function highlightCell(c) {
         overctx.fillStyle = "rgba(255,120,0,0.8)";
         overctx.fillRect(x, y - wy, wx, wy);
         overctx.strokeStyle = "rgba(255,255,255,0.4)";
-        overctx.lineWidth = 3 / lastTransformState.scale;
+        overctx.lineWidth = 3 / lastTransformState.scale * 2;
         overctx.beginPath();
         overctx.ellipse(x + rx, y - ry, rx * 1.5, ry * 1.5, 0, 0, TPI);
         overctx.stroke();
@@ -7041,7 +7041,7 @@ function getBounds() {
 
 /**
 * returns the index value for the cell of a grid with given resolution
-* where the given real coordinate pair lies in*/
+* where the given geocoordinate pair lies in*/
 function coord2index(longi, lati, reso) {
     if (longi === C_WMAX) longi -= reso;
     // prevent 
@@ -7051,9 +7051,9 @@ function coord2index(longi, lati, reso) {
 }
 
 /**
-* returns the canvas rendering coordinates for a given index 
-* (for the bottom left corner of the gridscells rect) */
-function index2canvasCoord(i, reso) {
+* returns the geo coordinates for a given index
+* (for the bottom left corner of the gridcells rect)*/
+function index2geoCoord(i, reso) {
     if (reso === undefined) {
         reso = drawdat.reso;
     }
@@ -7061,17 +7061,26 @@ function index2canvasCoord(i, reso) {
     var rowpos = (i - cpr / 2) % cpr;
     if (rowpos < 0) rowpos += cpr;
     rowpos -= cpr / 2;
-    var lbx = rowpos * reso + -C_WMIN, //+reso/2,
-    lby = Math.floor((+i + cpr / 2) / cpr) * reso * -1 + -C_HMIN;
-    //+reso/2;
-    // canvas normalization
-    lbx = lbx / 360 * canvasW;
-    lby = lby / 180 * canvasH;
+    var lbx = rowpos * reso, //+(C_WMIN), //+reso/2,
+    lby = Math.floor((+i + cpr / 2) / cpr) * reso;
+    //*(-1));//+(-C_HMIN); //+reso/2;
     return [ lbx, lby ];
 }
 
 /**
-* returns the aggrid cell index and real coords for a given canvas coordinate pair */
+* returns the canvas rendering coordinates for a given index 
+* (for the bottom left corner of the gridscells rect) */
+function index2canvasCoord(i, reso) {
+    // get geocoordinates
+    var gc = index2geoCoord(i, reso);
+    // canvas normalization
+    var lbx = (gc[0] + -C_WMIN) / 360 * canvasW, lby = (gc[1] * -1 + -C_HMIN) / 180 * canvasH;
+    return [ lbx, lby ];
+}
+
+/**
+* returns the aggrid cell index and real coords for a given canvas coordinate pair 
+* (!) for real canvas coords (like pointer pos) not virtual (on transformed map)*/
 function canvasCoord2geoCoord(x, y) {
     var t = lastTransformState;
     return {
@@ -7089,7 +7098,7 @@ function clearTile(i) {
 }
 
 /**
-* returns the currently pointed at canvas coordinates */
+* returns the currently pointed at real canvas coordinates */
 function cco() {
     var s = lastTransformState.scale;
     var x = d3.event.pageX - canvasL - drawdat.wx * s - M_HOVER_OFFSET.l * resoFactor;
@@ -7115,12 +7124,6 @@ function canvasMouseMove() {
     highlightCell(i);
     $("#hud").text("(" + gc.x.toFixed(5) + ", " + gc.y.toFixed(5) + ")");
     if (cell !== undefined) {
-        /*console.log(" ~~~~");
-		console.log("index: "+i);
-		console.log("we have "+cellmap[i].length+" events here: ");
-		console.log(cellmap[i]);
-		console.log(" ~~~~");*/
-        //var p = index2canvasCoord(c);
         // display the info bubble
         clearTimeout(bubbleTimer);
         $("div#bubble").css("opacity", "1").css("bottom", viewportH - d3.event.pageY + drawdat.wy + M_BUBBLE_OFFSET + "px").css("right", viewportW - d3.event.pageX + drawdat.wy + M_BUBBLE_OFFSET * resoFactor + "px").html(cell.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + gc.x.toFixed(2) + ", " + gc.y.toFixed(2) + "]</span>");
@@ -7173,10 +7176,8 @@ function selectCell(i) {
             timeout = 5;
         }
         setTimeout(function() {
-            //drawPlot(true, undefined, undefined, i); // highlight cell
-            var p = index2canvasCoord(i);
-            p = canvasCoord2geoCoord(p[0] + drawdat.rx, p[1] + drawdat.ry);
-            var x = p.x.toFixed(2), y = p.y.toFixed(2);
+            var p = index2geoCoord(i);
+            var x = (p[0] + drawdat.reso / 2).toFixed(2), y = (p[1] + drawdat.reso / 2).toFixed(2);
             highlightCell(i, true);
             //console.log(cell);
             tb.html("");
@@ -7185,7 +7186,7 @@ function selectCell(i) {
                 var q = current_datsel.props.members[this[0]];
                 tb.append("<tr>" + '<td><a class="q" href="https://www.wikidata.org/wiki/' + q + '" data-qid="' + q + '" target="wikidata">' + q + "</a></td>" + "<td>" + this[1] + "</td>" + "</tr>");
             });
-            $("#cellinfo-desc>div").html("the <em>selected cell</em> <span>at " + "(" + x + ", " + y + ")</span> " + "contains <em>" + cell.length + "</em> of them:");
+            $("#cellinfo-desc>div").html("the <em>selected cell</em> <span>around " + "(" + x + ", " + y + ")</span> " + "contains <em>" + cell.length + "</em> of them:");
             tb.trigger("scroll");
         }, timeout);
     } else {

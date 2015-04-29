@@ -36,17 +36,18 @@ function getBounds() {
 
 /**
 * returns the index value for the cell of a grid with given resolution
-* where the given real coordinate pair lies in*/
+* where the given geocoordinate pair lies in*/
 function coord2index(longi, lati, reso) {
 	if(longi === C_WMAX) longi -= reso;	// prevent 
 	if(lati  === C_HMAX) lati  -= reso; // out of bounds cells
 
 	return (Math.floor(lati/reso)*((C_WMAX-C_WMIN)/reso) + Math.floor(longi/reso));
 }
+
 /**
-* returns the canvas rendering coordinates for a given index 
-* (for the bottom left corner of the gridscells rect) */
-function index2canvasCoord(i, reso) {
+* returns the geo coordinates for a given index
+* (for the bottom left corner of the gridcells rect)*/
+function index2geoCoord(i, reso) {
 	if(reso === undefined) { reso = drawdat.reso; }
 	var cpr = (C_WMAX-C_WMIN)/reso;
 
@@ -54,18 +55,27 @@ function index2canvasCoord(i, reso) {
 	if(rowpos<0) rowpos += cpr;
 	rowpos -= cpr/2;
 
-	var lbx = (rowpos*reso)+(-C_WMIN), //+reso/2,
-		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)*(-1))+(-C_HMIN); //+reso/2;
-	
-	// canvas normalization
-	lbx = (lbx/360)*canvasW;
-	lby = (lby/180)*canvasH;
+	var lbx = (rowpos*reso),//+(C_WMIN), //+reso/2,
+		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)); //*(-1));//+(-C_HMIN); //+reso/2;
 
 	return [lbx,lby];
 }
 
 /**
-* returns the aggrid cell index and real coords for a given canvas coordinate pair */
+* returns the canvas rendering coordinates for a given index 
+* (for the bottom left corner of the gridscells rect) */
+function index2canvasCoord(i, reso) {
+	// get geocoordinates
+	var gc = index2geoCoord(i, reso);
+	// canvas normalization
+	var lbx = ((gc[0]+(-C_WMIN)) / 360) * canvasW,
+		lby = (((gc[1]*(-1))+(-C_HMIN)) / 180) * canvasH;
+	return [lbx,lby];
+}
+
+/**
+* returns the aggrid cell index and real coords for a given canvas coordinate pair 
+* (!) for real canvas coords (like pointer pos) not virtual (on transformed map)*/
 function canvasCoord2geoCoord(x, y){
 	var t = lastTransformState;
 	return { 
@@ -85,7 +95,7 @@ function clearTile(i) {
 }
 
 /**
-* returns the currently pointed at canvas coordinates */
+* returns the currently pointed at real canvas coordinates */
 function cco() {
 	var s = lastTransformState.scale;
 	var x = d3.event.pageX - canvasL - drawdat.wx*s - M_HOVER_OFFSET.l*resoFactor;
@@ -114,12 +124,6 @@ function canvasMouseMove() {
 	$("#hud").text('(' + gc.x.toFixed(5) + ', ' + gc.y.toFixed(5) + ')');
 
 	if(cell !== undefined) {
-		/*console.log(" ~~~~");
-		console.log("index: "+i);
-		console.log("we have "+cellmap[i].length+" events here: ");
-		console.log(cellmap[i]);
-		console.log(" ~~~~");*/
-		//var p = index2canvasCoord(c);
 
 		// display the info bubble
 		clearTimeout(bubbleTimer);
@@ -179,11 +183,10 @@ function selectCell(i) {
 			timeout = 5;
 		}
 		setTimeout(function() {
-			//drawPlot(true, undefined, undefined, i); // highlight cell
-			var p = index2canvasCoord(i);
-			p = canvasCoord2geoCoord(p[0] + drawdat.rx ,p[1] + drawdat.ry);
-			var x = (p.x).toFixed(2),
-				y = (p.y).toFixed(2);
+
+			var p = index2geoCoord(i);
+			var x = (p[0] + drawdat.reso/2).toFixed(2),
+				y = (p[1] + drawdat.reso/2).toFixed(2);
 
 			highlightCell(i,true);
 			//console.log(cell);
@@ -199,7 +202,7 @@ function selectCell(i) {
 
 
 			$("#cellinfo-desc>div").html(
-				"the <em>selected cell</em> <span>at "+
+				"the <em>selected cell</em> <span>around "+
 				"("+ x +", "+ y +")</span> "+
 				"contains <em>"+cell.length+"</em> of them:");
 
