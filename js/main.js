@@ -6695,7 +6695,7 @@ function generateGrid(reso, mAE, data) {
     }
     // todo dynamic from filter?
     if (mAE === undefined) {
-        mAE = getBounds();
+        mAE = getBounds(true);
     }
     if (reso === undefined) {
         reso = calcReso();
@@ -6714,28 +6714,14 @@ function generateGrid(reso, mAE, data) {
         setColorScale(reso);
         // get axisExtremes
         var cAE = getTimeSelection();
-        // boundary enforcement
-        if (mAE[0].min < C_WMIN) {
-            mAE[0].min = C_WMIN;
-        }
-        if (mAE[0].max > C_WMAX) {
-            mAE[0].max = C_WMAX;
-        }
-        if (mAE[1].min < C_HMIN) {
-            mAE[1].min = C_HMIN;
-        }
-        if (mAE[1].max > C_HMAX) {
-            mAE[1].max = C_HMAX;
-        }
+        /*// boundary enforcement
+		if(mAE[0].min < C_WMIN) { mAE[0].min = C_WMIN; }
+		if(mAE[0].max > C_WMAX) { mAE[0].max = C_WMAX; }
+		if(mAE[1].min < C_HMIN) { mAE[1].min = C_HMIN; }
+		if(mAE[1].max > C_HMAX) { mAE[1].max = C_HMAX; }*/
         // min and max tile
-        var tMin = 0;
-        while (mAE[0].min > C_WMIN + (tMin + 1) * data.parent.tile_width) {
-            tMin++;
-        }
-        var tMax = tMin;
-        while (mAE[0].max > C_WMIN + (tMax + 1) * data.parent.tile_width) {
-            tMax++;
-        }
+        var mmt = getMinMaxTile(mAE);
+        var tMin = mmt.min, tMax = mmt.max;
         console.log("  # will iterate over tiles " + tMin + " to " + tMax);
         /// finish
         var finish = function() {
@@ -6766,7 +6752,7 @@ function generateGrid(reso, mAE, data) {
                 i = tMax - offset;
             }
             if (i <= tMax && i >= tMin) {
-                // still work to do							// for each map tile in visible area
+                // still work to do			// for each map tile in visible area
                 for (var j = cAE.min; j <= cAE.max; j++) {
                     // go over each key in range
                     if (data.data[i][j] !== undefined) {
@@ -7038,7 +7024,7 @@ function calcReso() {
 /**
 * returns the current map bounds (rectangle of the currently visible map area)
 * as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
-function getBounds() {
+function getBounds(enforce) {
     var tx = -lastTransformState.translate[0] / canvasW * 360, ty = -lastTransformState.translate[1] / canvasH * 180;
     var xmin = tx / lastTransformState.scale + C_WMIN, ymin = ty / lastTransformState.scale + C_HMIN, bth = M_BOUNDING_THRESHOLD / (lastTransformState.scale / 2);
     var bounds = [ {
@@ -7048,7 +7034,42 @@ function getBounds() {
         min: -(ymin + (C_HMAX - C_HMIN) / lastTransformState.scale) - bth,
         max: -ymin + bth
     } ];
+    // boundary enforcement
+    if (enforce === true) {
+        if (bounds[0].min < C_WMIN) {
+            bounds[0].min = C_WMIN;
+        }
+        if (bounds[0].max > C_WMAX) {
+            bounds[0].max = C_WMAX;
+        }
+        if (bounds[1].min < C_HMIN) {
+            bounds[1].min = C_HMIN;
+        }
+        if (bounds[1].max > C_HMAX) {
+            bounds[1].max = C_HMAX;
+        }
+    }
     return bounds;
+}
+
+/**
+* returns min and max tile index for given or current bounds */
+function getMinMaxTile(mAE) {
+    if (mAE === undefined) {
+        mAE = getBounds(true);
+    }
+    var tMin = 0;
+    while (mAE[0].min > C_WMIN + (tMin + 1) * current_datsel.tile_width) {
+        tMin++;
+    }
+    var tMax = tMin;
+    while (mAE[0].max > C_WMIN + (tMax + 1) * current_datsel.tile_width) {
+        tMax++;
+    }
+    return {
+        min: tMin,
+        max: tMax
+    };
 }
 
 /**
@@ -7284,6 +7305,7 @@ function zoom() {
         drawPlot(undefined, undefined);
         // TODO function parameters (?)
         //forceBounds();
+        genChart();
         genGrid();
     }
 }
@@ -7322,25 +7344,44 @@ function updateChartData(data) {
     // TODO
     console.log("/~~ generating chart data ~~\\ ");
     var benchmark_chart = new Date();
+    var mAE = getBounds(true);
+    // min and max tile
+    var mmt = getMinMaxTile(mAE);
     ////
     /// tomporary hacky timeline fix for changed data structure
     // TODO refurbish when upgrading timeline
     // still TODO? check if it can improved
     var x = [], y = [], ticks = [];
-    var dat_obj = {}, i, j, d;
-    var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
-    for (i = 0; i < tilecount; i++) {
+    var dat_obj = {}, i, j, l, k, d;
+    for (i = mmt.min; i <= mmt.max; i++) {
         for (j = data.min; j <= data.max; j++) {
-            d = data.data[i][j];
-            if (d !== undefined) {
+            if (data.data[i][j] !== undefined) {
+                l = data.data[i][j].length;
                 if (dat_obj[j] === undefined) {
-                    dat_obj[j] = d.length;
-                } else {
-                    dat_obj[j] += d.length;
+                    dat_obj[j] = 0;
+                }
+                for (k = 0; k < l; k++) {
+                    d = data.data[i][j][k];
+                    if (section_filter(d, mAE)) {
+                        dat_obj[j]++;
+                    }
                 }
             }
         }
     }
+    /*var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
+	for(i = 0; i < tilecount; i++) {
+		for(j=data.min; j<=data.max; j++) {
+			d = data.data[i][j];
+			if(d !== undefined) {
+				if(dat_obj[j] === undefined) {
+					dat_obj[j] = d.length;
+				} else {
+					dat_obj[j] += d.length;
+				}
+			}
+		}
+	}*/
     for (i = data.min; i <= data.max; i++) {
         if (dat_obj[i] !== undefined) {
             x.push(i);
@@ -7349,6 +7390,7 @@ function updateChartData(data) {
     }
     //chartdat.push([x,y]);
     chartdat[0] = [ x, y ];
+    //chartdat[0] = [[1,2,3,4,5],[3,6,3,4,6]];
     console.log("  |BM| iterating and sorting finished (took " + (new Date() - benchmark_chart) + "ms)");
 }
 

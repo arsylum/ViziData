@@ -19,15 +19,41 @@ function updateChartData(data) {
 	console.log("/~~ generating chart data ~~\\ ");
 	var benchmark_chart = new Date();
 
+
+	var mAE = getBounds(true);
+
+	// min and max tile
+	var mmt = getMinMaxTile(mAE);
+
+
+
+
 	////
 	/// tomporary hacky timeline fix for changed data structure
 	// TODO refurbish when upgrading timeline
 	// still TODO? check if it can improved
 	var x = [], y = [], ticks = [];
 	var dat_obj = {},
-		i,j,d;
+		i,j,l,k,d;
 	
-	var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
+
+	for(i = mmt.min; i<= mmt.max; i++) {
+		for(j=data.min; j<=data.max; j++) {
+			if(data.data[i][j] !== undefined) {
+				l = data.data[i][j].length;
+				if(dat_obj[j] === undefined) { dat_obj[j] = 0; }
+				for(k = 0; k < l; k++) {
+					d = data.data[i][j][k];
+					if(section_filter(d,mAE)) {
+						dat_obj[j]++;
+					}
+				}
+			}
+		}
+	}
+
+
+	/*var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
 	for(i = 0; i < tilecount; i++) {
 		for(j=data.min; j<=data.max; j++) {
 			d = data.data[i][j];
@@ -39,7 +65,7 @@ function updateChartData(data) {
 				}
 			}
 		}
-	}
+	}*/
 
 	for(i=data.min; i<=data.max; i++) {
 		if(dat_obj[i] !== undefined) {
@@ -50,6 +76,8 @@ function updateChartData(data) {
 	
 	//chartdat.push([x,y]);
 	chartdat[0] = [x,y];
+
+	//chartdat[0] = [[1,2,3,4,5],[3,6,3,4,6]];
 
 	console.log("  |BM| iterating and sorting finished (took "+(new Date()-benchmark_chart)+"ms)");
 
@@ -62,6 +90,7 @@ function initChart() {
 	if(chart !== undefined) {
 		chart.destroy();
 	}
+
 
 	var connectionH = 10; // height of connection component
 		//summargin = 10; // extend value range of the summary component

@@ -16,7 +16,7 @@ function calcReso() {
 /**
 * returns the current map bounds (rectangle of the currently visible map area)
 * as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
-function getBounds() {
+function getBounds(enforce) {
 	var tx = (-lastTransformState.translate[0]/canvasW)*360,
 		ty = (-lastTransformState.translate[1]/canvasH)*180;
 
@@ -31,7 +31,32 @@ function getBounds() {
 		min: -(ymin+(C_HMAX-C_HMIN)/lastTransformState.scale) - bth,
 		max: -ymin + bth
 	}];
+
+	// boundary enforcement
+	if(enforce === true) {
+		if(bounds[0].min < C_WMIN) { bounds[0].min = C_WMIN; }
+		if(bounds[0].max > C_WMAX) { bounds[0].max = C_WMAX; }
+		if(bounds[1].min < C_HMIN) { bounds[1].min = C_HMIN; }
+		if(bounds[1].max > C_HMAX) { bounds[1].max = C_HMAX; }
+	}
+
 	return bounds;
+}
+
+/**
+* returns min and max tile index for given or current bounds */
+function getMinMaxTile(mAE) {
+	if(mAE === undefined) { mAE = getBounds(true); }
+
+	var tMin = 0;
+	while(mAE[0].min > (C_WMIN+(tMin+1)*current_datsel.tile_width)) {
+		tMin++;
+	}
+	var tMax = tMin;
+	while(mAE[0].max > (C_WMIN+(tMax+1)*current_datsel.tile_width)) {
+		tMax++;
+	}
+	return { min: tMin, max: tMax };
 }
 
 /**
@@ -292,6 +317,7 @@ function zoom() {
 
 		drawPlot(undefined,undefined); // TODO function parameters (?)
 		//forceBounds();
+		genChart();
 		genGrid();
 	}
 }

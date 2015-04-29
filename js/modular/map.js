@@ -23,7 +23,7 @@ function generateGrid(reso, mAE, data) {
 
 	if(!allow_redraw) { return false; }
 	if(data === undefined) { data = current_setsel; } // todo dynamic from filter?
-	if( mAE === undefined) {  mAE = getBounds(); }
+	if( mAE === undefined) {  mAE = getBounds(true); }
 	if(reso === undefined) { reso = calcReso(); }
 
 
@@ -44,21 +44,16 @@ function generateGrid(reso, mAE, data) {
 		// get axisExtremes
 		var cAE = getTimeSelection();
 
-		// boundary enforcement
+		/*// boundary enforcement
 		if(mAE[0].min < C_WMIN) { mAE[0].min = C_WMIN; }
 		if(mAE[0].max > C_WMAX) { mAE[0].max = C_WMAX; }
 		if(mAE[1].min < C_HMIN) { mAE[1].min = C_HMIN; }
-		if(mAE[1].max > C_HMAX) { mAE[1].max = C_HMAX; }
+		if(mAE[1].max > C_HMAX) { mAE[1].max = C_HMAX; }*/
 
 		// min and max tile
-		var tMin = 0;
-		while(mAE[0].min > (C_WMIN+(tMin+1)*data.parent.tile_width)) {
-			tMin++;
-		}
-		var tMax = tMin;
-		while(mAE[0].max > (C_WMIN+(tMax+1)*data.parent.tile_width)) {
-			tMax++;
-		}
+		var mmt = getMinMaxTile(mAE);
+		var tMin = mmt.min,
+			tMax = mmt.max;
 		console.log("  # will iterate over tiles "+tMin+" to "+tMax);
 		
 
@@ -94,7 +89,7 @@ function generateGrid(reso, mAE, data) {
 			var cellmapprog = {}, l, a, ti, i;
 			if(!renderRTL) { i = tMin + offset; }
 					  else { i = tMax - offset; }
-			if(i <= tMax && i >= tMin) {	// still work to do							// for each map tile in visible area
+			if(i <= tMax && i >= tMin) {	// still work to do			// for each map tile in visible area
 				for(var j = cAE.min; j <= cAE.max; j++) { 					// go over each key in range
 					if(data.data[i][j] !== undefined) {							// if it is defined
 						l = data.data[i][j].length;
