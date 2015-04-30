@@ -2,29 +2,41 @@
 /// timeline ///
 ////////////////
 function genChart(data){
+	if(current_setsel === undefined) { return false; }
 
 	var benchmark_chart = new Date();
 
-	updateChartData(data);
+	updateChartDataFkt(data);
 	initChart();
 
 	console.log("  |BM| chart creation complete (total of "+(new Date()-benchmark_chart)+"ms)");
 	console.log("\\~~ finished generating chart ~~/ ");
 }
 
-
+/**
+* timeout wrapper */
 function updateChartData(data) {
+	clearTimeout(chartdatTimer);
+	chartdatTimer = setTimeout(function() {
+		updateChartDataFkt(data);
+		//summary.trigger("select", timeSel); // to make envision redraw...
+		chart.components[0].draw(null, { xaxis: {
+			min: timeSel.data.x.min,
+			max: timeSel.data.x.max
+		}});
+	}, CALC_TIMEOUT);
+}
+
+
+function updateChartDataFkt(data) {
 	if(data === undefined) { data = current_setsel; } // TODO
 
-	console.log("/~~ generating chart data ~~\\ ");
+	//console.log("/~~ generating chart data ~~\\ ");
 	var benchmark_chart = new Date();
 
-
 	var mAE = getBounds(true);
-
 	// min and max tile
 	var mmt = getMinMaxTile(mAE);
-
 
 
 
@@ -37,35 +49,36 @@ function updateChartData(data) {
 		i,j,l,k,d;
 	
 
-	for(i = mmt.min; i<= mmt.max; i++) {
-		for(j=data.min; j<=data.max; j++) {
-			if(data.data[i][j] !== undefined) {
-				l = data.data[i][j].length;
-				if(dat_obj[j] === undefined) { dat_obj[j] = 0; }
-				for(k = 0; k < l; k++) {
-					d = data.data[i][j][k];
-					if(section_filter(d,mAE)) {
-						dat_obj[j]++;
+	if(!timelineIsGlobal) {
+		for(i = mmt.min; i<= mmt.max; i++) {
+			for(j=data.min; j<=data.max; j++) {
+				if(data.data[i][j] !== undefined) {
+					l = data.data[i][j].length;
+					if(dat_obj[j] === undefined) { dat_obj[j] = 0; }
+					for(k = 0; k < l; k++) {
+						d = data.data[i][j][k];
+						if(section_filter(d,mAE)) {
+							dat_obj[j]++;
+						}
+					}
+				}
+			}
+		}
+	} else {
+		var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
+		for(i = 0; i < tilecount; i++) {
+			for(j=data.min; j<=data.max; j++) {
+				d = data.data[i][j];
+				if(d !== undefined) {
+					if(dat_obj[j] === undefined) {
+						dat_obj[j] = d.length;
+					} else {
+						dat_obj[j] += d.length;
 					}
 				}
 			}
 		}
 	}
-
-
-	/*var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
-	for(i = 0; i < tilecount; i++) {
-		for(j=data.min; j<=data.max; j++) {
-			d = data.data[i][j];
-			if(d !== undefined) {
-				if(dat_obj[j] === undefined) {
-					dat_obj[j] = d.length;
-				} else {
-					dat_obj[j] += d.length;
-				}
-			}
-		}
-	}*/
 
 	for(i=data.min; i<=data.max; i++) {
 		if(dat_obj[i] !== undefined) {
@@ -77,9 +90,7 @@ function updateChartData(data) {
 	//chartdat.push([x,y]);
 	chartdat[0] = [x,y];
 
-	//chartdat[0] = [[1,2,3,4,5],[3,6,3,4,6]];
-
-	console.log("  |BM| iterating and sorting finished (took "+(new Date()-benchmark_chart)+"ms)");
+	console.log("  |BM| timeline data updated in "+(new Date()-benchmark_chart)+"ms");
 
 }
 

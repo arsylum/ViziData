@@ -29,13 +29,26 @@
 	<menu>
 		<div id="filter"></div>
 		<div id="controls">
-			<label id="ctrl-reso">
-				Grid resolution<br>
+			<!-- switch timeline mode -->
+			<fieldset id="ctrl-tlmode">
+				<legend>Timeline Mode</legend>
+				<label>
+					<input type="radio" name="mapglob" value="1">
+					Global
+				</label>
+				<label>
+					<input type="radio" name="mapglob" value="0">
+					Map area
+				</label>
+			</fieldset>
+
+			<label id="ctrl-reso" class="slider">
+				Grid Resolution<br>
 				<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1" />
 			</label>
 			<input id="reso-display" type="text" readonly size="2" value="1" />
 			
-			<label id="ctrl-zoom">
+			<label id="ctrl-zoom" class="slider">
 				Zoom<br>
 				<input id="zoom-slider" type="range" step="0.1" value="1" disabled />
 			</label>

@@ -499,18 +499,24 @@ menu#timefilter {
 /************
 *** Forms **/
 select, label{
-	display: block;
+	//display: block;
+	display: inline;
 }
 
 #controls {
-	&>label {
+
+	#ctrl-tlmode {
+		margin: .5em 0;
+	}
+
+	&>.slider {
 		line-height: 1.5em;
 		margin: .5em 0;
 		display: inline-block;
 		width: 74%;
 	}
 
-	input {
+	input[type=range], input[type=text] {
 		display: inline-block;
 		padding: 2%;
 		margin: 0;

@@ -6473,7 +6473,7 @@ function setSetSel(dsi) {
 var C_WMIN = -180, C_WMAX = 180, C_HMIN = -90, C_HMAX = 90, C_W = C_WMAX - C_WMIN, C_H = C_HMAX - C_HMIN;
 
 // map parameters
-var M_BOUNDING_THRESHOLD = 10, // grid clipping tolerance
+var M_BOUNDING_THRESHOLD = 0, // grid clipping tolerance
 M_ZOOM_RANGE = [ 1, 8 ], // zoom range (results in svg scale 2^(v-1))
 M_BUBBLE_OFFSET = 10, // distance of map tooltip from pointer
 M_HOVER_OFFSET = {
@@ -6495,6 +6495,10 @@ var M_COLOR_SCALE = [ // provided by colorbrewer2.org
 	'rgb(8,29,88)'];*/
 "#ccddff", "#aacc66", "#aa6611", "#800", "#300" ];
 
+// timing, responsiveness
+var CALC_TIMEOUT = 200;
+
+// default timeout before large operations are run
 // DATA
 var DATA_DIR = "./data/", META_FILES = [ "humans.json" ];
 
@@ -6523,12 +6527,13 @@ bubble, // popup bubble on map
 zoombh;
 
 // zoomBehavior
-var allow_redraw = true, colorize = false, //true,
+var allow_redraw = true, timelineIsGlobal = 0, colorize = false, //true,
 colorScale, // color scaling function
 mutexGenGrid = 0, // genGrid mutex (0: free, 1: looping, -1: kill loop)
 redrawTimer, // genGrid
+chartdatTimer, // updateChartData
 bubbleTimer, // hide map tooltip bubble
-boundsTimer, // forceBounds
+//boundsTimer, // forceBounds
 resizeTimer, // window resize handling
 infolistTimer;
 
@@ -6571,6 +6576,11 @@ $(function() {
 			useUTC: false
 		}
 	});*/
+    $("#ctrl-tlmode input").on("change", function() {
+        console.log($(this).val());
+        timelineIsGlobal = parseInt($(this).val());
+        updateChartData();
+    }).filter("[value=" + timelineIsGlobal + "]").prop("checked", true);
     resoFactor = parseFloat($("#reso-slider").val());
     $("#zoom-slider").attr("min", M_ZOOM_RANGE[0]).attr("max", M_ZOOM_RANGE[1]);
     $("#freezer>input").on("change", function() {
@@ -6597,8 +6607,6 @@ $(function() {
     // setup canvas
     mapcan = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
     overcan = d3.select("#map").append("canvas").classed("overlay", true);
-    onResize();
-    // set canvas dimensions
     // setup svg
     /*d3.select("#mapcanvas").append("g").attr("id","maplayer");//experimental
 	plotlayer = d3.select("#mapcanvas")
@@ -6618,6 +6626,7 @@ $(function() {
         if (!statifyUrl()) {
             $("#filter input")[DEFAULT_DATASET].click();
         }
+        onResize();
     });
     /// TODO
     // load all the meta data meta files
@@ -6659,7 +6668,7 @@ function onResize() {
     $([ mapcan.node(), overcan.node() ]).attr("width", canvasW).attr("height", canvasH);
     mapctx = mapcan.node().getContext("2d");
     overctx = overcan.node().getContext("2d");
-    initChart();
+    genChart();
     genGrid();
 }
 
@@ -6680,7 +6689,7 @@ function genGrid(reso, mAE, data) {
     clearTimeout(redrawTimer);
     redrawTimer = setTimeout(function() {
         generateGrid(reso, mAE, data);
-    }, 200);
+    }, CALC_TIMEOUT);
 }
 
 /**
@@ -7305,8 +7314,8 @@ function zoom() {
         drawPlot(undefined, undefined);
         // TODO function parameters (?)
         //forceBounds();
-        genChart();
         genGrid();
+        updateChartData();
     }
 }
 
@@ -7330,19 +7339,38 @@ function setColorScale(r) {
 /// timeline ///
 ////////////////
 function genChart(data) {
+    if (current_setsel === undefined) {
+        return false;
+    }
     var benchmark_chart = new Date();
-    updateChartData(data);
+    updateChartDataFkt(data);
     initChart();
     console.log("  |BM| chart creation complete (total of " + (new Date() - benchmark_chart) + "ms)");
     console.log("\\~~ finished generating chart ~~/ ");
 }
 
+/**
+* timeout wrapper */
 function updateChartData(data) {
+    clearTimeout(chartdatTimer);
+    chartdatTimer = setTimeout(function() {
+        updateChartDataFkt(data);
+        //summary.trigger("select", timeSel); // to make envision redraw...
+        chart.components[0].draw(null, {
+            xaxis: {
+                min: timeSel.data.x.min,
+                max: timeSel.data.x.max
+            }
+        });
+    }, CALC_TIMEOUT);
+}
+
+function updateChartDataFkt(data) {
     if (data === undefined) {
         data = current_setsel;
     }
     // TODO
-    console.log("/~~ generating chart data ~~\\ ");
+    //console.log("/~~ generating chart data ~~\\ ");
     var benchmark_chart = new Date();
     var mAE = getBounds(true);
     // min and max tile
@@ -7353,35 +7381,38 @@ function updateChartData(data) {
     // still TODO? check if it can improved
     var x = [], y = [], ticks = [];
     var dat_obj = {}, i, j, l, k, d;
-    for (i = mmt.min; i <= mmt.max; i++) {
-        for (j = data.min; j <= data.max; j++) {
-            if (data.data[i][j] !== undefined) {
-                l = data.data[i][j].length;
-                if (dat_obj[j] === undefined) {
-                    dat_obj[j] = 0;
+    if (!timelineIsGlobal) {
+        for (i = mmt.min; i <= mmt.max; i++) {
+            for (j = data.min; j <= data.max; j++) {
+                if (data.data[i][j] !== undefined) {
+                    l = data.data[i][j].length;
+                    if (dat_obj[j] === undefined) {
+                        dat_obj[j] = 0;
+                    }
+                    for (k = 0; k < l; k++) {
+                        d = data.data[i][j][k];
+                        if (section_filter(d, mAE)) {
+                            dat_obj[j]++;
+                        }
+                    }
                 }
-                for (k = 0; k < l; k++) {
-                    d = data.data[i][j][k];
-                    if (section_filter(d, mAE)) {
-                        dat_obj[j]++;
+            }
+        }
+    } else {
+        var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
+        for (i = 0; i < tilecount; i++) {
+            for (j = data.min; j <= data.max; j++) {
+                d = data.data[i][j];
+                if (d !== undefined) {
+                    if (dat_obj[j] === undefined) {
+                        dat_obj[j] = d.length;
+                    } else {
+                        dat_obj[j] += d.length;
                     }
                 }
             }
         }
     }
-    /*var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
-	for(i = 0; i < tilecount; i++) {
-		for(j=data.min; j<=data.max; j++) {
-			d = data.data[i][j];
-			if(d !== undefined) {
-				if(dat_obj[j] === undefined) {
-					dat_obj[j] = d.length;
-				} else {
-					dat_obj[j] += d.length;
-				}
-			}
-		}
-	}*/
     for (i = data.min; i <= data.max; i++) {
         if (dat_obj[i] !== undefined) {
             x.push(i);
@@ -7390,8 +7421,7 @@ function updateChartData(data) {
     }
     //chartdat.push([x,y]);
     chartdat[0] = [ x, y ];
-    //chartdat[0] = [[1,2,3,4,5],[3,6,3,4,6]];
-    console.log("  |BM| iterating and sorting finished (took " + (new Date() - benchmark_chart) + "ms)");
+    console.log("  |BM| timeline data updated in " + (new Date() - benchmark_chart) + "ms");
 }
 
 function initChart() {

@@ -15,7 +15,7 @@ var C_WMIN = -180,
 	C_H = C_HMAX-C_HMIN;
 
 // map parameters
-var M_BOUNDING_THRESHOLD = 10,	// grid clipping tolerance
+var M_BOUNDING_THRESHOLD = 0,	// grid clipping tolerance
 	M_ZOOM_RANGE = [1,8],		// zoom range (results in svg scale 2^(v-1))
 	M_BUBBLE_OFFSET = 10,		// distance of map tooltip from pointer
 	M_HOVER_OFFSET = {			// pointer selection offset
@@ -34,6 +34,9 @@ var M_COLOR_SCALE = [	// provided by colorbrewer2.org
 	'rgb(37,52,148)',
 	'rgb(8,29,88)'];*/
 	'#ccddff', '#aacc66', '#aa6611', '#800', '#300'];
+
+// timing, responsiveness
+var CALC_TIMEOUT = 200; // default timeout before large operations are run
 
 // DATA
 var DATA_DIR = "./data/",
@@ -64,12 +67,14 @@ var chart,		// Timeline / dataLine
 	zoombh;		// zoomBehavior
 
 var allow_redraw = true,
+	timelineIsGlobal = 0,
 	colorize = false, //true,
 	colorScale, // color scaling function
 	mutexGenGrid = 0, // genGrid mutex (0: free, 1: looping, -1: kill loop)
 	redrawTimer, // genGrid
+	chartdatTimer, // updateChartData
 	bubbleTimer, // hide map tooltip bubble
-	boundsTimer, // forceBounds
+	//boundsTimer, // forceBounds
 	resizeTimer, // window resize handling
 	infolistTimer; // item table scroll handler
 

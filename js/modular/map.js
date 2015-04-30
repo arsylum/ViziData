@@ -13,7 +13,7 @@ function genGrid(reso, mAE, data) {
 	clearTimeout(redrawTimer);
 	redrawTimer = setTimeout(function() {
 		generateGrid(reso, mAE, data);
-	}, 200);
+	}, CALC_TIMEOUT);
 }
 
 /**

@@ -317,8 +317,9 @@ function zoom() {
 
 		drawPlot(undefined,undefined); // TODO function parameters (?)
 		//forceBounds();
-		genChart();
+
 		genGrid();
+		updateChartData();
 	}
 }
 

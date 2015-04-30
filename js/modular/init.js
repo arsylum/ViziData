@@ -11,6 +11,11 @@ $(function(){
 		}
 	});*/
 
+	$("#ctrl-tlmode input").on("change", function() {
+		console.log($(this).val());
+		timelineIsGlobal = parseInt($(this).val());
+		updateChartData();
+	}).filter("[value="+timelineIsGlobal+"]").prop("checked", true);
 	resoFactor = parseFloat($("#reso-slider").val());
 	$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);
 	$("#freezer>input").on("change", function() {
@@ -40,7 +45,6 @@ $(function(){
 	// setup canvas
 	mapcan = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
 	overcan = d3.select("#map").append("canvas").classed("overlay", true);
-	onResize(); // set canvas dimensions
 
 	// setup svg
 	
@@ -68,6 +72,7 @@ $(function(){
 		if(!statifyUrl()) {
 			$("#filter input")[DEFAULT_DATASET].click(); // select&load initial dataset
 		}
+		onResize(); // set canvas dimensions
 	});
 
 	/// TODO
@@ -111,6 +116,6 @@ function onResize() {
 	mapctx = mapcan.node().getContext("2d");
 	overctx = overcan.node().getContext("2d");
 
-	initChart();
+	genChart();
 	genGrid();
 }
