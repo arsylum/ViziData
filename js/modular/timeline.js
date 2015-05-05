@@ -48,7 +48,6 @@ function updateChartDataFkt(data) {
 	var dat_obj = {},
 		i,j,l,k,d;
 	
-
 	if(!timelineIsGlobal) {
 		for(i = mmt.min; i<= mmt.max; i++) {
 			for(j=data.min; j<=data.max; j++) {
@@ -171,7 +170,8 @@ function initChart() {
 	          	autoscaleMargin : 0.05,
 	          	noTicks : 4,
 	          	showLabels : true,
-	          	min : 0
+	          	min : 0,
+	          	//max: arrayMax(chartdat[0][1])
 	        }
 		}
     };

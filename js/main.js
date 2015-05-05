@@ -7048,11 +7048,23 @@ function getBounds(enforce) {
         if (bounds[0].min < C_WMIN) {
             bounds[0].min = C_WMIN;
         }
+        if (bounds[0].min > C_WMAX) {
+            bounds[0].min = C_WMAX;
+        }
+        if (bounds[0].max < C_WMIN) {
+            bounds[0].max = C_WMIN;
+        }
         if (bounds[0].max > C_WMAX) {
             bounds[0].max = C_WMAX;
         }
         if (bounds[1].min < C_HMIN) {
             bounds[1].min = C_HMIN;
+        }
+        if (bounds[1].min > C_HMAX) {
+            bounds[1].min = C_HMAX;
+        }
+        if (bounds[1].max < C_HMIN) {
+            bounds[1].max = C_HMIN;
         }
         if (bounds[1].max > C_HMAX) {
             bounds[1].max = C_HMAX;
