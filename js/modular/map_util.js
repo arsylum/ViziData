@@ -318,7 +318,7 @@ function zoom() {
 		renderRTL = (d3.event.translate[0] < lastTransformState.translate[0]);		
 		lastTransformState = d3.event;
 		
-		$("#ctrl-zoom>input").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
+		$("#zoom-slider").val((Math.log(d3.event.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
 		drawPlot(undefined,undefined); // TODO function parameters (?)
 		//forceBounds();

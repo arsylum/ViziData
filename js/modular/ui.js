@@ -21,9 +21,9 @@ function setupControlHandlers() {
 		filter.append(fs);
 	}
 
-	$("#controls input[type='range']")
+	$(".controls input[type='range']")
 		.on("input", function() {
-			$(this).parent().next("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
+			$(this).siblings("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
 		});
 	$("#zoom-slider").on("change", function() {
 		transitTo(getZoomTransform($(this).val()));
@@ -33,16 +33,20 @@ function setupControlHandlers() {
 		genGrid();
 	});
 
-
-	$(window).resize(function() {
-		viewportW = $(this).width();
-		viewportH = $(this).height();
+	$("#sidebar>menu h2").on("click", function() {
+		$(this).toggleClass("closed");
+		$(this).siblings("fieldset").slideToggle();
 	});
 
-	$("#export").click(function() {
-		$(this).attr("disabled","disabled");
-		exportSvg();
-	});
+	// $(window).resize(function() {
+	// 	viewportW = $(this).width();
+	// 	viewportH = $(this).height();
+	// });
+
+	// $("#export").click(function() {
+	// 	$(this).attr("disabled","disabled");
+	// 	exportSvg();
+	// });
 
 
 	// label language

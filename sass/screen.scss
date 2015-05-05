@@ -84,7 +84,8 @@ body {
 menu {
 	background: $control-bg-color;
 	padding: $controls-padding;
-	@include border-radius($outer-border-radius);
+	//@include border-radius($outer-border-radius);
+	border-radius: 0 0 $outer-border-radius $outer-border-radius;
 	div {
 		@include border-radius($outer-border-radius/2);
 	}
@@ -237,15 +238,67 @@ menu#timefilter {
 #sidebar>menu{
 	/*height: $filter-height;*/
 	min-height: $timelline-max-height;
+	line-height: 1.2em;
 	
 	div {
 		/*height: 100-(2*($filter-padding));*/
 		background: $control-mbg-color;
-		padding: $box-padding;
+		//padding: $box-padding;
 		margin-bottom: $box-margin-v;
 	}
 	div:last-child {
 		margin-bottom: 0;
+	}
+
+	div>fieldset {
+		padding: 0 $box-padding;
+		margin-top: .5em;
+
+		&:last-child {
+			padding-bottom: $box-padding;
+		}
+	}
+
+	h2 {
+		//border: 1px orange solid;
+		border-radius: ($outer-border-radius/2) ($outer-border-radius/2) 0 0;
+		background: #777;
+		font-family: sans-serif;
+		font-size: 14px;
+		line-height: 20px;
+		padding: 0px $box-padding;
+		color: white;
+		cursor: pointer;
+		height: 20px;
+		&:hover {
+			/* text-shadow: 1px 0px 0px orange, -1px 0px 0 orange, 0 1px 0 orange, 0 -1px 0 orange; */
+			/* padding-left: 20px; */
+			//color: rgb(255, 234, 197);
+			//font-weight: bold;
+			background: #666;
+			$tsc: rgba(255,255,255,0.6);
+			//text-shadow: 1px 0 0 $tsc, -1px 0 0 $tsc, 0 1px 0 $tsc, 0 -1px 0 $tsc;
+		}
+
+		&:after {
+			content: '';
+			height: 8px;
+			width: 8px;
+			border: 2px white solid;
+			float: right;
+			transform: rotate(135deg);
+			border-style: solid solid none none;
+			transition: transform 0.4s, top 0.4s, border-width 0s;
+			position: relative;
+			top: 3px;
+		}
+		&.closed:after {
+			transform: rotate(45deg);
+			top: 5px;
+		}
+		&:hover:after {
+			border-width: 3px;
+		}
 	}
 }
 
@@ -254,11 +307,11 @@ menu#timefilter {
 	border: 1px solid #ECECEC;
 }
 
-#filter {
-	/*height: 100-(2*($filter-padding));d*/
-	background: $control-mbg-color;
-	padding: $box-padding;
-}
+// #filter {
+// 	/*height: 100-(2*($filter-padding));d*/
+// 	background: $control-mbg-color;
+// 	padding: $box-padding;
+// }
 
 #legend {
 	//width: (($left-row-width)-($controls-padding)*2-($box-padding)*2);
@@ -503,31 +556,43 @@ select, label{
 	display: inline;
 }
 
-#controls {
+menu .controls {
 
-	#ctrl-tlmode {
-		margin: .5em 0;
-	}
+	// #ctrl-tlmode {
+	// 	margin: .5em 0;
+	// }
 
-	&>.slider {
+	.slider {
 		line-height: 1.5em;
-		margin: .5em 0;
-		display: inline-block;
-		width: 74%;
+		//margin: .5em 0;
+		//display: inline-block;
+		width: 100%;
+		// input {
+		// 	display: inline-block;
+		// 	width: 80%;
+		// 	&:last-child {
+		// 		width: 20%;
+		// 	}
+		// }
+		legend {
+			margin-bottom: -.5em;
+		}
 	}
+
+	
 
 	input[type=range], input[type=text] {
 		display: inline-block;
-		padding: 2%;
+		//padding: 2%;
 		margin: 0;
 		border: none;
 		vertical-align: middle;
-		width: 100%;
+		width: 80%;
 	}
 
 	input[type=text][readonly] {
 		width: 14%;
-		margin-left: 6%;
+		margin-left: 2%;
 		text-align: center;
 	}
 
@@ -640,9 +705,9 @@ button[disabled] {
 
 /***********
 *** text **/
-#filter {
-	line-height: 1.5em;
-}
+// #filter {
+// 	line-height: 1.5em;
+// }
 
 
 em {

@@ -7322,7 +7322,7 @@ function zoom() {
         }
         renderRTL = d3.event.translate[0] < lastTransformState.translate[0];
         lastTransformState = d3.event;
-        $("#ctrl-zoom>input").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
+        $("#zoom-slider").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
         drawPlot(undefined, undefined);
         // TODO function parameters (?)
         //forceBounds();
@@ -7681,8 +7681,8 @@ function setupControlHandlers() {
         }
         filter.append(fs);
     }
-    $("#controls input[type='range']").on("input", function() {
-        $(this).parent().next("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
+    $(".controls input[type='range']").on("input", function() {
+        $(this).siblings("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
     });
     $("#zoom-slider").on("change", function() {
         transitTo(getZoomTransform($(this).val()));
@@ -7691,14 +7691,18 @@ function setupControlHandlers() {
         resoFactor = parseFloat($(this).val());
         genGrid();
     });
-    $(window).resize(function() {
-        viewportW = $(this).width();
-        viewportH = $(this).height();
+    $("#sidebar>menu h2").on("click", function() {
+        $(this).toggleClass("closed");
+        $(this).siblings("fieldset").slideToggle();
     });
-    $("#export").click(function() {
-        $(this).attr("disabled", "disabled");
-        exportSvg();
-    });
+    // $(window).resize(function() {
+    // 	viewportW = $(this).width();
+    // 	viewportH = $(this).height();
+    // });
+    // $("#export").click(function() {
+    // 	$(this).attr("disabled","disabled");
+    // 	exportSvg();
+    // });
     // label language
     // TODO get full list from..where?
     var langs = langCodes;

@@ -28,10 +28,11 @@
 <div id="sidebar">
 	<menu>
 		<div id="filter"><h2>Data Selection</h2></div>
-		<div id="controls">
+		<div id="controls-timeline" class="controls">
+			<h2>Timeline Settings</h2>
 			<!-- switch timeline mode -->
 			<fieldset id="ctrl-tlmode">
-				<legend>Timeline Mode</legend>
+				<legend>Timeline Data</legend>
 				<label>
 					<input type="radio" name="mapglob" value="1">
 					Global
@@ -41,30 +42,36 @@
 					Map area
 				</label>
 			</fieldset>
-
-			<label id="ctrl-reso" class="slider">
-				Grid Resolution<br>
+		</div>
+		<div id="controls-map" class="controls">
+			<h2>Map Settings</h2>
+			<fieldset class="slider">
+				<!--<label id="ctrl-reso" class="slider">-->
+				<legend>Grid Resolution</legend>
 				<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1" />
-			</label>
-			<input id="reso-display" type="text" readonly size="2" value="1" />
-			
-			<label id="ctrl-zoom" class="slider">
-				Zoom<br>
+				<!--</label>-->
+				<input id="reso-display" type="text" readonly size="2" value="1" />
+			</fieldset>
+			<fieldset class="slider">
+				<legend>Zoom</legend>
 				<input id="zoom-slider" type="range" step="0.1" value="1" disabled />
-			</label>
-			<input id="zoom-display" type="text" readonly size="3" value="1.0" />
+				<input id="zoom-display" type="text" readonly size="3" value="1.0" />
+			</fieldset>
+			<fieldset>
+				<label id="freezer">
+					<input type="checkbox" />
+					prevent redrawing
+				</label>
+			</fieldset>
 
 		</div>
-		<div>
-			<label id="freezer">
-				<input type="checkbox" />
-				prevent redrawing
-			</label>
+		<!--<div>
+			
 			<!--<label id="colorizer">
 				<input type="checkbox" />
 				disable individual colors
-			</label>-->
-		</div>
+			</label>
+		</div>-->
 	</menu>
 	<!--<div id="stuff">
 	</div>-->
