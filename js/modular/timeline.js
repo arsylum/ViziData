@@ -135,6 +135,7 @@ function initChart() {
         summaryOptions, // summary, (global)
         connection, connectionOptions;
 
+    var normalize = $("#tl-normalize").get(0).checked;
 
     // Configuration for detail (top view):
     detailOptions = {
@@ -166,7 +167,7 @@ function initChart() {
 			    }
 	        },
 	        yaxis : { 
-	          	autoscale : true,
+	          	autoscale : normalize,
 	          	autoscaleMargin : 0.05,
 	          	noTicks : 4,
 	          	showLabels : true,
@@ -175,6 +176,9 @@ function initChart() {
 	        }
 		}
     };
+    if(!normalize) { 
+    	detailOptions.config.yaxis.max = current_setsel.maxEventCount + T_YAXIS_MAX_OFFSET; 
+    }
 
     // Configuration for summary (bottom view):
     summaryOptions = {

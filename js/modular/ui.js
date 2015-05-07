@@ -32,6 +32,21 @@ function setupControlHandlers() {
 		resoFactor = parseFloat($(this).val());
 		genGrid();
 	});
+	$("#tl-normalize").on("change", function() {
+		if(chart === undefined) {
+			return false;
+		}
+		var detail = chart.components[0],
+			ac = detail.options.config.yaxis;
+		if(this.checked) {
+			ac.autoscale = true;
+			delete(ac.max);
+		} else {
+			ac.autoscale = false;
+			ac.max = current_setsel.maxEventCount + T_YAXIS_MAX_OFFSET;
+		}
+		updateChartData();
+	});
 
 	$("#sidebar>menu h2").on("click", function() {
 		$(this).toggleClass("closed");

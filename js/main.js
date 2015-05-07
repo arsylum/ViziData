@@ -7474,6 +7474,7 @@ function initChart() {
     };
     var detail, detailOptions, summaryOptions, // summary, (global)
     connection, connectionOptions;
+    var normalize = $("#tl-normalize").get(0).checked;
     // Configuration for detail (top view):
     detailOptions = {
         name: "detail",
@@ -7504,7 +7505,7 @@ function initChart() {
                 }
             },
             yaxis: {
-                autoscale: true,
+                autoscale: normalize,
                 autoscaleMargin: .05,
                 noTicks: 4,
                 showLabels: true,
@@ -7512,6 +7513,9 @@ function initChart() {
             }
         }
     };
+    if (!normalize) {
+        detailOptions.config.yaxis.max = current_setsel.maxEventCount + T_YAXIS_MAX_OFFSET;
+    }
     // Configuration for summary (bottom view):
     summaryOptions = {
         name: "summary",
@@ -7693,6 +7697,20 @@ function setupControlHandlers() {
     $("#reso-slider").on("change", function() {
         resoFactor = parseFloat($(this).val());
         genGrid();
+    });
+    $("#tl-normalize").on("change", function() {
+        if (chart === undefined) {
+            return false;
+        }
+        var detail = chart.components[0], ac = detail.options.config.yaxis;
+        if (this.checked) {
+            ac.autoscale = true;
+            delete ac.max;
+        } else {
+            ac.autoscale = false;
+            ac.max = current_setsel.maxEventCount + T_YAXIS_MAX_OFFSET;
+        }
+        updateChartData();
     });
     $("#sidebar>menu h2").on("click", function() {
         $(this).toggleClass("closed");
