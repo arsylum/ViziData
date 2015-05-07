@@ -35,6 +35,9 @@ var M_COLOR_SCALE = [	// provided by colorbrewer2.org
 	'rgb(8,29,88)'];*/
 	'#ccddff', '#aacc66', '#aa6611', '#800', '#300'];
 
+// Timeline
+var T_YAXIS_MAX_OFFSET = 100;
+
 // timing, responsiveness
 var CALC_TIMEOUT = 200; // default timeout before large operations are run
 

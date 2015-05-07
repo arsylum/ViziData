@@ -42,6 +42,12 @@
 					Map area
 				</label>
 			</fieldset>
+			<fieldset>
+				<label>
+					<input id="tl-normalize" type="checkbox">
+					Normalize Y-Axis
+				</label>
+			</fieldset>
 		</div>
 		<div id="controls-map" class="controls">
 			<h2>Map Settings</h2>
@@ -106,7 +112,9 @@
 </div>
 
 <menu id="timefilter">
-	<div id="chart"></div>
+	<div id="chartwrapper">
+		<div id="chart"></div>
+	</div>
 </menu>
 <div id="map">
 	<div id="hud" class="hover-tt"></div>

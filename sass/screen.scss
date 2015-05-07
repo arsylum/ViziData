@@ -54,6 +54,7 @@ $map-padding: 0.2%;
 /***********
 ** FANCY **/
 $outer-border-radius: 8px;
+$menu-box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
 
 * {
 	box-sizing: border-box;
@@ -85,11 +86,14 @@ menu {
 	background: $control-bg-color;
 	padding: $controls-padding;
 	//@include border-radius($outer-border-radius);
-	border-radius: 0 0 $outer-border-radius $outer-border-radius;
 	div {
 		@include border-radius($outer-border-radius/2);
 	}
 
+}
+
+menu, #chartwrapper {
+	border-radius: 0 0 $outer-border-radius $outer-border-radius;
 }
 
 menu#timefilter {
@@ -97,13 +101,24 @@ menu#timefilter {
 	min-height: $timeline-min-height;
 	max-height: $timelline-max-height;
 	/*margin-left: ($left-row-width)-($controls-padding);*/
+	
+	padding: 0;
+	background: transparent;
+	#chartwrapper {
+		padding: $controls-padding;
+		margin-left: ($left-row-width)-($controls-padding);
+		height: 100%;
+		background: $control-bg-color;
+		box-shadow: none;
+	}
 
 	#chart {
 		background: white;
 		/*height: $timeline-height;*/
 		/*min-height: $timeline-min-height;*/
 		height: 100%;
-		margin-left: ($left-row-width)-($controls-padding);
+		//margin-left: ($left-row-width)-($controls-padding);
+		box-shadow: $menu-box-shadow;
 
 		* {
 			// prevent flickering highlights on interaction
@@ -237,7 +252,7 @@ menu#timefilter {
 
 #sidebar>menu{
 	/*height: $filter-height;*/
-	min-height: $timelline-max-height;
+	//min-height: $timelline-max-height;
 	line-height: 1.2em;
 	
 	div {
@@ -720,7 +735,8 @@ em {
 *** fancy **/
 
 menu>div {
-	@include box-shadow(0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2));
+	//@include box-shadow(0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2));
+	box-shadow: $menu-box-shadow;
 }
 
 /*#chart {
