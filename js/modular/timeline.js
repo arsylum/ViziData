@@ -16,6 +16,7 @@ function genChart(data){
 /**
 * timeout wrapper */
 function updateChartData(data) {
+	if(current_setsel === undefined) { return false; }
 	clearTimeout(chartdatTimer);
 	chartdatTimer = setTimeout(function() {
 		updateChartDataFkt(data);

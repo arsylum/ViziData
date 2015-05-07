@@ -6574,32 +6574,8 @@ $(function() {
         scale: 1,
         translate: [ 0, 0 ]
     };
-    /*Highcharts.setOptions({
-		global: {
-			useUTC: false
-		}
-	});*/
-    $("#ctrl-tlmode input").on("change", function() {
-        console.log($(this).val());
-        timelineIsGlobal = parseInt($(this).val());
-        updateChartData();
-    }).filter("[value=" + timelineIsGlobal + "]").prop("checked", true);
-    resoFactor = parseFloat($("#reso-slider").val());
+    //resoFactor = parseFloat($("#reso-slider").val());
     $("#zoom-slider").attr("min", M_ZOOM_RANGE[0]).attr("max", M_ZOOM_RANGE[1]);
-    $("#freezer>input").on("change", function() {
-        allow_redraw = !this.checked;
-        if (this.checked) {
-            $("#legend").css("opacity", ".5");
-        } else {
-            $("#legend").css("opacity", "1");
-            genGrid();
-        }
-    });
-    $("#colorizer>input").on("change", function() {
-        colorize = !this.checked;
-        genGrid();
-    });
-    $("#infolist").on("scroll", infolistScroll);
     // bind window resize handling
     $(window).resize(function() {
         clearTimeout(resizeTimer);
@@ -6610,17 +6586,7 @@ $(function() {
     // setup canvas
     mapcan = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
     overcan = d3.select("#map").append("canvas").classed("overlay", true);
-    // setup svg
-    /*d3.select("#mapcanvas").append("g").attr("id","maplayer");//experimental
-	plotlayer = d3.select("#mapcanvas")
-		.attr("viewBox", "-1 -1 "+(C_W+1)+" "+(C_H+1))
-			.call(zoombh)
-			.append("g")
-				.attr("id","heatlayer");*/
-    // setup color scale
-    // todo probably should have it's own function/segment somewhere
-    //var domain =
-    for (var i = 0; i < M_COLOR_SCALE.length; i++) {}
+    // init color scale
     colorScale = d3.scale.log().range(M_COLOR_SCALE);
     // Load default dataset once ready
     $(document).on("meta_files_ready", function() {
@@ -7367,6 +7333,9 @@ function genChart(data) {
 /**
 * timeout wrapper */
 function updateChartData(data) {
+    if (current_setsel === undefined) {
+        return false;
+    }
     clearTimeout(chartdatTimer);
     chartdatTimer = setTimeout(function() {
         updateChartDataFkt(data);
@@ -7698,6 +7667,23 @@ function setupControlHandlers() {
         resoFactor = parseFloat($(this).val());
         genGrid();
     });
+    $("#freezer>input").on("change", function() {
+        allow_redraw = !this.checked;
+        if (this.checked) {
+            $("#legend").css("opacity", ".5");
+        } else {
+            $("#legend").css("opacity", "1");
+            genGrid();
+        }
+    });
+    $("#ctrl-tlmode input").on("change", function() {
+        timelineIsGlobal = parseInt($(this).val());
+        updateChartData();
+        if (current_setsel !== undefined) {
+            urlifyState();
+        }
+    });
+    //.filter("[value="+timelineIsGlobal+"]").prop("checked", true);
     $("#tl-normalize").on("change", function() {
         if (chart === undefined) {
             return false;
@@ -7711,11 +7697,17 @@ function setupControlHandlers() {
             ac.max = current_setsel.maxEventCount + T_YAXIS_MAX_OFFSET;
         }
         updateChartData();
+        urlifyState();
     });
     $("#sidebar>menu h2").on("click", function() {
         $(this).toggleClass("closed");
         $(this).siblings("fieldset").slideToggle();
     });
+    // $("#colorizer>input").on("change", function() {
+    // 	colorize = !this.checked;
+    // 	genGrid();
+    // });
+    $("#infolist").on("scroll", infolistScroll);
     // $(window).resize(function() {
     // 	viewportW = $(this).width();
     // 	viewportH = $(this).height();
@@ -7737,6 +7729,19 @@ function setupControlHandlers() {
     });
 }
 
+////////////////////////////////
+/// url parameters key overview:
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+// c: selected Cell
+// d: selected Dataset
+// e: timeline Selection Interval
+// f: timeline Data Source Mode
+// g: grid Resolution Slider
+// l: label language
+// n: timeline normalization
+// s: map scale
+// t: map translation
+////////////////////////////////
 /**
 * encodes current state of viz into url to make it shareable*/
 function urlifyState() {
@@ -7747,6 +7752,9 @@ function urlifyState() {
     var hash = "d=" + setsel;
     // item label language
     hash += "&l=" + $("#langsel").val();
+    // timeline settings
+    hash += "&f=" + timelineIsGlobal;
+    hash += "&n=" + $("#tl-normalize").get(0).checked;
     // timeline selection
     var time = getTimeSelection();
     hash += "&e=" + time.min + "_" + time.max;
@@ -7764,9 +7772,12 @@ function urlifyState() {
 function statifyUrl() {
     var hash = window.location.hash;
     //if (hash === "") { return false; }
-    var labellang;
-    var timesel;
-    var ds = 0;
+    /// default values
+    var labellang = DEFAULT_LABELLANG, timesel = {
+        min: 1500,
+        max: 2014
+    }, ds = DEFAULT_DATASET, tl_mode = 0, // == map area
+    tl_normalize = false;
     hash = hash.substring(1).split("&");
     for (var i = 0; i < hash.length; ++i) {
         var key = hash[i].substring(0, 1);
@@ -7780,6 +7791,16 @@ function statifyUrl() {
           case "l":
             // item label language
             labellang = val;
+            break;
+
+          case "f":
+            // timeline data source (global or map area)
+            tl_mode = val;
+            break;
+
+          case "n":
+            // timeline normalization
+            tl_normalize = val === "true";
             break;
 
           case "e":
@@ -7817,18 +7838,11 @@ function statifyUrl() {
         }
     }
     // label language
-    if (labellang === undefined) {
-        labellang = DEFAULT_LABELLANG;
-    }
     $("#langsel").val(labellang);
+    /// timeline settings
+    $("#ctrl-tlmode input[value=" + tl_mode + "]").prop("checked", true).trigger("change");
+    $("#tl-normalize").get(0).checked = tl_normalize;
     // time selection
-    if (timesel === undefined) {
-        // TODO store default values somewhere (in dataset?)
-        timesel = {
-            min: 1500,
-            max: 2014
-        };
-    }
     timeSel = {
         data: {
             // TODO this could go into dataset config options

@@ -5,33 +5,9 @@ $(function(){
 	// init stuff
 	lastTransformState = {scale: 1, translate: [0,0]};
 
-	/*Highcharts.setOptions({
-		global: {
-			useUTC: false
-		}
-	});*/
-
-	$("#ctrl-tlmode input").on("change", function() {
-		console.log($(this).val());
-		timelineIsGlobal = parseInt($(this).val());
-		updateChartData();
-	}).filter("[value="+timelineIsGlobal+"]").prop("checked", true);
-	resoFactor = parseFloat($("#reso-slider").val());
+	//resoFactor = parseFloat($("#reso-slider").val());
 	$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);
-	$("#freezer>input").on("change", function() {
-		allow_redraw = !this.checked;
-		if(this.checked) { 
-			$("#legend").css("opacity",".5"); 
-		} else { 
-			$("#legend").css("opacity","1"); 
-			genGrid();
-		}
-	});
-	$("#colorizer>input").on("change", function() {
-		colorize = !this.checked;
-		genGrid();
-	});
-	$("#infolist").on("scroll", infolistScroll);
+	
 
 	// bind window resize handling
 	$(window).resize(function() {
@@ -46,21 +22,7 @@ $(function(){
 	mapcan = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
 	overcan = d3.select("#map").append("canvas").classed("overlay", true);
 
-	// setup svg
-	
-	/*d3.select("#mapcanvas").append("g").attr("id","maplayer");//experimental
-	plotlayer = d3.select("#mapcanvas")
-		.attr("viewBox", "-1 -1 "+(C_W+1)+" "+(C_H+1))
-			.call(zoombh)
-			.append("g")
-				.attr("id","heatlayer");*/
-
-	// setup color scale
-	// todo probably should have it's own function/segment somewhere
-	//var domain =
-	for(var i = 0; i< M_COLOR_SCALE.length; i++) {
-
-	}
+	// init color scale
 	colorScale = d3.scale.log()
 		//.domain([0,1,2,3,4,5,6,7,8])
 		.range(M_COLOR_SCALE);
