@@ -35,11 +35,9 @@ function updateChartDataFkt(data) {
 	//console.log("/~~ generating chart data ~~\\ ");
 	var benchmark_chart = new Date();
 
-	var mAE = getBounds(true);
-	// min and max tile
-	var mmt = getMinMaxTile(mAE);
-
-
+	drawWhat();
+	var mAE = drawdat.bounds,
+	    mmt = drawdat.mmt;
 
 	////
 	/// tomporary hacky timeline fix for changed data structure
@@ -164,7 +162,10 @@ function initChart() {
 				fillColor: '#ff9900',
 				fillOpacity: 0.6,
 				trackFormatter : function (o) {
-			    	return "<em>" + current_setsel.strings.label + "</em> in " + parseInt(o.x) + ": <em>"+ parseInt(o.y) + "</em>";
+					var k = parseInt(o.x);
+					//console.log("na sieh an!");
+					highlightCellsFor(k); // hooking here for our highlight function
+			    	return "<em>" + current_setsel.strings.label + "</em> in " + k + ": <em>"+ parseInt(o.y) + "</em>";
 			    }
 	        },
 	        yaxis : { 
@@ -178,7 +179,7 @@ function initChart() {
 		}
     };
     if(!normalize) { 
-    	detailOptions.config.yaxis.max = current_setsel.maxEventCount + T_YAXIS_MAX_OFFSET; 
+    	detailOptions.config.yaxis.max = current_setsel.maxEventCount*T_YAXIS_MAX_EXPAND; 
     }
 
     // Configuration for summary (bottom view):
@@ -252,6 +253,7 @@ function initChart() {
         .add(envision.actions.selection, {callback: selCallback});
 
    	appendTimelineRangeTips();
+   	appendListeners();
     // set to initial selection state
   	summary.trigger('select', timeSel);
 
@@ -314,6 +316,12 @@ function getTimeSelection() {
 		min: (cAE.min >= min ? cAE.min : min),
 		max: (cAE.max <= max ? cAE.max : max)
 	};
+}
+
+function appendListeners() {
+	$(chart.components[0].node).on("mouseleave", function() {
+    	highlightCell(false);
+	});
 }
 
 function appendTimelineRangeTips() {

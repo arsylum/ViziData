@@ -36,7 +36,7 @@ var M_COLOR_SCALE = [	// provided by colorbrewer2.org
 	'#ccddff', '#aacc66', '#aa6611', '#800', '#300'];
 
 // Timeline
-var T_YAXIS_MAX_OFFSET = 100;
+var T_YAXIS_MAX_EXPAND = 1.21; // faktor for top margin
 
 // timing, responsiveness
 var CALC_TIMEOUT = 200; // default timeout before large operations are run
@@ -87,7 +87,7 @@ var gdata = [],		// global rawdata
 	chartdat = [], // timeline rendering data
 	timeSel, // current timeline selection
 	cellmap, // latest generated tilemap
-	drawdat, // latest generated drawing data
+	drawdat = {}, // latest generated drawing data
 	filledTiles = [9999], // don't need to draw whats already there [min,max]
 	selectedCell = false, // currently selected cell
 	renderRTL = false, // flag for tile iteration direction

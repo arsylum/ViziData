@@ -6496,8 +6496,9 @@ var M_COLOR_SCALE = [ // provided by colorbrewer2.org
 "#ccddff", "#aacc66", "#aa6611", "#800", "#300" ];
 
 // Timeline
-var T_YAXIS_MAX_OFFSET = 100;
+var T_YAXIS_MAX_EXPAND = 1.21;
 
+// faktor for top margin
 // timing, responsiveness
 var CALC_TIMEOUT = 200;
 
@@ -6547,7 +6548,7 @@ current_setsel, // selected dataset
 chartdat = [], // timeline rendering data
 timeSel, // current timeline selection
 cellmap, // latest generated tilemap
-drawdat, // latest generated drawing data
+drawdat = {}, // latest generated drawing data
 filledTiles = [ 9999 ], // don't need to draw whats already there [min,max]
 selectedCell = false, // currently selected cell
 renderRTL = false, // flag for tile iteration direction
@@ -6574,7 +6575,7 @@ $(function() {
         scale: 1,
         translate: [ 0, 0 ]
     };
-    //resoFactor = parseFloat($("#reso-slider").val());
+    resoFactor = parseFloat($("#reso-slider").val());
     $("#zoom-slider").attr("min", M_ZOOM_RANGE[0]).attr("max", M_ZOOM_RANGE[1]);
     // bind window resize handling
     $(window).resize(function() {
@@ -6985,6 +6986,48 @@ function highlightCell(c) {
     overctx.restore();
 }
 
+/**
+ * highlight all cells that contain data in key */
+function highlightCellsFor(key) {
+    var data = current_setsel.data, reso = drawdat.reso;
+    drawWhat();
+    var mmt = drawdat.mmt;
+    //var bm = Date.now();
+    var i, t, j, ci, cmap = {}, ca = [];
+    for (i = mmt.min; i <= mmt.max; i++) {
+        if ((t = data[i][key]) !== undefined) {
+            for (j = 0; j < t.length; j++) {
+                ci = coord2index(t[j][ARR_M_LON], t[j][ARR_M_LAT], reso);
+                if (cmap[ci] === undefined) {
+                    cmap[ci] = true;
+                }
+            }
+        }
+    }
+    $.each(cmap, function(k) {
+        ca.push(k);
+    });
+    overctx.save();
+    overctx.clearRect(0, 0, canvasW, canvasH);
+    overctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
+    overctx.scale(lastTransformState.scale, lastTransformState.scale);
+    var wx = drawdat.wx * 1, wy = drawdat.wy * 1, rx = drawdat.rx * 1, ry = drawdat.ry * 1;
+    overctx.fillStyle = "rgba(255,255,0,0.4)";
+    overctx.strokeStyle = "rgba(255,255,0,1)";
+    overctx.lineWidth = rx / 4;
+    var cc, x, y;
+    for (i = 0; i < ca.length; i++) {
+        cc = index2canvasCoord(ca[i], reso);
+        x = cc[0];
+        y = cc[1] - wy;
+        overctx.beginPath();
+        overctx.rect(x, y, wx, wy);
+        overctx.fill();
+        overctx.stroke();
+    }
+    overctx.restore();
+}
+
 /////////////////////
 /// map utilities ///
 /////////////////////
@@ -6997,6 +7040,18 @@ function highlightCell(c) {
 function calcReso() {
     //var rf = parseFloat($("#reso-slider").val());
     return 1 / lastTransformState.scale * resoFactor;
+}
+
+/**
+* keep map bounds and min/max tile in global object for efficency
+* (object is reset whenever a new plot drawmap is calculated, so should be ok) */
+function drawWhat() {
+    if (drawdat.bounds === undefined) {
+        drawdat.bounds = getBounds(true);
+    }
+    if (drawdat.mmt === undefined) {
+        drawdat.mmt = getMinMaxTile(drawdat.bounds);
+    }
 }
 
 /**
@@ -7356,9 +7411,8 @@ function updateChartDataFkt(data) {
     // TODO
     //console.log("/~~ generating chart data ~~\\ ");
     var benchmark_chart = new Date();
-    var mAE = getBounds(true);
-    // min and max tile
-    var mmt = getMinMaxTile(mAE);
+    drawWhat();
+    var mAE = drawdat.bounds, mmt = drawdat.mmt;
     ////
     /// tomporary hacky timeline fix for changed data structure
     // TODO refurbish when upgrading timeline
@@ -7470,7 +7524,11 @@ function initChart() {
                 fillColor: "#ff9900",
                 fillOpacity: .6,
                 trackFormatter: function(o) {
-                    return "<em>" + current_setsel.strings.label + "</em> in " + parseInt(o.x) + ": <em>" + parseInt(o.y) + "</em>";
+                    var k = parseInt(o.x);
+                    //console.log("na sieh an!");
+                    highlightCellsFor(k);
+                    // hooking here for our highlight function
+                    return "<em>" + current_setsel.strings.label + "</em> in " + k + ": <em>" + parseInt(o.y) + "</em>";
                 }
             },
             yaxis: {
@@ -7483,7 +7541,7 @@ function initChart() {
         }
     };
     if (!normalize) {
-        detailOptions.config.yaxis.max = current_setsel.maxEventCount + T_YAXIS_MAX_OFFSET;
+        detailOptions.config.yaxis.max = current_setsel.maxEventCount * T_YAXIS_MAX_EXPAND;
     }
     // Configuration for summary (bottom view):
     summaryOptions = {
@@ -7535,6 +7593,7 @@ function initChart() {
         callback: selCallback
     });
     appendTimelineRangeTips();
+    appendListeners();
     // set to initial selection state
     summary.trigger("select", timeSel);
 }
@@ -7595,6 +7654,12 @@ function getTimeSelection() {
         min: cAE.min >= min ? cAE.min : min,
         max: cAE.max <= max ? cAE.max : max
     };
+}
+
+function appendListeners() {
+    $(chart.components[0].node).on("mouseleave", function() {
+        highlightCell(false);
+    });
 }
 
 function appendTimelineRangeTips() {
@@ -7694,7 +7759,7 @@ function setupControlHandlers() {
             delete ac.max;
         } else {
             ac.autoscale = false;
-            ac.max = current_setsel.maxEventCount + T_YAXIS_MAX_OFFSET;
+            ac.max = current_setsel.maxEventCount * T_YAXIS_MAX_EXPAND;
         }
         updateChartData();
         urlifyState();

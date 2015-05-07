@@ -384,3 +384,61 @@ function highlightCell(c) {
 	
 	overctx.restore();
 }
+
+ /**
+ * highlight all cells that contain data in key */
+function highlightCellsFor(key) {
+	var data = current_setsel.data,
+		reso = drawdat.reso;
+
+	drawWhat();
+	var mmt = drawdat.mmt;
+
+	//var bm = Date.now();
+
+	var i,t,j,ci, cmap = {}, ca = [];
+
+	for(i = mmt.min; i <= mmt.max; i++) {
+		if((t = data[i][key]) !== undefined) {
+			for(j = 0; j < t.length; j++) {
+				ci = coord2index(t[j][ARR_M_LON],t[j][ARR_M_LAT],reso);
+				if(cmap[ci] === undefined) {
+					cmap[ci] = true;
+				}
+			}
+		}
+	}
+	$.each(cmap, function(k) {
+		ca.push(k);
+	});
+
+	overctx.save();
+	overctx.clearRect(0,0,canvasW,canvasH);
+
+	overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
+  	overctx.scale(lastTransformState.scale, lastTransformState.scale);
+
+  	var wx = drawdat.wx * 1,
+		wy = drawdat.wy * 1,
+		rx = drawdat.rx * 1,
+		ry = drawdat.ry * 1;
+
+	overctx.fillStyle = "rgba(255,255,0,0.4)";
+	overctx.strokeStyle = "rgba(255,255,0,1)";
+	overctx.lineWidth = rx/4;
+
+  	var cc, x, y;
+  	for(i = 0; i< ca.length; i++) {
+  		cc = index2canvasCoord(ca[i], reso);
+  		x = cc[0];
+  		y = cc[1] - wy;
+ 
+  		overctx.beginPath();
+  		overctx.rect(x,y,wx,wy);
+  		overctx.fill();
+  		overctx.stroke();
+  	}
+
+  	overctx.restore();
+	//console.log(Date.now() - bm + 'ms');
+}

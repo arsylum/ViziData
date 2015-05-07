@@ -14,6 +14,14 @@ function calcReso() {
 }
 
 /**
+* keep map bounds and min/max tile in global object for efficency
+* (object is reset whenever a new plot drawmap is calculated, so should be ok) */
+function drawWhat() {
+	if(drawdat.bounds === undefined) { drawdat.bounds = getBounds(true); }
+	if(drawdat.mmt === undefined) { drawdat.mmt = getMinMaxTile(drawdat.bounds); }
+}
+
+/**
 * returns the current map bounds (rectangle of the currently visible map area)
 * as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
 function getBounds(enforce) {

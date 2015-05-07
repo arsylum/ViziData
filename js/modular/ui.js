@@ -59,7 +59,7 @@ function setupControlHandlers() {
 			delete(ac.max);
 		} else {
 			ac.autoscale = false;
-			ac.max = current_setsel.maxEventCount + T_YAXIS_MAX_OFFSET;
+			ac.max = current_setsel.maxEventCount * T_YAXIS_MAX_EXPAND;
 		}
 		updateChartData();
 		urlifyState();

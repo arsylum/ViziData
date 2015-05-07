@@ -4686,6 +4686,7 @@ Flotr.addPlugin('hit', {
       this.prevHit = null;
     }
     octx.restore();
+
   },
   /**
    * Retrieves the nearest data point from the mouse cursor. If it's within
