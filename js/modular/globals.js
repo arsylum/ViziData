@@ -66,6 +66,7 @@ var TPI = Math.PI * 2;
 var chart,		// Timeline / dataLine
 	summary, 	// summary component of timeline (interaction leader)
 	//plotlayer,  // plot drawing layer (<g>)
+	leafly,		//leaflet map
 	bubble,		// popup bubble on map
 	zoombh;		// zoomBehavior
 
@@ -98,8 +99,10 @@ var gdata = [],		// global rawdata
 var viewportH,
 	viewportW;
 
+var leaflaggrid,
+	leavlover;
 // map canvas
-var mapcan,	mapctx,
+var //mapcan,	mapctx,
 	overcan, overctx,
 	canvasW,
 	canvasH,

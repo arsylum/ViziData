@@ -7,6 +7,10 @@
 
 	<link href="./stylesheets/screen.css" media="screen, projection" rel="stylesheet" />
 
+	<!-- Leaflet -->
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+
+
 	<!-- local scripts for offline working - ->
 	<script type="text/javascript" src="../libs/jquery-2.1.1.min.js"></script>
 	<script type="text/javascript" src="../libs/d3.v3.min.js"></script>
@@ -16,7 +20,7 @@
 	
 	<!--<script src="http://code.highcharts.com/stock/highstock.js"></script>-->
 	<!--<script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>-->
-	
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
 
 	<script src="./js/main.js"></script>
 	
@@ -117,6 +121,7 @@
 	</div>
 </menu>
 <div id="map">
+	<div id ="leaflet"></div>
 	<div id="hud" class="hover-tt"></div>
 	<!--<svg version="1.1" id="mapcanvas" xmlns="http://www.w3.org/2000/svg"></svg>-->
 </div>

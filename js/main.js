@@ -6422,6 +6422,107 @@ envision.templates = envision.templates || {};
     V.templates.Zoom = Zoom;
 })();
 
+/*
+ Generic  Canvas Overlay for leaflet, 
+ Stanislav Sumbera, April , 2014
+
+ - added userDrawFunc that is called when Canvas need to be redrawn
+ - added few useful params fro userDrawFunc callback
+  - fixed resize map bug
+  inspired & portions taken from  :   https://github.com/Leaflet/Leaflet.heat
+
+  http://bl.ocks.org/sumbera/11114288
+*/
+L.CanvasOverlay = L.Class.extend({
+    initialize: function(userDrawFunc, options) {
+        this._userDrawFunc = userDrawFunc;
+        L.setOptions(this, options);
+    },
+    drawing: function(userDrawFunc) {
+        this._userDrawFunc = userDrawFunc;
+        return this;
+    },
+    params: function(options) {
+        L.setOptions(this, options);
+        return this;
+    },
+    canvas: function() {
+        return this._canvas;
+    },
+    redraw: function() {
+        if (!this._frame) {
+            this._frame = L.Util.requestAnimFrame(this._redraw, this);
+        }
+        return this;
+    },
+    onAdd: function(map) {
+        this._map = map;
+        this._canvas = L.DomUtil.create("canvas", "leaflet-heatmap-layer");
+        var size = this._map.getSize();
+        this._canvas.width = size.x;
+        this._canvas.height = size.y;
+        var animated = this._map.options.zoomAnimation && L.Browser.any3d;
+        L.DomUtil.addClass(this._canvas, "leaflet-zoom-" + (animated ? "animated" : "hide"));
+        map._panes.overlayPane.appendChild(this._canvas);
+        map.on("moveend", this._reset, this);
+        map.on("resize", this._resize, this);
+        if (map.options.zoomAnimation && L.Browser.any3d) {
+            map.on("zoomanim", this._animateZoom, this);
+        }
+        this._reset();
+    },
+    onRemove: function(map) {
+        map.getPanes().overlayPane.removeChild(this._canvas);
+        map.off("moveend", this._reset, this);
+        map.off("resize", this._resize, this);
+        if (map.options.zoomAnimation) {
+            map.off("zoomanim", this._animateZoom, this);
+        }
+        this_canvas = null;
+    },
+    addTo: function(map) {
+        map.addLayer(this);
+        return this;
+    },
+    _resize: function(resizeEvent) {
+        this._canvas.width = resizeEvent.newSize.x;
+        this._canvas.height = resizeEvent.newSize.y;
+    },
+    _reset: function() {
+        var topLeft = this._map.containerPointToLayerPoint([ 0, 0 ]);
+        L.DomUtil.setPosition(this._canvas, topLeft);
+        this._redraw();
+    },
+    _redraw: function() {
+        var size = this._map.getSize();
+        var bounds = this._map.getBounds();
+        var zoomScale = size.x * 180 / (20037508.34 * (bounds.getEast() - bounds.getWest()));
+        // resolution = 1/zoomScale
+        var zoom = this._map.getZoom();
+        // console.time('process');
+        if (this._userDrawFunc) {
+            this._userDrawFunc(this, {
+                canvas: this._canvas,
+                bounds: bounds,
+                size: size,
+                zoomScale: zoomScale,
+                zoom: zoom,
+                options: this.options
+            });
+        }
+        // console.timeEnd('process');
+        this._frame = null;
+    },
+    _animateZoom: function(e) {
+        var scale = this._map.getZoomScale(e.zoom), offset = this._map._getCenterOffset(e.center)._multiplyBy(-scale).subtract(this._map._getMapPanePos());
+        this._canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + " scale(" + scale + ")";
+    }
+});
+
+L.canvasOverlay = function(userDrawFunc, options) {
+    return new L.CanvasOverlay(userDrawFunc, options);
+};
+
 ////////////////////////
 /// data management ///
 //////////////////////
@@ -6527,6 +6628,7 @@ var TPI = Math.PI * 2;
 var chart, // Timeline / dataLine
 summary, // summary component of timeline (interaction leader)
 //plotlayer,  // plot drawing layer (<g>)
+leafly, //leaflet map
 bubble, // popup bubble on map
 zoombh;
 
@@ -6558,8 +6660,11 @@ resoFactor;
 /// positions and dimensions
 var viewportH, viewportW;
 
+var leaflaggrid, leavlover;
+
 // map canvas
-var mapcan, mapctx, overcan, overctx, canvasW, canvasH, canvasT, canvasL;
+var //mapcan,	mapctx,
+overcan, overctx, canvasW, canvasH, canvasT, canvasL;
 
 var lastTransformState;
 
@@ -6621,6 +6726,25 @@ $(function() {
     }
 });
 
+function initLeaflet() {
+    if (leafly !== undefined) {
+        return false;
+    }
+    var tileUrl = "http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png";
+    tileUrl = "http://{s}.sm.mapstack.stamen.com/((toner-background,$fff[@30],$002266[hsl-color@40]),(toner-labels,$fff[@10]))/{z}/{x}/{y}.png";
+    //http://a.sm.mapstack.stamen.com/(water-mask,$000[@10],$00ff55[hsl-color])/3/3/6.png
+    //http://b.sm.mapstack.stamen.com/((toner-background,$fff[difference],$fff[@60]),(toner-labels,$000[@10])[@80])/11/330/795.png
+    leafly = L.map("leaflet", {
+        maxBounds: [ [ -90, -180 ], [ 90, 180 ] ]
+    }).setView([ 0, 0 ], 2);
+    L.tileLayer(tileUrl, {}).addTo(leafly);
+    leafly.on("moveend", function(e) {
+        genGrid();
+    });
+    leaflaggrid = L.canvasOverlay();
+    leaflaggrid.drawing(drawPlot).addTo(leafly);
+}
+
 ////////////////
 /// on resize //
 ////////////////
@@ -6636,8 +6760,10 @@ function onResize() {
     canvasH = Math.floor($("#map").height());
     //d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
     $([ mapcan.node(), overcan.node() ]).attr("width", canvasW).attr("height", canvasH);
-    mapctx = mapcan.node().getContext("2d");
+    $("#leaflet").css("width", canvasW).css("height", canvasH);
+    //mapctx = mapcan.node().getContext("2d");
     overctx = overcan.node().getContext("2d");
+    initLeaflet();
     genChart();
     genGrid();
 }
@@ -6706,12 +6832,14 @@ function generateGrid(reso, mAE, data) {
         var finish = function() {
             console.log("  |BM| progressive drawing(ms): " + progBM);
             console.log("  |BM| iteration complete (" + (new Date() - bms) + "ms)");
-            drawPlot(true, cellmap, reso);
+            //drawPlot(true, cellmap, reso);
+            calcPlotDat(cellmap, reso);
             console.log("  |BM| finished genGrid (total of " + (new Date() - bms) + "ms)");
             filledTiles = [ tMin + 1, tMax - 1 ];
             $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
             "we have registered a total of<br>" + "<em>" + count + " " + data.parent.label + "</em><br>" + "that <em>" + data.strings.term + "</em><br>" + "between <em>" + cAE.min + "</em> and <em>" + cAE.max + "</em>");
             selectCell();
+            leaflaggrid._redraw();
             //urlifyState(); // is always called in selectCell
             console.log("\\~~ grid generation complete~~/ ");
             mutexGenGrid = 0;
@@ -6755,9 +6883,7 @@ function generateGrid(reso, mAE, data) {
                     }
                 }
                 // draw each tile after aggregating (if not already drawn)
-                if (i < filledTiles[0] || i > filledTiles[1]) {
-                    progBM += drawPlot(i, cellmapprog, reso) + ",";
-                }
+                if (i < filledTiles[0] || i > filledTiles[1]) {}
                 setTimeout(function() {
                     iterate(++offset);
                 }, 1);
@@ -6807,29 +6933,22 @@ function testing_aggregator(tmap,obj,reso) {
 }
 */
 /**
-* draw the map layer
-* [@param clear] clear before drawing, true: everything, false: nothing, i: tile i
-* [@param newmap] new cell mapping to derive drawing data from
-* [@param reso] required if newmap is given - resolution of new gridmap */
-function drawPlot(clear, newmap, reso) {
-    if (clear === undefined) {
-        clear = true;
-    }
+* calculate new plot drawing object */
+function calcPlotDat(newmap, reso) {
     if (newmap !== undefined && reso === undefined) {
         conslole.warn("drawPlot(): newmap given but no resolution. Using old drawing data.");
     }
-    mapctx.save();
-    if (clear === true) {
-        mapctx.clearRect(0, 0, canvasW, canvasH);
-    }
-    var uMBM = new Date();
+    var uMBM = Date.now();
     if (newmap !== undefined && reso !== undefined) {
         // calculate new drawing map
         var draw = [], min = Infinity, max = -Infinity;
         $.each(newmap, function(k, v) {
-            var c = index2canvasCoord(k, reso);
+            //var c = index2canvasCoord(k, reso);
+            var c = index2geoCoord(k, reso);
+            //var p = tileMap.latLngToLayerPoint([c[0],c[1]]);
             v = v.length;
-            draw.push([ [ c[0], c[1] ], v ]);
+            //draw.push([[c[0],c[1]],v]);
+            draw.push([ [ c[1], c[0] ], v ]);
             // get extreme values
             if (v < min) {
                 min = v;
@@ -6845,11 +6964,32 @@ function drawPlot(clear, newmap, reso) {
             reso: reso
         };
     }
-    if (typeof clear !== "number" && newmap !== undefined) {
-        console.log("  ~ drawing " + drawdat.draw.length + " shapes");
-        console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
-        console.log("  |BM| (dataset generation in " + (new Date() - uMBM) + "ms)");
+    //if(typeof clear !== "number" && newmap !== undefined) {
+    console.log("  ~ drawing " + drawdat.draw.length + " shapes");
+    console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
+    console.log("  |BM| (dataset generation in " + (new Date() - uMBM) + "ms)");
+}
+
+/**
+* draw the grid layer
+* [@param clear] clear before drawing, true: everything, false: nothing, i: tile i
+* [@param newmap] new cell mapping to derive drawing data from
+* [@param reso] required if newmap is given - resolution of new gridmap */
+//function drawPlot(clear, newmap, reso) { //TODO remove param?
+function drawPlot(leavas, params) {
+    if (drawdat.draw === undefined) {
+        return false;
     }
+    // if(clear === undefined) { clear = true; }
+    // if(newmap !== undefined && reso === undefined) { 
+    // 	conslole.warn('drawPlot(): newmap given but no resolution. Using old drawing data.');
+    // } 
+    var bm = Date.now();
+    var mapctx = params.canvas.getContext("2d");
+    // mapctx.save();
+    //if(clear === true) {
+    mapctx.clearRect(0, 0, params.canvas.width, params.canvas.height);
+    //}
     // color defs
     /*// TODO color calculation is buggy
 		// (using hsl model might be good idea)
@@ -6869,28 +7009,41 @@ function drawPlot(clear, newmap, reso) {
 		rmax = 185;//14;
 		rlog_factor = rmax/Math.log(drawdat.max);
 	}*/
-    var canvasRenderBM = new Date();
+    //var canvasRenderBM = new Date();
     // sizes and radii of primitiva
     var bleed = 1;
     // + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
     var wx = drawdat.reso * canvasW / 360 * bleed, wy = drawdat.reso * canvasH / 180 * bleed, //rx = ((drawdat.reso*canvasW)/360/2) * bleed,
     //ry = ((drawdat.reso*canvasH)/180/2) * bleed;
     rx = wx / 2, ry = wy / 2;
+    var gb = leafly.getBounds();
+    var ccount = (gb._northEast.lat - gb._southWest.lat) / drawdat.reso;
+    var b = leafly.getPixelBounds();
+    var r = (b.max.x - b.min.x) / 360 * resoFactor;
+    wx = r * 1.1;
+    //wy = r; //params.canvas.height / ccount;
+    //
+    //
     drawdat.wx = wx;
     drawdat.wy = wy;
     drawdat.rx = rx;
     drawdat.ry = ry;
     var i = -1, n = drawdat.draw.length, d, cx, cy, fc, gradient;
     // TODO keep only what is used
-    mapctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
-    mapctx.scale(lastTransformState.scale, lastTransformState.scale);
+    // mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
+    // mapctx.scale(lastTransformState.scale, lastTransformState.scale);
     if (typeof clear === "number") {
         clearTile(clear);
     }
     while (++i < n) {
         d = drawdat.draw[i];
-        cx = d[0][0];
-        cy = d[0][1];
+        p = leavas._map.latLngToContainerPoint(d[0]);
+        // cx = d.x; //d[0][0];
+        // cy = d.y; //[0][1];
+        wy = 2 * r * (Math.abs(d[0][0]) / 45);
+        //console.log(d[0], wy);
+        //wy = p.y - (128 / Math.PI) * Math.pow(2,leafly.getZoom()) * (Math.PI - Math.log(Math.tan(Math.PI/4 + (p.y-1)/2)));
+        //console.log(p.y,wy);
         mapctx.fillStyle = //fc = 
         /*"rgb("+
 			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
@@ -6905,7 +7058,7 @@ function drawPlot(clear, newmap, reso) {
 		gradient.addColorStop(1,fc+"1)");*/
         //ctx.fillStyle = gradient;
         //ctx.fillRect(cx-rx,cy-rx,wx,wy);
-        mapctx.fillRect(cx, cy - wy, wx, wy);
+        mapctx.fillRect(p.x, p.y - wy, wx, wy);
     }
     /*if(highlight !== undefined) {
 		if(reso === undefined) { reso = drawdat.reso; }
@@ -6921,11 +7074,11 @@ function drawPlot(clear, newmap, reso) {
 		mapctx.strokeRect(c[0],c[1]-wy,wx,wy);
 	}*/
     if (typeof clear !== "number") {
-        console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (new Date() - canvasRenderBM) + "ms");
+        console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (Date.now() - bm) + "ms");
     }
     mapctx.restore();
     // todo - return benchmark
-    return new Date() - canvasRenderBM;
+    return Date.now() - bm;
 }
 
 function highlightCell(c) {
@@ -7039,7 +7192,12 @@ function highlightCellsFor(key) {
 * returns current grid resolution*/
 function calcReso() {
     //var rf = parseFloat($("#reso-slider").val());
-    return 1 / lastTransformState.scale * resoFactor;
+    //return (1/lastTransformState.scale)*resoFactor;
+    //console.log((1/(leafly.getZoom()+1)) * resoFactor);
+    //return (1/(leafly.getZoom()+1)) * resoFactor;
+    var b = leafly.getBounds();
+    var r = (b._northEast.lng - b._southWest.lng) / 360 * resoFactor;
+    return r;
 }
 
 /**
@@ -7058,14 +7216,27 @@ function drawWhat() {
 * returns the current map bounds (rectangle of the currently visible map area)
 * as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
 function getBounds(enforce) {
-    var tx = -lastTransformState.translate[0] / canvasW * 360, ty = -lastTransformState.translate[1] / canvasH * 180;
-    var xmin = tx / lastTransformState.scale + C_WMIN, ymin = ty / lastTransformState.scale + C_HMIN, bth = M_BOUNDING_THRESHOLD / (lastTransformState.scale / 2);
+    /*var tx = (-lastTransformState.translate[0]/canvasW)*360,
+		ty = (-lastTransformState.translate[1]/canvasH)*180;
+
+	var xmin = (tx)/lastTransformState.scale+C_WMIN,
+		ymin = (ty)/lastTransformState.scale+C_HMIN,
+		bth = M_BOUNDING_THRESHOLD/(lastTransformState.scale/2);
+
+	var bounds = [{
+		min: xmin - bth,
+		max: xmin+(C_WMAX-C_WMIN)/lastTransformState.scale + bth
+	},{
+		min: -(ymin+(C_HMAX-C_HMIN)/lastTransformState.scale) - bth,
+		max: -ymin + bth
+	}];*/
+    var b = leafly.getBounds();
     var bounds = [ {
-        min: xmin - bth,
-        max: xmin + (C_WMAX - C_WMIN) / lastTransformState.scale + bth
+        min: b._southWest.lng,
+        max: b._northEast.lng
     }, {
-        min: -(ymin + (C_HMAX - C_HMIN) / lastTransformState.scale) - bth,
-        max: -ymin + bth
+        min: b._southWest.lat,
+        max: b._northEast.lat
     } ];
     // boundary enforcement
     if (enforce === true) {

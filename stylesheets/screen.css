@@ -693,6 +693,12 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   position: relative;
 }
 /* line 479, ../sass/screen.scss */
+#map #leaflet {
+  position: absolute;
+  z-index: 2;
+  background: transparent;
+}
+/* line 487, ../sass/screen.scss */
 #map #hud {
   position: absolute;
   right: 8px;
@@ -700,21 +706,26 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   -webkit-transition: opacity 0.2s;
           transition: opacity 0.2s;
   opacity: 0;
+  z-index: 5;
 }
-/* line 493, ../sass/screen.scss */
+/* line 502, ../sass/screen.scss */
 #map:hover #hud {
   opacity: 1;
 }
-
-/* line 498, ../sass/screen.scss */
-.overlay {
+/* line 506, ../sass/screen.scss */
+#map canvas {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 3;
   pointer-events: none;
 }
+/* line 513, ../sass/screen.scss */
+#map .overlay {
+  z-index: 4;
+}
 
-/* line 506, ../sass/screen.scss */
+/* line 523, ../sass/screen.scss */
 #bubble {
   position: absolute;
   bottom: 1337px;
@@ -731,7 +742,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   pointer-events: none;
 }
 
-/* line 521, ../sass/screen.scss */
+/* line 538, ../sass/screen.scss */
 #bubble > span,
 #legend span,
 #stuff span,
@@ -742,7 +753,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   font-family: sans-serif;
 }
 
-/* line 530, ../sass/screen.scss */
+/* line 547, ../sass/screen.scss */
 #sidebar header h1 {
   clear: both;
   font-family: sans-serif;
@@ -750,22 +761,22 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   margin: 15px 15px 5px;
   font-weight: bold;
 }
-/* line 537, ../sass/screen.scss */
+/* line 554, ../sass/screen.scss */
 #sidebar header h1 span {
   font-size: .5em;
 }
-/* line 542, ../sass/screen.scss */
+/* line 559, ../sass/screen.scss */
 #sidebar header #github_link {
   position: relative;
   float: left;
   width: 120px;
   margin: 0 15px;
 }
-/* line 548, ../sass/screen.scss */
+/* line 565, ../sass/screen.scss */
 #sidebar header #github_link img {
   float: left;
 }
-/* line 552, ../sass/screen.scss */
+/* line 569, ../sass/screen.scss */
 #sidebar header #github_link img[src*=logo] {
   -webkit-transition: .5s;
           transition: .5s;
@@ -773,7 +784,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   left: 100px;
   opacity: 0;
 }
-/* line 561, ../sass/screen.scss */
+/* line 578, ../sass/screen.scss */
 #sidebar header:hover #github_link img[src*=logo] {
   left: 38px;
   opacity: 1;
@@ -781,21 +792,21 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
 
 /************
 *** Forms **/
-/* line 569, ../sass/screen.scss */
+/* line 586, ../sass/screen.scss */
 select, label {
   display: inline;
 }
 
-/* line 580, ../sass/screen.scss */
+/* line 597, ../sass/screen.scss */
 menu .controls .slider {
   line-height: 1.5em;
   width: 100%;
 }
-/* line 592, ../sass/screen.scss */
+/* line 609, ../sass/screen.scss */
 menu .controls .slider legend {
   margin-bottom: -.5em;
 }
-/* line 599, ../sass/screen.scss */
+/* line 616, ../sass/screen.scss */
 menu .controls input[type=range], menu .controls input[type=text] {
   display: inline-block;
   margin: 0;
@@ -803,24 +814,24 @@ menu .controls input[type=range], menu .controls input[type=text] {
   vertical-align: middle;
   width: 80%;
 }
-/* line 608, ../sass/screen.scss */
+/* line 625, ../sass/screen.scss */
 menu .controls input[type=text][readonly] {
   width: 14%;
   margin-left: 2%;
   text-align: center;
 }
-/* line 614, ../sass/screen.scss */
+/* line 631, ../sass/screen.scss */
 menu .controls input[type=range] {
   -webkit-appearance: none;
 }
-/* line 618, ../sass/screen.scss */
+/* line 635, ../sass/screen.scss */
 menu .controls input[type=range]::-webkit-slider-runnable-track {
   height: 2px;
   background: #E3E3E3;
   border: none;
   border-radius: 1px;
 }
-/* line 625, ../sass/screen.scss */
+/* line 642, ../sass/screen.scss */
 menu .controls input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
   border: none;
@@ -832,22 +843,22 @@ menu .controls input[type=range]::-webkit-slider-thumb {
   -webkit-transition: background 0.4s;
           transition: background 0.4s;
 }
-/* line 636, ../sass/screen.scss */
+/* line 653, ../sass/screen.scss */
 menu .controls input[type=range]:active::-webkit-slider-thumb,
 menu .controls input[type=range]:hover::-webkit-slider-thumb {
   background: #aa5500;
   cursor: pointer;
 }
-/* line 642, ../sass/screen.scss */
+/* line 659, ../sass/screen.scss */
 menu .controls input[type=range]:disabled::-webkit-slider-thumb {
   background: #d8d8d8;
   cursor: default;
 }
-/* line 647, ../sass/screen.scss */
+/* line 664, ../sass/screen.scss */
 menu .controls input[type=range]:focus {
   outline: none;
 }
-/* line 651, ../sass/screen.scss */
+/* line 668, ../sass/screen.scss */
 menu .controls input[type=range]:active::-webkit-slider-runnable-track {
   background: #ccc;
 }
@@ -858,7 +869,7 @@ menu .controls input[type=range]:active::-webkit-slider-runnable-track {
 	height: 1px;
 	content: "";
 }*/
-/* line 665, ../sass/screen.scss */
+/* line 682, ../sass/screen.scss */
 button {
   width: 100%;
   border: 1px solid #ACACAC;
@@ -872,7 +883,7 @@ button {
   box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
 }
 
-/* line 676, ../sass/screen.scss */
+/* line 693, ../sass/screen.scss */
 button:hover {
   color: #ffffff;
   background: #BBBED1;
@@ -880,7 +891,7 @@ button:hover {
   /*@include box-shadow(0 -3px 3px -3px rgba(100, 0, 0, 0.8), 0 3px 3px -3px rgba(100, 0, 0, 0.8));*/
 }
 
-/* line 683, ../sass/screen.scss */
+/* line 700, ../sass/screen.scss */
 button[disabled] {
   background: #ECECEC;
   cursor: default;
@@ -919,7 +930,7 @@ button[disabled] {
 }*/
 /***********
 *** text **/
-/* line 728, ../sass/screen.scss */
+/* line 745, ../sass/screen.scss */
 em {
   font-style: italic;
   color: #aa5500;
@@ -927,7 +938,7 @@ em {
 
 /************
 *** fancy **/
-/* line 737, ../sass/screen.scss */
+/* line 754, ../sass/screen.scss */
 menu > div {
   box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
 }
@@ -937,7 +948,7 @@ menu > div {
 }*/
 /****************
 *** technical **/
-/* line 749, ../sass/screen.scss */
+/* line 766, ../sass/screen.scss */
 #bubble {
   opacity: 0;
 }

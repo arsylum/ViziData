@@ -61,7 +61,8 @@ function generateGrid(reso, mAE, data) {
 		var finish = function() {
 			console.log("  |BM| progressive drawing(ms): " + progBM);
 			console.log("  |BM| iteration complete ("+(new Date()-bms)+"ms)");
-			drawPlot(true, cellmap, reso);
+			//drawPlot(true, cellmap, reso);
+			calcPlotDat(cellmap, reso);
 			console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
 
 			filledTiles = [tMin+1,tMax-1];
@@ -74,6 +75,7 @@ function generateGrid(reso, mAE, data) {
 				"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
 
 			selectCell();
+			leaflaggrid._redraw();
 			//urlifyState(); // is always called in selectCell
 
 			console.log("\\~~ grid generation complete~~/ ");
@@ -107,7 +109,7 @@ function generateGrid(reso, mAE, data) {
 				}
 				// draw each tile after aggregating (if not already drawn)
 				if(i < filledTiles[0] || i > filledTiles[1]) {
-					progBM += drawPlot(i, cellmapprog, reso) +',';
+					//progBM += drawPlot(i, cellmapprog, reso) +',';
 				}
 				setTimeout(function() {
 					iterate(++offset);
@@ -166,23 +168,13 @@ function testing_aggregator(tmap,obj,reso) {
 */
 
 /**
-* draw the map layer
-* [@param clear] clear before drawing, true: everything, false: nothing, i: tile i
-* [@param newmap] new cell mapping to derive drawing data from
-* [@param reso] required if newmap is given - resolution of new gridmap */
-function drawPlot(clear, newmap, reso) {
-	if(clear === undefined) { clear = true; }
-
+* calculate new plot drawing object */
+function calcPlotDat(newmap, reso) {
 	if(newmap !== undefined && reso === undefined) { 
 		conslole.warn('drawPlot(): newmap given but no resolution. Using old drawing data.');
 	} 
 
-	mapctx.save();
-	if(clear === true) {
-		mapctx.clearRect(0,0,canvasW,canvasH);
-	}
-
-	var uMBM = new Date();
+	var uMBM = Date.now();
 
 	if(newmap !== undefined && reso !== undefined) { // calculate new drawing map
 		var draw = [],
@@ -190,10 +182,14 @@ function drawPlot(clear, newmap, reso) {
 			max = -Infinity;
 		
 		$.each(newmap, function(k,v) {
-			var c = index2canvasCoord(k, reso);
+			//var c = index2canvasCoord(k, reso);
+			var c = index2geoCoord(k,reso);
+			//var p = tileMap.latLngToLayerPoint([c[0],c[1]]);
+
 			v = v.length;
 
-			draw.push([[c[0],c[1]],v]);
+			//draw.push([[c[0],c[1]],v]);
+			draw.push([[c[1],c[0]],v]);
 
 			// get extreme values
 			if(v<min) { min = v; }
@@ -201,11 +197,36 @@ function drawPlot(clear, newmap, reso) {
 		});
 		drawdat = {draw: draw, min: min, max: max, reso: reso};
 	}
-	if(typeof clear !== "number" && newmap !== undefined) {
+	//if(typeof clear !== "number" && newmap !== undefined) {
 		console.log("  ~ drawing "+drawdat.draw.length+" shapes");
 		console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);
 		console.log("  |BM| (dataset generation in "+(new Date()-uMBM)+"ms)");
-	}
+	//}
+}
+
+/**
+* draw the grid layer
+* [@param clear] clear before drawing, true: everything, false: nothing, i: tile i
+* [@param newmap] new cell mapping to derive drawing data from
+* [@param reso] required if newmap is given - resolution of new gridmap */
+//function drawPlot(clear, newmap, reso) { //TODO remove param?
+function drawPlot(leavas, params) {
+	if(drawdat.draw === undefined) { return false; }
+	// if(clear === undefined) { clear = true; }
+
+	// if(newmap !== undefined && reso === undefined) { 
+	// 	conslole.warn('drawPlot(): newmap given but no resolution. Using old drawing data.');
+	// } 
+
+	var bm = Date.now();
+
+	var mapctx = params.canvas.getContext('2d');
+
+	// mapctx.save();
+	//if(clear === true) {
+	mapctx.clearRect(0,0,params.canvas.width, params.canvas.height);
+	//}
+
 
 	// color defs
 	/*// TODO color calculation is buggy
@@ -228,7 +249,7 @@ function drawPlot(clear, newmap, reso) {
 	}*/
 	
 
-	var canvasRenderBM = new Date();
+	//var canvasRenderBM = new Date();
 
 	// sizes and radii of primitiva
 	var bleed = 1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
@@ -239,6 +260,17 @@ function drawPlot(clear, newmap, reso) {
 		rx = wx/2,
 		ry = wy/2;
 
+
+	var gb = leafly.getBounds();
+	var ccount = (gb._northEast.lat - gb._southWest.lat) / drawdat.reso;
+
+	var b = leafly.getPixelBounds();
+	var r = (b.max.x - b.min.x) / 360 * resoFactor;
+	wx = r*1.1;
+	//wy = r; //params.canvas.height / ccount;
+	//
+	//
+
 	drawdat.wx = wx;
 	drawdat.wy = wy;
 	drawdat.rx = rx;
@@ -246,8 +278,8 @@ function drawPlot(clear, newmap, reso) {
 
 	var i= -1, n = drawdat.draw.length, d, cx, cy, fc, gradient; // TODO keep only what is used
 
-  	mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
-  	mapctx.scale(lastTransformState.scale, lastTransformState.scale);
+  	// mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
+  	// mapctx.scale(lastTransformState.scale, lastTransformState.scale);
 
   	if(typeof clear === "number") {
   		clearTile(clear);
@@ -255,8 +287,14 @@ function drawPlot(clear, newmap, reso) {
 
 	while(++i < n) {
 		d = drawdat.draw[i];
-		cx = d[0][0];
-		cy = d[0][1];
+		p = leavas._map.latLngToContainerPoint(d[0]);
+		// cx = d.x; //d[0][0];
+		// cy = d.y; //[0][1];
+		wy =  2*r * (Math.abs(d[0][0])/45);
+		//console.log(d[0], wy);
+		//wy = p.y - (128 / Math.PI) * Math.pow(2,leafly.getZoom()) * (Math.PI - Math.log(Math.tan(Math.PI/4 + (p.y-1)/2)));
+		//console.log(p.y,wy);
+
 		mapctx.fillStyle = 
 		//fc = 
 		/*"rgb("+
@@ -274,7 +312,7 @@ function drawPlot(clear, newmap, reso) {
 		//ctx.fillStyle = gradient;
 
 		//ctx.fillRect(cx-rx,cy-rx,wx,wy);
-		mapctx.fillRect(cx,cy-wy,wx,wy);/*
+		mapctx.fillRect(p.x,p.y-wy,wx,wy);/*
 		ctx.beginPath();
 		//ctx.moveTo(cx,cy);
 		//ctx.arc(cx, cy, rx, 0, 2 * Math.PI);
@@ -298,11 +336,11 @@ function drawPlot(clear, newmap, reso) {
 	}*/
 
 	if(typeof clear !== "number") {
-		console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(new Date()-canvasRenderBM)+"ms");
+		console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(Date.now()-bm)+"ms");
 	}
 	mapctx.restore();
 	// todo - return benchmark
-	return (new Date()-canvasRenderBM);
+	return (Date.now()-bm);
 }
 
 

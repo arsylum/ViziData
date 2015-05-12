@@ -58,6 +58,53 @@ $(function(){
 	}
 });
 
+function initLeaflet() {
+	if(leafly !== undefined) { return false; }
+
+	var tileUrl = "http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png";
+	tileUrl = "http://{s}.sm.mapstack.stamen.com/((toner-background,$fff[@30],$002266[hsl-color@40]),(toner-labels,$fff[@10]))/{z}/{x}/{y}.png";
+//http://a.sm.mapstack.stamen.com/(water-mask,$000[@10],$00ff55[hsl-color])/3/3/6.png
+//http://b.sm.mapstack.stamen.com/((toner-background,$fff[difference],$fff[@60]),(toner-labels,$000[@10])[@80])/11/330/795.png
+	leafly = L.map('leaflet', {
+		maxBounds: [[-90,-180],[90,180]]
+		//worldCopyJump: true,
+		//crs: L.CRS.EPSG4326
+	}).setView([0,0], 2);
+	L.tileLayer(tileUrl, {
+		//noWrap: true,
+	    //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(leafly);
+	
+	leafly.on("moveend", function(e) {
+		genGrid();
+
+	});
+
+	leaflaggrid = L.canvasOverlay();
+	leaflaggrid
+		.drawing(drawPlot)
+		.addTo(leafly);
+
+        /*function drawingOnCanvas(canvasOverlay, params) {
+        	var bm = Date.now();
+            var ctx = params.canvas.getContext('2d');
+            ctx.clearRect(0, 0, params.canvas.width, params.canvas.height);
+            ctx.fillStyle = "rgba(255,116,0, 0.7)";
+            //var dots = [[0,0],[10,10],[20,20]];
+
+            for(var i = 0; i<drawdat.draw.length; i++) {
+            	var p = canvasOverlay._map.latLngToContainerPoint(drawdat.draw[i][0]);
+            	ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.closePath();
+            }*/
+            
+// console.log(Date.now() - bm + "ms");
+//         }
+
+
+}
 
 ////////////////
 /// on resize //
@@ -75,9 +122,12 @@ function onResize() {
 	canvasH = Math.floor($("#map").height());
 	//d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
 	$([mapcan.node(),overcan.node()]).attr("width", canvasW).attr("height", canvasH);
-	mapctx = mapcan.node().getContext("2d");
+	$("#leaflet").css("width", canvasW).css("height",canvasH);
+	//mapctx = mapcan.node().getContext("2d");
 	overctx = overcan.node().getContext("2d");
 
+	initLeaflet();
+	
 	genChart();
 	genGrid();
 }

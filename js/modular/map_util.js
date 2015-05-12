@@ -10,7 +10,13 @@
 * returns current grid resolution*/
 function calcReso() {
 	//var rf = parseFloat($("#reso-slider").val());
-	return (1/lastTransformState.scale)*resoFactor;
+	//return (1/lastTransformState.scale)*resoFactor;
+	//console.log((1/(leafly.getZoom()+1)) * resoFactor);
+	//return (1/(leafly.getZoom()+1)) * resoFactor;
+
+	var b = leafly.getBounds();
+	var r = (b._northEast.lng - b._southWest.lng) / 360 * resoFactor;
+	return r;
 }
 
 /**
@@ -25,7 +31,7 @@ function drawWhat() {
 * returns the current map bounds (rectangle of the currently visible map area)
 * as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
 function getBounds(enforce) {
-	var tx = (-lastTransformState.translate[0]/canvasW)*360,
+	/*var tx = (-lastTransformState.translate[0]/canvasW)*360,
 		ty = (-lastTransformState.translate[1]/canvasH)*180;
 
 	var xmin = (tx)/lastTransformState.scale+C_WMIN,
@@ -38,7 +44,10 @@ function getBounds(enforce) {
 	},{
 		min: -(ymin+(C_HMAX-C_HMIN)/lastTransformState.scale) - bth,
 		max: -ymin + bth
-	}];
+	}];*/
+	var b = leafly.getBounds();
+	var bounds = [{min: b._southWest.lng, max: b._northEast.lng},
+				  {min: b._southWest.lat, max: b._northEast.lat}];
 
 	// boundary enforcement
 	if(enforce === true) {
