@@ -75,11 +75,11 @@ function generateGrid(reso, mAE, data) {
 				"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
 
 			selectCell();
-			leaflaggrid._redraw();
 			//urlifyState(); // is always called in selectCell
 
 			console.log("\\~~ grid generation complete~~/ ");
 			mutexGenGrid = 0;
+			leaflaggrid._redraw();
 		};
 
 		/// iterate & aggregate over a single tile
@@ -212,6 +212,12 @@ function calcPlotDat(newmap, reso) {
 //function drawPlot(clear, newmap, reso) { //TODO remove param?
 function drawPlot(leavas, params) {
 	if(drawdat.draw === undefined) { return false; }
+
+	// dont redraw the first time when zoom is changed
+	// (redraw when it is called again at the end of genGrid)
+	//if(lastMapZoom !== (lastMapZoom = leafly.getZoom())) { return false; }
+	if(mutexGenGrid !== 0) { return false; }
+
 	// if(clear === undefined) { clear = true; }
 
 	// if(newmap !== undefined && reso === undefined) { 
@@ -252,21 +258,22 @@ function drawPlot(leavas, params) {
 	//var canvasRenderBM = new Date();
 
 	// sizes and radii of primitiva
-	var bleed = 1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
-	var wx = ((drawdat.reso*canvasW)/360) * bleed,
-		wy = ((drawdat.reso*canvasH)/180) * bleed, 
-		//rx = ((drawdat.reso*canvasW)/360/2) * bleed,
-		//ry = ((drawdat.reso*canvasH)/180/2) * bleed;
-		rx = wx/2,
-		ry = wy/2;
+	var bleed = 1.1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
+	// var wx = ((drawdat.reso*canvasW)/360) * bleed,
+	// 	wy = ((drawdat.reso*canvasH)/180) * bleed, 
+	// 	//rx = ((drawdat.reso*canvasW)/360/2) * bleed,
+	// 	//ry = ((drawdat.reso*canvasH)/180/2) * bleed;
+	// 	rx = wx/2,
+	// 	ry = wy/2;
 
 
-	var gb = leafly.getBounds();
-	var ccount = (gb._northEast.lat - gb._southWest.lat) / drawdat.reso;
+	//var gb = leafly.getBounds();
+	//var ccount = (gb._northEast.lat - gb._southWest.lat) / drawdat.reso;
 
 	var b = leafly.getPixelBounds();
 	var r = (b.max.x - b.min.x) / 360 * resoFactor;
-	wx = r*1.1;
+	var wx = r*bleed;
+	var wy = wy, rx = wx/2, ry = wy/2;
 	//wy = r; //params.canvas.height / ccount;
 	//
 	//
@@ -290,7 +297,8 @@ function drawPlot(leavas, params) {
 		p = leavas._map.latLngToContainerPoint(d[0]);
 		// cx = d.x; //d[0][0];
 		// cy = d.y; //[0][1];
-		wy =  2*r * (Math.abs(d[0][0])/45);
+		//wy =  2*r * (Math.abs(d[0][0])/45);
+		wy = p.y - leavas._map.latLngToContainerPoint([d[0][0]+drawdat.reso,d[0][1]]).y;
 		//console.log(d[0], wy);
 		//wy = p.y - (128 / Math.PI) * Math.pow(2,leafly.getZoom()) * (Math.PI - Math.log(Math.tan(Math.PI/4 + (p.y-1)/2)));
 		//console.log(p.y,wy);

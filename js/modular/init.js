@@ -19,7 +19,8 @@ $(function(){
 	zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
 
 	// setup canvas
-	mapcan = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
+	mapcan = d3.select("#map").append("canvas")//.call(zoombh)
+		.on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
 	overcan = d3.select("#map").append("canvas").classed("overlay", true);
 
 	// init color scale
@@ -66,7 +67,8 @@ function initLeaflet() {
 //http://a.sm.mapstack.stamen.com/(water-mask,$000[@10],$00ff55[hsl-color])/3/3/6.png
 //http://b.sm.mapstack.stamen.com/((toner-background,$fff[difference],$fff[@60]),(toner-labels,$000[@10])[@80])/11/330/795.png
 	leafly = L.map('leaflet', {
-		maxBounds: [[-90,-180],[90,180]]
+		maxBounds: [[-90,-180],[90,180]],
+		attributionControl: false
 		//worldCopyJump: true,
 		//crs: L.CRS.EPSG4326
 	}).setView([0,0], 2);

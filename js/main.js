@@ -6666,9 +6666,10 @@ var leaflaggrid, leavlover;
 var //mapcan,	mapctx,
 overcan, overctx, canvasW, canvasH, canvasT, canvasL;
 
-var lastTransformState;
+var //lastTransformState; // remember map scaling (only redraw on changes)
+lastMapZoom;
 
-// remember map scaling (only redraw on changes)
+// keep track if zoom changes
 var langCodes = [ "aa", "ab", "ace", "aeb", "af", "ak", "aln", "als", "am", "an", "ang", "anp", "ar", "arc", "arn", "arq", "ary", "arz", "as", "ast", "av", "avk", "ay", "az", "azb", "ba", "bar", "bbc", "bbc-latn", "bcc", "bcl", "be", "be-tarask", "be-x-old", "bg", "bh", "bho", "bi", "bjn", "bm", "bn", "bo", "bpy", "bqi", "br", "brh", "bs", "bug", "bxr", "ca", "cbk-zam", "cdo", "ce", "ceb", "ch", "cho", "chr", "chy", "ckb", "co", "cps", "cr", "crh-cyrl", "crh-latn", "cs", "csb", "cu", "cv", "cy", "da", "de", "de-at", "de-ch", "de-formal", "diq", "dsb", "dtp", "dv", "dz", "ee", "egl", "el", "eml", "en", "en-ca", "en-gb", "eo", "es", "et", "eu", "ext", "fa", "ff", "fi", "fit", "fiu-vro", "fj", "fo", "fr", "frc", "frp", "frr", "fur", "fy", "ga", "gag", "gan", "gan-hans", "gan-hant", "gd", "gl", "glk", "gn", "gom-latn", "got", "grc", "gsw", "gu", "gv", "ha", "hak", "haw", "he", "hi", "hif", "hif-latn", "hil", "ho", "hr", "hrx", "hsb", "ht", "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", "ik", "ike-cans", "ike-latn", "ilo", "inh", "io", "is", "it", "iu", "ja", "jam", "jbo", "jut", "jv", "ka", "kaa", "kab", "kbd", "kbd-cyrl", "kg", "khw", "ki", "kiu", "kj", "kk", "kk-arab", "kk-cn", "kk-cyrl", "kk-kz", "kk-latn", "kk-tr", "kl", "km", "kn", "ko", "ko-kp", "koi", "kr", "krc", "kri", "krj", "ks", "ks-arab", "ks-deva", "ksh", "ku", "ku-arab", "ku-latn", "kv", "kw", "ky", "la", "lad", "lb", "lbe", "lez", "lfn", "lg", "li", "lij", "liv", "lmo", "ln", "lo", "loz", "lrc", "lt", "ltg", "lus", "lv", "lzh", "lzz", "mai", "map-bms", "mdf", "mg", "mh", "mhr", "mi", "min", "mk", "ml", "mn", "mo", "mr", "mrj", "ms", "mt", "mus", "mwl", "my", "myv", "mzn", "na", "nah", "nan", "nap", "nb", "nds", "nds-nl", "ne", "new", "ng", "niu", "nl", "nl-informal", "nn", "no", "nov", "nrm", "nso", "nv", "ny", "oc", "om", "or", "os", "ota", "pa", "pag", "pam", "pap", "pcd", "pdc", "pdt", "pfl", "pi", "pih", "pl", "pms", "pnb", "pnt", "prg", "ps", "pt", "pt-br", "qu", "qug", "rgn", "rif", "rm", "rmy", "rn", "ro", "roa-tara", "ru", "rue", "rup", "ruq", "ruq-cyrl", "ruq-latn", "rw", "rwr", "sa", "sah", "sat", "sc", "scn", "sco", "sd", "sdc", "se", "sei", "sg", "sgs", "sh", "shi", "shi-latn", "shi-tfng", "si", "simple", "sk", "sl", "sli", "sm", "sma", "sn", "so", "sq", "sr", "sr-ec", "sr-el", "srn", "ss", "st", "stq", "su", "sv", "sw", "szl", "ta", "tcy", "te", "tet", "tg", "tg-cyrl", "tg-latn", "th", "ti", "tk", "tl", "tly", "tn", "to", "tokipona", "tpi", "tr", "tru", "ts", "tt", "tt-cyrl", "tt-latn", "tum", "tw", "ty", "tyv", "udm", "ug", "ug-arab", "ug-latn", "uk", "ur", "uz", "ve", "vec", "vep", "vi", "vls", "vmf", "vo", "vot", "vro", "wa", "war", "wo", "wuu", "xal", "xh", "xmf", "yi", "yo", "yue", "za", "zea", "zh", "zh-cn", "zh-hans", "zh-hant", "zh-hk", "zh-min-nan", "zh-mo", "zh-my", "zh-sg", "zh-tw", "zu" ];
 
 ///////////////////
@@ -6690,7 +6691,7 @@ $(function() {
     // zoombehaviour
     zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
     // setup canvas
-    mapcan = d3.select("#map").append("canvas").call(zoombh).on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
+    mapcan = d3.select("#map").append("canvas").on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
     overcan = d3.select("#map").append("canvas").classed("overlay", true);
     // init color scale
     colorScale = d3.scale.log().range(M_COLOR_SCALE);
@@ -6735,7 +6736,8 @@ function initLeaflet() {
     //http://a.sm.mapstack.stamen.com/(water-mask,$000[@10],$00ff55[hsl-color])/3/3/6.png
     //http://b.sm.mapstack.stamen.com/((toner-background,$fff[difference],$fff[@60]),(toner-labels,$000[@10])[@80])/11/330/795.png
     leafly = L.map("leaflet", {
-        maxBounds: [ [ -90, -180 ], [ 90, 180 ] ]
+        maxBounds: [ [ -90, -180 ], [ 90, 180 ] ],
+        attributionControl: false
     }).setView([ 0, 0 ], 2);
     L.tileLayer(tileUrl, {}).addTo(leafly);
     leafly.on("moveend", function(e) {
@@ -6839,10 +6841,10 @@ function generateGrid(reso, mAE, data) {
             $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
             "we have registered a total of<br>" + "<em>" + count + " " + data.parent.label + "</em><br>" + "that <em>" + data.strings.term + "</em><br>" + "between <em>" + cAE.min + "</em> and <em>" + cAE.max + "</em>");
             selectCell();
-            leaflaggrid._redraw();
             //urlifyState(); // is always called in selectCell
             console.log("\\~~ grid generation complete~~/ ");
             mutexGenGrid = 0;
+            leaflaggrid._redraw();
         };
         /// iterate & aggregate over a single tile
         var iterate = function(offset) {
@@ -6980,6 +6982,12 @@ function drawPlot(leavas, params) {
     if (drawdat.draw === undefined) {
         return false;
     }
+    // dont redraw the first time when zoom is changed
+    // (redraw when it is called again at the end of genGrid)
+    //if(lastMapZoom !== (lastMapZoom = leafly.getZoom())) { return false; }
+    if (mutexGenGrid !== 0) {
+        return false;
+    }
     // if(clear === undefined) { clear = true; }
     // if(newmap !== undefined && reso === undefined) { 
     // 	conslole.warn('drawPlot(): newmap given but no resolution. Using old drawing data.');
@@ -7011,16 +7019,20 @@ function drawPlot(leavas, params) {
 	}*/
     //var canvasRenderBM = new Date();
     // sizes and radii of primitiva
-    var bleed = 1;
+    var bleed = 1.1;
     // + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
-    var wx = drawdat.reso * canvasW / 360 * bleed, wy = drawdat.reso * canvasH / 180 * bleed, //rx = ((drawdat.reso*canvasW)/360/2) * bleed,
-    //ry = ((drawdat.reso*canvasH)/180/2) * bleed;
-    rx = wx / 2, ry = wy / 2;
-    var gb = leafly.getBounds();
-    var ccount = (gb._northEast.lat - gb._southWest.lat) / drawdat.reso;
+    // var wx = ((drawdat.reso*canvasW)/360) * bleed,
+    // 	wy = ((drawdat.reso*canvasH)/180) * bleed, 
+    // 	//rx = ((drawdat.reso*canvasW)/360/2) * bleed,
+    // 	//ry = ((drawdat.reso*canvasH)/180/2) * bleed;
+    // 	rx = wx/2,
+    // 	ry = wy/2;
+    //var gb = leafly.getBounds();
+    //var ccount = (gb._northEast.lat - gb._southWest.lat) / drawdat.reso;
     var b = leafly.getPixelBounds();
     var r = (b.max.x - b.min.x) / 360 * resoFactor;
-    wx = r * 1.1;
+    var wx = r * bleed;
+    var wy = wy, rx = wx / 2, ry = wy / 2;
     //wy = r; //params.canvas.height / ccount;
     //
     //
@@ -7040,7 +7052,8 @@ function drawPlot(leavas, params) {
         p = leavas._map.latLngToContainerPoint(d[0]);
         // cx = d.x; //d[0][0];
         // cy = d.y; //[0][1];
-        wy = 2 * r * (Math.abs(d[0][0]) / 45);
+        //wy =  2*r * (Math.abs(d[0][0])/45);
+        wy = p.y - leavas._map.latLngToContainerPoint([ d[0][0] + drawdat.reso, d[0][1] ]).y;
         //console.log(d[0], wy);
         //wy = p.y - (128 / Math.PI) * Math.pow(2,leafly.getZoom()) * (Math.PI - Math.log(Math.tan(Math.PI/4 + (p.y-1)/2)));
         //console.log(p.y,wy);

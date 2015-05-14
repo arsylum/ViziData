@@ -109,7 +109,8 @@ var //mapcan,	mapctx,
 	canvasT,
 	canvasL;
 
-var lastTransformState; // remember map scaling (only redraw on changes)
+var //lastTransformState; // remember map scaling (only redraw on changes)
+	lastMapZoom; // keep track if zoom changes
 
 
 var langCodes = [
