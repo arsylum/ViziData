@@ -698,7 +698,11 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   z-index: 2;
   background: transparent;
 }
-/* line 487, ../sass/screen.scss */
+/* line 486, ../sass/screen.scss */
+#map .leaflet-container {
+  cursor: default;
+}
+/* line 490, ../sass/screen.scss */
 #map #hud {
   position: absolute;
   right: 8px;
@@ -708,11 +712,11 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   opacity: 0;
   z-index: 5;
 }
-/* line 502, ../sass/screen.scss */
+/* line 505, ../sass/screen.scss */
 #map:hover #hud {
   opacity: 1;
 }
-/* line 506, ../sass/screen.scss */
+/* line 509, ../sass/screen.scss */
 #map canvas {
   position: absolute;
   top: 0;
@@ -720,14 +724,15 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   z-index: 3;
   pointer-events: none;
 }
-/* line 513, ../sass/screen.scss */
+/* line 516, ../sass/screen.scss */
 #map .overlay {
   z-index: 4;
 }
 
-/* line 523, ../sass/screen.scss */
+/* line 526, ../sass/screen.scss */
 #bubble {
   position: absolute;
+  z-index: 999;
   bottom: 1337px;
   display: inline-block;
   text-align: right;
@@ -742,7 +747,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   pointer-events: none;
 }
 
-/* line 538, ../sass/screen.scss */
+/* line 542, ../sass/screen.scss */
 #bubble > span,
 #legend span,
 #stuff span,
@@ -753,7 +758,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   font-family: sans-serif;
 }
 
-/* line 547, ../sass/screen.scss */
+/* line 551, ../sass/screen.scss */
 #sidebar header h1 {
   clear: both;
   font-family: sans-serif;
@@ -761,22 +766,22 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   margin: 15px 15px 5px;
   font-weight: bold;
 }
-/* line 554, ../sass/screen.scss */
+/* line 558, ../sass/screen.scss */
 #sidebar header h1 span {
   font-size: .5em;
 }
-/* line 559, ../sass/screen.scss */
+/* line 563, ../sass/screen.scss */
 #sidebar header #github_link {
   position: relative;
   float: left;
   width: 120px;
   margin: 0 15px;
 }
-/* line 565, ../sass/screen.scss */
+/* line 569, ../sass/screen.scss */
 #sidebar header #github_link img {
   float: left;
 }
-/* line 569, ../sass/screen.scss */
+/* line 573, ../sass/screen.scss */
 #sidebar header #github_link img[src*=logo] {
   -webkit-transition: .5s;
           transition: .5s;
@@ -784,7 +789,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   left: 100px;
   opacity: 0;
 }
-/* line 578, ../sass/screen.scss */
+/* line 582, ../sass/screen.scss */
 #sidebar header:hover #github_link img[src*=logo] {
   left: 38px;
   opacity: 1;
@@ -792,21 +797,21 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
 
 /************
 *** Forms **/
-/* line 586, ../sass/screen.scss */
+/* line 590, ../sass/screen.scss */
 select, label {
   display: inline;
 }
 
-/* line 597, ../sass/screen.scss */
+/* line 601, ../sass/screen.scss */
 menu .controls .slider {
   line-height: 1.5em;
   width: 100%;
 }
-/* line 609, ../sass/screen.scss */
+/* line 613, ../sass/screen.scss */
 menu .controls .slider legend {
   margin-bottom: -.5em;
 }
-/* line 616, ../sass/screen.scss */
+/* line 620, ../sass/screen.scss */
 menu .controls input[type=range], menu .controls input[type=text] {
   display: inline-block;
   margin: 0;
@@ -814,24 +819,24 @@ menu .controls input[type=range], menu .controls input[type=text] {
   vertical-align: middle;
   width: 80%;
 }
-/* line 625, ../sass/screen.scss */
+/* line 629, ../sass/screen.scss */
 menu .controls input[type=text][readonly] {
   width: 14%;
   margin-left: 2%;
   text-align: center;
 }
-/* line 631, ../sass/screen.scss */
+/* line 635, ../sass/screen.scss */
 menu .controls input[type=range] {
   -webkit-appearance: none;
 }
-/* line 635, ../sass/screen.scss */
+/* line 639, ../sass/screen.scss */
 menu .controls input[type=range]::-webkit-slider-runnable-track {
   height: 2px;
   background: #E3E3E3;
   border: none;
   border-radius: 1px;
 }
-/* line 642, ../sass/screen.scss */
+/* line 646, ../sass/screen.scss */
 menu .controls input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
   border: none;
@@ -843,22 +848,22 @@ menu .controls input[type=range]::-webkit-slider-thumb {
   -webkit-transition: background 0.4s;
           transition: background 0.4s;
 }
-/* line 653, ../sass/screen.scss */
+/* line 657, ../sass/screen.scss */
 menu .controls input[type=range]:active::-webkit-slider-thumb,
 menu .controls input[type=range]:hover::-webkit-slider-thumb {
   background: #aa5500;
   cursor: pointer;
 }
-/* line 659, ../sass/screen.scss */
+/* line 663, ../sass/screen.scss */
 menu .controls input[type=range]:disabled::-webkit-slider-thumb {
   background: #d8d8d8;
   cursor: default;
 }
-/* line 664, ../sass/screen.scss */
+/* line 668, ../sass/screen.scss */
 menu .controls input[type=range]:focus {
   outline: none;
 }
-/* line 668, ../sass/screen.scss */
+/* line 672, ../sass/screen.scss */
 menu .controls input[type=range]:active::-webkit-slider-runnable-track {
   background: #ccc;
 }
@@ -869,7 +874,7 @@ menu .controls input[type=range]:active::-webkit-slider-runnable-track {
 	height: 1px;
 	content: "";
 }*/
-/* line 682, ../sass/screen.scss */
+/* line 686, ../sass/screen.scss */
 button {
   width: 100%;
   border: 1px solid #ACACAC;
@@ -883,7 +888,7 @@ button {
   box-shadow: 0 -3px 3px -3px rgba(0, 0, 0, 0.2), 0 3px 3px -3px rgba(0, 0, 0, 0.2);
 }
 
-/* line 693, ../sass/screen.scss */
+/* line 697, ../sass/screen.scss */
 button:hover {
   color: #ffffff;
   background: #BBBED1;
@@ -891,7 +896,7 @@ button:hover {
   /*@include box-shadow(0 -3px 3px -3px rgba(100, 0, 0, 0.8), 0 3px 3px -3px rgba(100, 0, 0, 0.8));*/
 }
 
-/* line 700, ../sass/screen.scss */
+/* line 704, ../sass/screen.scss */
 button[disabled] {
   background: #ECECEC;
   cursor: default;
@@ -930,7 +935,7 @@ button[disabled] {
 }*/
 /***********
 *** text **/
-/* line 745, ../sass/screen.scss */
+/* line 749, ../sass/screen.scss */
 em {
   font-style: italic;
   color: #aa5500;
@@ -938,7 +943,7 @@ em {
 
 /************
 *** fancy **/
-/* line 754, ../sass/screen.scss */
+/* line 758, ../sass/screen.scss */
 menu > div {
   box-shadow: 0 -2px 3px -1px rgba(0, 0, 0, 0.2), 0 2px 2px -1px rgba(0, 0, 0, 0.2);
 }
@@ -948,7 +953,7 @@ menu > div {
 }*/
 /****************
 *** technical **/
-/* line 766, ../sass/screen.scss */
+/* line 770, ../sass/screen.scss */
 #bubble {
   opacity: 0;
 }

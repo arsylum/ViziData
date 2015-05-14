@@ -6691,7 +6691,9 @@ $(function() {
     // zoombehaviour
     zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
     // setup canvas
-    mapcan = d3.select("#map").append("canvas").on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
+    mapcan = d3.select("#map").append("canvas");
+    //.call(zoombh)
+    //.on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
     overcan = d3.select("#map").append("canvas").classed("overlay", true);
     // init color scale
     colorScale = d3.scale.log().range(M_COLOR_SCALE);
@@ -6736,12 +6738,18 @@ function initLeaflet() {
     //http://a.sm.mapstack.stamen.com/(water-mask,$000[@10],$00ff55[hsl-color])/3/3/6.png
     //http://b.sm.mapstack.stamen.com/((toner-background,$fff[difference],$fff[@60]),(toner-labels,$000[@10])[@80])/11/330/795.png
     leafly = L.map("leaflet", {
-        maxBounds: [ [ -90, -180 ], [ 90, 180 ] ],
-        attributionControl: false
+        //maxBounds: [[-90,-180],[90,180]],
+        attributionControl: false,
+        worldCopyJump: true
     }).setView([ 0, 0 ], 2);
     L.tileLayer(tileUrl, {}).addTo(leafly);
-    leafly.on("moveend", function(e) {
+    leafly.on("moveend", function() {
         genGrid();
+    }).on("mousemove", function(e) {
+        //console.log(e.latlng);
+        canvasMouseMove(e);
+    }).on("click", function(e) {
+        canvasMouseClick(e);
     });
     leaflaggrid = L.canvasOverlay();
     leaflaggrid.drawing(drawPlot).addTo(leafly);
@@ -6950,7 +6958,7 @@ function calcPlotDat(newmap, reso) {
             //var p = tileMap.latLngToLayerPoint([c[0],c[1]]);
             v = v.length;
             //draw.push([[c[0],c[1]],v]);
-            draw.push([ [ c[1], c[0] ], v ]);
+            draw.push([ c, v ]);
             // get extreme values
             if (v < min) {
                 min = v;
@@ -7032,7 +7040,7 @@ function drawPlot(leavas, params) {
     var b = leafly.getPixelBounds();
     var r = (b.max.x - b.min.x) / 360 * resoFactor;
     var wx = r * bleed;
-    var wy = wy, rx = wx / 2, ry = wy / 2;
+    var wy = wx, rx = wx / 2, ry = wy / 2;
     //wy = r; //params.canvas.height / ccount;
     //
     //
@@ -7095,16 +7103,19 @@ function drawPlot(leavas, params) {
 }
 
 function highlightCell(c) {
-    var x, y, p, linewidth = 2;
+    var x, y, g, p, linewidth = 2;
     var wx = drawdat.wx, wy = drawdat.wy, rx = drawdat.rx, ry = drawdat.ry;
     overctx.save();
     overctx.clearRect(0, 0, canvasW, canvasH);
-    overctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
-    overctx.scale(lastTransformState.scale, lastTransformState.scale);
+    // overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
+    //  	overctx.scale(lastTransformState.scale, lastTransformState.scale);
     if (selectedCell !== false) {
-        p = index2canvasCoord(selectedCell);
-        x = p[0];
-        y = p[1];
+        g = index2geoCoord(selectedCell);
+        p = leafly.latLngToContainerPoint(g);
+        x = p.x;
+        y = p.y;
+        wy = y - leafly.latLngToContainerPoint([ g[0] + drawdat.reso, g[1] ]).y;
+        ry = wy / 2;
         overctx.fillStyle = "rgba(255,120,0,0.8)";
         overctx.fillRect(x, y - wy, wx, wy);
         overctx.strokeStyle = "rgba(255,255,255,0.4)";
@@ -7126,9 +7137,12 @@ function highlightCell(c) {
         overctx.restore();
         return false;
     }
-    p = index2canvasCoord(c);
-    x = p[0];
-    y = p[1];
+    g = index2geoCoord(c);
+    p = leafly.latLngToContainerPoint(g);
+    x = p.x;
+    y = p.y;
+    wy = y - leafly.latLngToContainerPoint([ g[0] + drawdat.reso, g[1] ]).y;
+    ry = wy / 2;
     /*	} else {
 		console.warn("highlightCell: invalid first argument");
 		return false;
@@ -7326,7 +7340,7 @@ function index2geoCoord(i, reso) {
     var lbx = rowpos * reso, //+(C_WMIN), //+reso/2,
     lby = Math.floor((+i + cpr / 2) / cpr) * reso;
     //*(-1));//+(-C_HMIN); //+reso/2;
-    return [ lbx, lby ];
+    return [ lby, lbx ];
 }
 
 /**
@@ -7360,26 +7374,37 @@ function clearTile(i) {
 }
 
 /**
-* returns the currently pointed at real canvas coordinates */
+* returns the currently pointed at real canvas coordinates * /
 function cco() {
-    var s = lastTransformState.scale;
-    var x = d3.event.pageX - canvasL - drawdat.wx * s - M_HOVER_OFFSET.l * resoFactor;
-    var y = d3.event.pageY - canvasT - drawdat.wy * s - M_HOVER_OFFSET.t * resoFactor;
-    return [ x, y ];
+	var s = lastTransformState.scale;
+	var x = d3.event.pageX - canvasL - drawdat.wx*s - M_HOVER_OFFSET.l*resoFactor;
+	var y = d3.event.pageY - canvasT - drawdat.wy*s - M_HOVER_OFFSET.t*resoFactor;
+	return [x,y];
+}*/
+/**
+* adjust the currently pointed at geo coordinates */
+function currentCursorPos(e) {
+    var z = leafly.getZoom();
+    return {
+        x: e.latlng.lng - resoFactor / (z + 1),
+        y: e.latlng.lat + resoFactor / (z + 1)
+    };
 }
 
 /**
 * map tooltip */
-function canvasMouseMove() {
+function canvasMouseMove(e) {
     if (drawdat === undefined) {
         return false;
     }
     // no drawing, no tooltip!
-    var cc = cco();
-    var x = cc[0], y = cc[1];
-    //console.log(d3.event);
-    //console.log('Position in canvas: ('+x+','+y+')');
-    var gc = canvasCoord2geoCoord(x, y);
+    /*var cc = cco();
+	var x = cc[0],
+		y = cc[1];
+	//console.log(d3.event);
+	//console.log('Position in canvas: ('+x+','+y+')');
+	var gc = canvasCoord2geoCoord(x,y);*/
+    var gc = currentCursorPos(e);
     var i = coord2index(gc.x, gc.y, drawdat.reso);
     var cell = cellmap[i];
     // hover highlight
@@ -7388,7 +7413,7 @@ function canvasMouseMove() {
     if (cell !== undefined) {
         // display the info bubble
         clearTimeout(bubbleTimer);
-        $("div#bubble").css("opacity", "1").css("bottom", viewportH - d3.event.pageY + drawdat.wy + M_BUBBLE_OFFSET + "px").css("right", viewportW - d3.event.pageX + drawdat.wy + M_BUBBLE_OFFSET * resoFactor + "px").html(cell.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + gc.x.toFixed(2) + ", " + gc.y.toFixed(2) + "]</span>");
+        $("div#bubble").css("opacity", "1").css("bottom", viewportH - e.originalEvent.pageY + drawdat.wy + M_BUBBLE_OFFSET + "px").css("right", viewportW - e.originalEvent.pageX + drawdat.wy + M_BUBBLE_OFFSET * resoFactor + "px").html(cell.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + gc.x.toFixed(2) + ", " + gc.y.toFixed(2) + "]</span>");
     } else {
         // hide the info bubble
         //highlightCell(false);
@@ -7398,15 +7423,17 @@ function canvasMouseMove() {
     }
 }
 
-function canvasMouseClick() {
-    // TODO copied from cabvasMouseMove, DRY?
+function canvasMouseClick(e) {
     if (drawdat === undefined) {
         return false;
     }
     // no drawing, no info!
-    var cc = cco();
-    var x = cc[0], y = cc[1];
-    var gc = canvasCoord2geoCoord(x, y);
+    /*var cc = cco();
+	var x = cc[0],
+		y = cc[1];
+
+	var gc = canvasCoord2geoCoord(x,y);*/
+    var gc = currentCursorPos(e);
     var i = coord2index(gc.x, gc.y, drawdat.reso);
     selectCell(i);
 }

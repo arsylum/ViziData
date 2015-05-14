@@ -483,6 +483,9 @@ menu#timefilter {
 		//cursor: crosshair;
 	}
 
+	.leaflet-container {
+		cursor: default;
+	}
 
 	#hud {
 		position: absolute;
@@ -522,6 +525,7 @@ menu#timefilter {
 
 #bubble {
 	position: absolute;
+	z-index: 999;
 	bottom: 1337px;
 	display: inline-block;
 	text-align: right;

@@ -105,7 +105,7 @@ function index2geoCoord(i, reso) {
 	var lbx = (rowpos*reso),//+(C_WMIN), //+reso/2,
 		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)); //*(-1));//+(-C_HMIN); //+reso/2;
 
-	return [lbx,lby];
+	return [lby,lbx];
 }
 
 /**
@@ -142,26 +142,37 @@ function clearTile(i) {
 }
 
 /**
-* returns the currently pointed at real canvas coordinates */
+* returns the currently pointed at real canvas coordinates * /
 function cco() {
 	var s = lastTransformState.scale;
 	var x = d3.event.pageX - canvasL - drawdat.wx*s - M_HOVER_OFFSET.l*resoFactor;
 	var y = d3.event.pageY - canvasT - drawdat.wy*s - M_HOVER_OFFSET.t*resoFactor;
 	return [x,y];
-}
+}*/
 
+/**
+* adjust the currently pointed at geo coordinates */
+function currentCursorPos(e) {
+	var z = leafly.getZoom();
+	return { 
+		x: e.latlng.lng - resoFactor/(z+1),
+		y: e.latlng.lat + resoFactor/(z+1)
+	};
+}
 
 /**
 * map tooltip */
-function canvasMouseMove() {
+function canvasMouseMove(e) {
 	if(drawdat === undefined) { return false; } // no drawing, no tooltip!
 
-	var cc = cco();
+	/*var cc = cco();
 	var x = cc[0],
 		y = cc[1];
 	//console.log(d3.event);
 	//console.log('Position in canvas: ('+x+','+y+')');
-	var gc = canvasCoord2geoCoord(x,y);
+	var gc = canvasCoord2geoCoord(x,y);*/
+
+	var gc = currentCursorPos(e);
 	var i = coord2index(gc.x, gc.y, drawdat.reso);
 	var cell = cellmap[i];
 
@@ -175,8 +186,8 @@ function canvasMouseMove() {
 		// display the info bubble
 		clearTimeout(bubbleTimer);
 		$("div#bubble").css("opacity","1")
-			.css("bottom", (viewportH - d3.event.pageY + drawdat.wy + M_BUBBLE_OFFSET) + "px")
-			.css("right", (viewportW - d3.event.pageX + drawdat.wy + M_BUBBLE_OFFSET*resoFactor) + "px")
+			.css("bottom", (viewportH - e.originalEvent.pageY + drawdat.wy + M_BUBBLE_OFFSET) + "px")
+			.css("right", (viewportW - e.originalEvent.pageX + drawdat.wy + M_BUBBLE_OFFSET*resoFactor) + "px")
 			.html(cell.length +" <em>"+current_setsel.strings.label+"</em><br>"+
 				"<span>["+(gc.x.toFixed(2))+", "+(gc.y.toFixed(2))+"]</span>");
 
@@ -189,15 +200,15 @@ function canvasMouseMove() {
 	}
 }
 
-function canvasMouseClick() {
-	// TODO copied from cabvasMouseMove, DRY?
+function canvasMouseClick(e) {
 	if(drawdat === undefined) { return false; } // no drawing, no info!
 
-	var cc = cco();
+	/*var cc = cco();
 	var x = cc[0],
 		y = cc[1];
 
-	var gc = canvasCoord2geoCoord(x,y);
+	var gc = canvasCoord2geoCoord(x,y);*/
+	var gc = currentCursorPos(e);
 	var i = coord2index(gc.x, gc.y, drawdat.reso);
 
 	selectCell(i);

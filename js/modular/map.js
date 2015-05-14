@@ -189,7 +189,7 @@ function calcPlotDat(newmap, reso) {
 			v = v.length;
 
 			//draw.push([[c[0],c[1]],v]);
-			draw.push([[c[1],c[0]],v]);
+			draw.push([c,v]);
 
 			// get extreme values
 			if(v<min) { min = v; }
@@ -273,7 +273,7 @@ function drawPlot(leavas, params) {
 	var b = leafly.getPixelBounds();
 	var r = (b.max.x - b.min.x) / 360 * resoFactor;
 	var wx = r*bleed;
-	var wy = wy, rx = wx/2, ry = wy/2;
+	var wy = wx, rx = wx/2, ry = wy/2;
 	//wy = r; //params.canvas.height / ccount;
 	//
 	//
@@ -354,7 +354,7 @@ function drawPlot(leavas, params) {
 
 function highlightCell(c) {
 
-	var x,y,p,
+	var x,y,g,p,
 		linewidth = 2;
 
 	var wx = drawdat.wx,
@@ -366,14 +366,18 @@ function highlightCell(c) {
 	overctx.save();
 	overctx.clearRect(0,0,canvasW,canvasH);
 
-	overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
-  	overctx.scale(lastTransformState.scale, lastTransformState.scale);
+	// overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
+ //  	overctx.scale(lastTransformState.scale, lastTransformState.scale);
 
 	
 	if(selectedCell !== false) {
-  		p = index2canvasCoord(selectedCell);
-  		x = p[0];
-  		y = p[1];
+  		g = index2geoCoord(selectedCell);
+  		p = leafly.latLngToContainerPoint(g);
+  		x = p.x;
+  		y = p.y;
+
+  		wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
+		ry = wy/2;
 
   		overctx.fillStyle = "rgba(255,120,0,0.8)";
 		overctx.fillRect(x,y-wy,wx,wy);
@@ -399,9 +403,13 @@ function highlightCell(c) {
 		return false; 
 	}
 	
-	p = index2canvasCoord(c);
-	x = p[0];
-	y = p[1];
+	g = index2geoCoord(c);
+	p = leafly.latLngToContainerPoint(g);
+	x = p.x;
+	y = p.y;
+	
+	wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
+	ry = wy/2;
 
 /*	} else {
 		console.warn("highlightCell: invalid first argument");
