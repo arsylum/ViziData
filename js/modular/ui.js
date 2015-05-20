@@ -25,12 +25,15 @@ function setupControlHandlers() {
 		.on("input", function() {
 			$(this).siblings("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
 		});
-	$("#zoom-slider").on("change", function() {
+	/*$("#zoom-slider").on("change", function() {
 		transitTo(getZoomTransform($(this).val()));
-	});
+	});*/
 	$("#reso-slider").on("change", function() {
 		resoFactor = parseFloat($(this).val());
 		genGrid();
+	});
+	$("#bleed-slider").on("change", function() {
+		leaflaggrid._redraw()
 	});
 	$("#freezer>input").on("change", function() {
 		allow_redraw = !this.checked;

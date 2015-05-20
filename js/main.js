@@ -6735,6 +6735,8 @@ function initLeaflet() {
     }
     var tileUrl = "http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png";
     tileUrl = "http://{s}.sm.mapstack.stamen.com/((toner-background,$fff[@30],$002266[hsl-color@40]),(toner-labels,$fff[@10]))/{z}/{x}/{y}.png";
+    tileUrl = "http://{s}.sm.mapstack.stamen.com/(watercolor,$fff[@30],$fff[hsl-saturation@80])[@50]/{z}/{x}/{y}.png";
+    tileUrl = "http://{s}.sm.mapstack.stamen.com/((watercolor,$fff[@30],$fff[hsl-saturation@80])[@50],toner-labels[@40])/{z}/{x}/{y}.png";
     //http://a.sm.mapstack.stamen.com/(water-mask,$000[@10],$00ff55[hsl-color])/3/3/6.png
     //http://b.sm.mapstack.stamen.com/((toner-background,$fff[difference],$fff[@60]),(toner-labels,$000[@10])[@80])/11/330/795.png
     leafly = L.map("leaflet", {
@@ -7027,7 +7029,7 @@ function drawPlot(leavas, params) {
 	}*/
     //var canvasRenderBM = new Date();
     // sizes and radii of primitiva
-    var bleed = 1.1;
+    var bleed = parseFloat($("#bleed-slider").val());
     // + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
     // var wx = ((drawdat.reso*canvasW)/360) * bleed,
     // 	wy = ((drawdat.reso*canvasH)/180) * bleed, 
@@ -7050,22 +7052,31 @@ function drawPlot(leavas, params) {
     drawdat.ry = ry;
     var i = -1, n = drawdat.draw.length, d, cx, cy, fc, gradient;
     // TODO keep only what is used
+    //var col;
     // mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
     // mapctx.scale(lastTransformState.scale, lastTransformState.scale);
     if (typeof clear === "number") {
         clearTile(clear);
     }
+    var galph = 1 - (bleed - 1) * .15;
+    if (galph > 1) {
+        galph = 1;
+    }
+    mapctx.globalAlpha = galph;
     while (++i < n) {
         d = drawdat.draw[i];
         p = leavas._map.latLngToContainerPoint(d[0]);
         // cx = d.x; //d[0][0];
         // cy = d.y; //[0][1];
         //wy =  2*r * (Math.abs(d[0][0])/45);
-        wy = p.y - leavas._map.latLngToContainerPoint([ d[0][0] + drawdat.reso, d[0][1] ]).y;
+        //wy = p.y - leavas._map.latLngToContainerPoint([d[0][0]+drawdat.reso,d[0][1]]).y;
+        //ry = (p.y - leavas._map.latLngToContainerPoint([d[0][0]+drawdat.reso,d[0][1]]).y) / 2;
         //console.log(d[0], wy);
         //wy = p.y - (128 / Math.PI) * Math.pow(2,leafly.getZoom()) * (Math.PI - Math.log(Math.tan(Math.PI/4 + (p.y-1)/2)));
         //console.log(p.y,wy);
-        mapctx.fillStyle = //fc = 
+        //col = d3.rgb(colorScale(d[1]));
+        mapctx.fillStyle = //"rgba("+col.r+","+col.g+","+col.b+",0.8)";
+        //fc = 
         /*"rgb("+
 			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
 			Math.floor(gmax -Math.floor(Math.log(d[1])*glog_factor))+","+
@@ -7078,8 +7089,9 @@ function drawPlot(leavas, params) {
 		gradient.addColorStop(0.7, fc+"1)");
 		gradient.addColorStop(1,fc+"1)");*/
         //ctx.fillStyle = gradient;
-        //ctx.fillRect(cx-rx,cy-rx,wx,wy);
-        mapctx.fillRect(p.x, p.y - wy, wx, wy);
+        mapctx.beginPath();
+        mapctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+        mapctx.fill();
     }
     /*if(highlight !== undefined) {
 		if(reso === undefined) { reso = drawdat.reso; }
@@ -7097,6 +7109,7 @@ function drawPlot(leavas, params) {
     if (typeof clear !== "number") {
         console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (Date.now() - bm) + "ms");
     }
+    mapctx.globalAlpha = 1;
     mapctx.restore();
     // todo - return benchmark
     return Date.now() - bm;
@@ -7936,12 +7949,15 @@ function setupControlHandlers() {
     $(".controls input[type='range']").on("input", function() {
         $(this).siblings("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
     });
-    $("#zoom-slider").on("change", function() {
-        transitTo(getZoomTransform($(this).val()));
-    });
+    /*$("#zoom-slider").on("change", function() {
+		transitTo(getZoomTransform($(this).val()));
+	});*/
     $("#reso-slider").on("change", function() {
         resoFactor = parseFloat($(this).val());
         genGrid();
+    });
+    $("#bleed-slider").on("change", function() {
+        leaflaggrid._redraw();
     });
     $("#freezer>input").on("change", function() {
         allow_redraw = !this.checked;

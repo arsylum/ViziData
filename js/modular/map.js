@@ -258,7 +258,7 @@ function drawPlot(leavas, params) {
 	//var canvasRenderBM = new Date();
 
 	// sizes and radii of primitiva
-	var bleed = 1.1;// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
+	var bleed = parseFloat($("#bleed-slider").val());// + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
 	// var wx = ((drawdat.reso*canvasW)/360) * bleed,
 	// 	wy = ((drawdat.reso*canvasH)/180) * bleed, 
 	// 	//rx = ((drawdat.reso*canvasW)/360/2) * bleed,
@@ -284,6 +284,7 @@ function drawPlot(leavas, params) {
 	drawdat.ry = ry;
 
 	var i= -1, n = drawdat.draw.length, d, cx, cy, fc, gradient; // TODO keep only what is used
+	//var col;
 
   	// mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
   	// mapctx.scale(lastTransformState.scale, lastTransformState.scale);
@@ -292,18 +293,25 @@ function drawPlot(leavas, params) {
   		clearTile(clear);
   	}
 
+  	var galph = 1.0 - ((bleed - 1) * 0.15);
+  	if(galph > 1) { galph = 1.0; }
+  	mapctx.globalAlpha = galph;
+
 	while(++i < n) {
 		d = drawdat.draw[i];
 		p = leavas._map.latLngToContainerPoint(d[0]);
 		// cx = d.x; //d[0][0];
 		// cy = d.y; //[0][1];
 		//wy =  2*r * (Math.abs(d[0][0])/45);
-		wy = p.y - leavas._map.latLngToContainerPoint([d[0][0]+drawdat.reso,d[0][1]]).y;
+		//wy = p.y - leavas._map.latLngToContainerPoint([d[0][0]+drawdat.reso,d[0][1]]).y;
+		//ry = (p.y - leavas._map.latLngToContainerPoint([d[0][0]+drawdat.reso,d[0][1]]).y) / 2;
 		//console.log(d[0], wy);
 		//wy = p.y - (128 / Math.PI) * Math.pow(2,leafly.getZoom()) * (Math.PI - Math.log(Math.tan(Math.PI/4 + (p.y-1)/2)));
 		//console.log(p.y,wy);
 
-		mapctx.fillStyle = 
+ 		//col = d3.rgb(colorScale(d[1]));
+
+		mapctx.fillStyle = //"rgba("+col.r+","+col.g+","+col.b+",0.8)";
 		//fc = 
 		/*"rgb("+
 			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
@@ -319,14 +327,18 @@ function drawPlot(leavas, params) {
 		gradient.addColorStop(1,fc+"1)");*/
 		//ctx.fillStyle = gradient;
 
+		mapctx.beginPath();
+		mapctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+		mapctx.fill();
+
 		//ctx.fillRect(cx-rx,cy-rx,wx,wy);
-		mapctx.fillRect(p.x,p.y-wy,wx,wy);/*
-		ctx.beginPath();
+		//mapctx.fillRect(p.x,p.y-wy,wx,wy);/*
+		//ctx.beginPath();
 		//ctx.moveTo(cx,cy);
 		//ctx.arc(cx, cy, rx, 0, 2 * Math.PI);
-		ctx.ellipse(cx, cy, rx, ry, 0, 0, 2*Math.PI);
+		//ctx.ellipse(cx, cy, rx, ry, 0, 0, 2*Math.PI);
 		//ctx.stroke();
-		ctx.fill();
+		//ctx.fill();
 		//*/
 	}
 	/*if(highlight !== undefined) {
@@ -346,6 +358,7 @@ function drawPlot(leavas, params) {
 	if(typeof clear !== "number") {
 		console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(Date.now()-bm)+"ms");
 	}
+	mapctx.globalAlpha = 1.0;
 	mapctx.restore();
 	// todo - return benchmark
 	return (Date.now()-bm);
