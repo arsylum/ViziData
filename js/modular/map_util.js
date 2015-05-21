@@ -153,10 +153,15 @@ function cco() {
 /**
 * adjust the currently pointed at geo coordinates */
 function currentCursorPos(e) {
-	var z = leafly.getZoom();
+	var z = leafly.getZoom(),
+		p = e.containerPoint;
+		p.x -= M_HOVER_OFFSET.l;
+		p.y -= M_HOVER_OFFSET.t;
+
+	var ll = leafly.containerPointToLatLng(p);
 	return { 
-		x: e.latlng.lng - resoFactor/(z+1),
-		y: e.latlng.lat + resoFactor/(z+1)
+		x: ll.lng,
+		y: ll.lat
 	};
 }
 

@@ -6579,8 +6579,8 @@ M_ZOOM_RANGE = [ 1, 8 ], // zoom range (results in svg scale 2^(v-1))
 M_BUBBLE_OFFSET = 10, // distance of map tooltip from pointer
 M_HOVER_OFFSET = {
     // pointer selection offset
-    l: 0,
-    t: 0
+    l: 5,
+    t: 5
 };
 
 // color scale
@@ -7435,10 +7435,13 @@ function cco() {
 /**
 * adjust the currently pointed at geo coordinates */
 function currentCursorPos(e) {
-    var z = leafly.getZoom();
+    var z = leafly.getZoom(), p = e.containerPoint;
+    p.x -= M_HOVER_OFFSET.l;
+    p.y -= M_HOVER_OFFSET.t;
+    var ll = leafly.containerPointToLatLng(p);
     return {
-        x: e.latlng.lng - resoFactor / (z + 1),
-        y: e.latlng.lat + resoFactor / (z + 1)
+        x: ll.lng,
+        y: ll.lat
     };
 }
 

@@ -19,8 +19,8 @@ var M_BOUNDING_THRESHOLD = 0,	// grid clipping tolerance
 	M_ZOOM_RANGE = [1,8],		// zoom range (results in svg scale 2^(v-1))
 	M_BUBBLE_OFFSET = 10,		// distance of map tooltip from pointer
 	M_HOVER_OFFSET = {			// pointer selection offset
-		l: 0, 
-		t: 0
+		l: 5, 
+		t: 5
 	};
 // color scale
 var M_COLOR_SCALE = [	// provided by colorbrewer2.org
