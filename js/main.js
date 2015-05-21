@@ -6660,8 +6660,12 @@ resoFactor;
 /// positions and dimensions
 var viewportH, viewportW;
 
-var leaflaggrid, leavlover;
+/// leaflet layers
+var leafloor, // tilemap layer
+leaflaggrid, // grid layer
+leavlover;
 
+// overlay layer
 // map canvas
 var //mapcan,	mapctx,
 overcan, overctx, canvasW, canvasH, canvasT, canvasL;
@@ -6728,34 +6732,6 @@ $(function() {
         });
     }
 });
-
-function initLeaflet() {
-    if (leafly !== undefined) {
-        return false;
-    }
-    var tileUrl = "http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png";
-    tileUrl = "http://{s}.sm.mapstack.stamen.com/((toner-background,$fff[@30],$002266[hsl-color@40]),(toner-labels,$fff[@10]))/{z}/{x}/{y}.png";
-    tileUrl = "http://{s}.sm.mapstack.stamen.com/(watercolor,$fff[@30],$fff[hsl-saturation@80])[@50]/{z}/{x}/{y}.png";
-    tileUrl = "http://{s}.sm.mapstack.stamen.com/((watercolor,$fff[@30],$fff[hsl-saturation@80])[@50],toner-labels[@40])/{z}/{x}/{y}.png";
-    //http://a.sm.mapstack.stamen.com/(water-mask,$000[@10],$00ff55[hsl-color])/3/3/6.png
-    //http://b.sm.mapstack.stamen.com/((toner-background,$fff[difference],$fff[@60]),(toner-labels,$000[@10])[@80])/11/330/795.png
-    leafly = L.map("leaflet", {
-        //maxBounds: [[-90,-180],[90,180]],
-        attributionControl: false,
-        worldCopyJump: true
-    }).setView([ 0, 0 ], 2);
-    L.tileLayer(tileUrl, {}).addTo(leafly);
-    leafly.on("moveend", function() {
-        genGrid();
-    }).on("mousemove", function(e) {
-        //console.log(e.latlng);
-        canvasMouseMove(e);
-    }).on("click", function(e) {
-        canvasMouseClick(e);
-    });
-    leaflaggrid = L.canvasOverlay();
-    leaflaggrid.drawing(drawPlot).addTo(leafly);
-}
 
 ////////////////
 /// on resize //
@@ -7219,6 +7195,62 @@ function highlightCellsFor(key) {
         overctx.stroke();
     }
     overctx.restore();
+}
+
+function initLeaflet() {
+    if (leafly !== undefined) {
+        return false;
+    }
+    /*var tileUrl = "http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png";
+	tileUrl = "http://{s}.sm.mapstack.stamen.com/((toner-background,$fff[@30],$002266[hsl-color@40]),(toner-labels,$fff[@10]))/{z}/{x}/{y}.png";
+	tileUrl = "http://{s}.sm.mapstack.stamen.com/((watercolor,$fff[@30],$fff[hsl-saturation@80])[@50])/{z}/{x}/{y}.png";
+	//tileUrl = "http://{s}.sm.mapstack.stamen.com/((watercolor,$fff[@30],$fff[hsl-saturation@80])[@50],toner-labels[@40])/{z}/{x}/{y}.png";
+	*/
+    //http://a.sm.mapstack.stamen.com/(water-mask,$000[@10],$00ff55[hsl-color])/3/3/6.png
+    //http://b.sm.mapstack.stamen.com/((toner-background,$fff[difference],$fff[@60]),(toner-labels,$000[@10])[@80])/11/330/795.png
+    leafly = L.map("leaflet", {
+        //maxBounds: [[-90,-180],[90,180]],
+        attributionControl: false,
+        worldCopyJump: true
+    }).setView([ 0, 0 ], 2);
+    leafloor = L.tileLayer();
+    //tileUrl, {
+    //noWrap: true,
+    //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    //});
+    changeTileSrc();
+    leafloor.addTo(leafly);
+    leafly.on("moveend", function() {
+        genGrid();
+    }).on("mousemove", function(e) {
+        //console.log(e.latlng);
+        canvasMouseMove(e);
+    }).on("click", function(e) {
+        canvasMouseClick(e);
+    });
+    leaflaggrid = L.canvasOverlay();
+    leaflaggrid.drawing(drawPlot).addTo(leafly);
+}
+
+function changeTileSrc() {
+    if (leafloor === undefined) {
+        return false;
+    }
+    var upre = "http://{s}.sm.mapstack.stamen.com/", usuf = "/{z}/{x}/{y}.png", parm = "(", url;
+    $("#ctrl-maplayer input[type=checkbox]").each(function() {
+        if (this.checked) {
+            if (parm !== "(") {
+                parm += ",";
+            }
+            parm += $(this).attr("data-str");
+        }
+    });
+    if (parm === "(") {
+        url = "";
+    } else {
+        url = upre + parm + ")" + usuf;
+    }
+    leafloor.setUrl(url);
 }
 
 /////////////////////
@@ -7968,6 +8000,10 @@ function setupControlHandlers() {
             genGrid();
         }
     });
+    $("#map-opacity").on("input", function() {
+        $(leafloor._container).css("opacity", $(this).val());
+    });
+    $("#ctrl-maplayer input[type=checkbox]").on("change", changeTileSrc);
     $("#ctrl-tlmode input").on("change", function() {
         timelineIsGlobal = parseInt($(this).val());
         updateChartData();

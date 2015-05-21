@@ -33,7 +33,7 @@ function setupControlHandlers() {
 		genGrid();
 	});
 	$("#bleed-slider").on("change", function() {
-		leaflaggrid._redraw()
+		leaflaggrid._redraw();
 	});
 	$("#freezer>input").on("change", function() {
 		allow_redraw = !this.checked;
@@ -44,6 +44,10 @@ function setupControlHandlers() {
 			genGrid();
 		}
 	});
+	$("#map-opacity").on("input", function() {
+		$(leafloor._container).css("opacity",$(this).val());
+	});
+	$("#ctrl-maplayer input[type=checkbox]").on("change", changeTileSrc);
 
 	$("#ctrl-tlmode input").on("change", function() {
 		timelineIsGlobal = parseInt($(this).val());

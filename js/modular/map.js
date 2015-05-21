@@ -509,3 +509,82 @@ function highlightCellsFor(key) {
   	overctx.restore();
 	//console.log(Date.now() - bm + 'ms');
 }
+
+function initLeaflet() {
+	if(leafly !== undefined) { return false; }
+
+	/*var tileUrl = "http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png";
+	tileUrl = "http://{s}.sm.mapstack.stamen.com/((toner-background,$fff[@30],$002266[hsl-color@40]),(toner-labels,$fff[@10]))/{z}/{x}/{y}.png";
+	tileUrl = "http://{s}.sm.mapstack.stamen.com/((watercolor,$fff[@30],$fff[hsl-saturation@80])[@50])/{z}/{x}/{y}.png";
+	//tileUrl = "http://{s}.sm.mapstack.stamen.com/((watercolor,$fff[@30],$fff[hsl-saturation@80])[@50],toner-labels[@40])/{z}/{x}/{y}.png";
+	*/
+//http://a.sm.mapstack.stamen.com/(water-mask,$000[@10],$00ff55[hsl-color])/3/3/6.png
+//http://b.sm.mapstack.stamen.com/((toner-background,$fff[difference],$fff[@60]),(toner-labels,$000[@10])[@80])/11/330/795.png
+	leafly = L.map('leaflet', {
+		//maxBounds: [[-90,-180],[90,180]],
+		attributionControl: false,
+		worldCopyJump: true
+		//crs: L.CRS.EPSG4326
+	}).setView([0,0], 2);
+	leafloor = L.tileLayer();//tileUrl, {
+		//noWrap: true,
+	    //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+	//});
+	changeTileSrc();
+	leafloor.addTo(leafly);
+	
+
+	
+	
+	leafly.on("moveend", function() {
+		genGrid();
+	}).on("mousemove", function(e) {
+		//console.log(e.latlng);
+		canvasMouseMove(e);
+	}).on("click", function(e) {
+		canvasMouseClick(e);
+	});
+
+	leaflaggrid = L.canvasOverlay();
+	leaflaggrid
+		.drawing(drawPlot)
+		.addTo(leafly);
+
+        /*function drawingOnCanvas(canvasOverlay, params) {
+        	var bm = Date.now();
+            var ctx = params.canvas.getContext('2d');
+            ctx.clearRect(0, 0, params.canvas.width, params.canvas.height);
+            ctx.fillStyle = "rgba(255,116,0, 0.7)";
+            //var dots = [[0,0],[10,10],[20,20]];
+
+            for(var i = 0; i<drawdat.draw.length; i++) {
+            	var p = canvasOverlay._map.latLngToContainerPoint(drawdat.draw[i][0]);
+            	ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.closePath();
+            }*/
+            
+// console.log(Date.now() - bm + "ms");
+//         }
+
+
+}
+
+function changeTileSrc() {
+	if(leafloor === undefined) { return false; }
+
+	var upre = 'http://{s}.sm.mapstack.stamen.com/',
+		usuf = '/{z}/{x}/{y}.png',
+		parm = '(',
+		url;
+	$("#ctrl-maplayer input[type=checkbox]").each(function() {
+		if(this.checked) {
+			if(parm !== '(') { parm += ','; }
+			parm += $(this).attr("data-str");
+		}
+	});
+	if(parm === '(') { url = ''; }
+	else { url = upre + parm + ')' + usuf; }
+	leafloor.setUrl(url);
+}

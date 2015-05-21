@@ -55,27 +55,49 @@
 		</div>
 		<div id="controls-map" class="controls">
 			<h2>Map Settings</h2>
-			<fieldset class="slider">
-				<!--<label id="ctrl-reso" class="slider">-->
-				<legend>Grid Size</legend>
-				<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1" />
-				<!--</label>-->
-				<input id="reso-display" type="text" readonly size="2" value="1" />
-			</fieldset>
-			<fieldset class="slider">
-				<legend>Point Drawing Size</legend>
-				<input id="bleed-slider" type="range" min="0.5" max="3" step="0.1" value="1" />
-				<input id="bleed-display" type="text" readonly size="2" value="1" />
-			<!--<fieldset class="slider">
-				<legend>Zoom</legend>
-				<input id="zoom-slider" type="range" step="0.1" value="1" disabled />
-				<input id="zoom-display" type="text" readonly size="3" value="1.0" />
-			</fieldset>-->
-			<fieldset>
-				<label id="freezer">
-					<input type="checkbox" />
-					prevent redrawing
+			<fieldset id="ctrl-maplayer" class="fieldgroup">
+				<legend>Map</legend>
+				<fieldset class="slider">
+					<legend>Opacity</legend>
+					<input type="range" id="map-opacity" min="0" max="1" step="0.1" value="1" />
+					<input type="text" id="map-opacity-display" readonly size="2" value="1" />
+				</fieldset>
+				<label>
+					<input id="maplayer-shape" type="checkbox" checked 
+						data-str="(watercolor,$fff[@30],$fff[hsl-saturation@80])[@50]" />
+					Shape
 				</label>
+				<label>
+					<input type="checkbox" id="maplayer-labels" checked
+						data-str="toner-labels[@40]" />
+					Labels
+				</label>
+			</fieldset>
+			<fieldset class="fieldgroup">
+				<legend>Grid</legend>
+				<fieldset class="slider">
+					<!--<label id="ctrl-reso" class="slider">-->
+					<legend>Size</legend>
+					<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1" />
+					<!--</label>-->
+					<input id="reso-display" type="text" readonly size="2" value="1" />
+				</fieldset>
+				<fieldset class="slider">
+					<legend>Drawing Overlap</legend>
+					<input id="bleed-slider" type="range" min="0.5" max="3" step="0.1" value="1" />
+					<input id="bleed-display" type="text" readonly size="2" value="1" />
+				</fieldset>
+				<!--<fieldset class="slider">
+					<legend>Zoom</legend>
+					<input id="zoom-slider" type="range" step="0.1" value="1" disabled />
+					<input id="zoom-display" type="text" readonly size="3" value="1.0" />
+				</fieldset>-->
+				<!--<fieldset>
+					<label id="freezer">
+						<input type="checkbox" />
+						prevent redrawing
+					</label>
+				</fieldset>-->
 			</fieldset>
 
 		</div>

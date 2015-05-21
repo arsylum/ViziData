@@ -274,6 +274,20 @@ menu#timefilter {
 		}
 	}
 
+	.fieldgroup {
+		//margin: -($box-padding / 2);
+		//padding: $box-padding / 2;
+		border: 2px rgb(208, 208, 208) solid;
+		border-radius: 0 0 $outer-border-radius/2 $outer-border-radius/2;
+
+		&>legend {
+			font-family: sans-serif;
+		}
+	}
+	h2+.fieldgroup {
+		margin-top: 0;
+	}
+
 	h2 {
 		//border: 1px orange solid;
 		border-radius: ($outer-border-radius/2) ($outer-border-radius/2) 0 0;

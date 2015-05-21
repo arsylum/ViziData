@@ -99,8 +99,10 @@ var gdata = [],		// global rawdata
 var viewportH,
 	viewportW;
 
-var leaflaggrid,
-	leavlover;
+/// leaflet layers
+var leafloor,		// tilemap layer
+	leaflaggrid,	// grid layer
+	leavlover;		// overlay layer
 // map canvas
 var //mapcan,	mapctx,
 	overcan, overctx,
