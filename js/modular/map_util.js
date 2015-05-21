@@ -163,7 +163,8 @@ function currentCursorPos(e) {
 /**
 * map tooltip */
 function canvasMouseMove(e) {
-	if(drawdat === undefined) { return false; } // no drawing, no tooltip!
+	// doesn't work, fix or ignore, not critical (console errors when map is not ready)
+	//if(drawdat === undefined) { return false; } // no drawing, no tooltip!
 
 	/*var cc = cco();
 	var x = cc[0],
@@ -183,13 +184,17 @@ function canvasMouseMove(e) {
 
 	if(cell !== undefined) {
 
+		var p = index2geoCoord(i);
+		var x = (p[0] + drawdat.reso/2).toFixed(2),
+			y = (p[1] + drawdat.reso/2).toFixed(2);
+
 		// display the info bubble
 		clearTimeout(bubbleTimer);
 		$("div#bubble").css("opacity","1")
 			.css("bottom", (viewportH - e.originalEvent.pageY + drawdat.wy + M_BUBBLE_OFFSET) + "px")
 			.css("right", (viewportW - e.originalEvent.pageX + drawdat.wy + M_BUBBLE_OFFSET*resoFactor) + "px")
 			.html(cell.length +" <em>"+current_setsel.strings.label+"</em><br>"+
-				"<span>["+(gc.x.toFixed(2))+", "+(gc.y.toFixed(2))+"]</span>");
+				"<span>["+x+", "+y+"]</span>");
 
 	} else {
 		// hide the info bubble
@@ -201,7 +206,8 @@ function canvasMouseMove(e) {
 }
 
 function canvasMouseClick(e) {
-	if(drawdat === undefined) { return false; } // no drawing, no info!
+	// doesn't work, fix or ignore, not critical (console errors when map is not ready)
+	//if(drawdat === undefined) { return false; } // no drawing, no info!
 
 	/*var cc = cco();
 	var x = cc[0],

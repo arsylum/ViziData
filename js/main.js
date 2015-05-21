@@ -7103,10 +7103,13 @@ function highlightCell(c) {
         p = leafly.latLngToContainerPoint(g);
         x = p.x;
         y = p.y;
-        wy = y - leafly.latLngToContainerPoint([ g[0] + drawdat.reso, g[1] ]).y;
-        ry = wy / 2;
+        //wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
+        //ry = wy/2;
         overctx.fillStyle = "rgba(255,120,0,0.8)";
-        overctx.fillRect(x, y - wy, wx, wy);
+        //overctx.fillRect(x,y-wy,wx,wy);
+        overctx.beginPath();
+        overctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+        overctx.fill();
         overctx.strokeStyle = "rgba(255,255,255,0.4)";
         overctx.lineWidth = 3 / lastTransformState.scale * linewidth;
         overctx.beginPath();
@@ -7130,15 +7133,18 @@ function highlightCell(c) {
     p = leafly.latLngToContainerPoint(g);
     x = p.x;
     y = p.y;
-    wy = y - leafly.latLngToContainerPoint([ g[0] + drawdat.reso, g[1] ]).y;
-    ry = wy / 2;
+    //wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
+    //ry = wy/2;
     /*	} else {
 		console.warn("highlightCell: invalid first argument");
 		return false;
 	}*/
     // highlight cell rect
     overctx.fillStyle = "rgba(255,130,0,0.7)";
-    overctx.fillRect(x, y - wy, wx, wy);
+    //overctx.fillRect(x,y-wy,wx,wy);
+    overctx.beginPath();
+    overctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+    overctx.fill();
     // glow circle
     var gradient = overctx.createRadialGradient(x + rx, y - ry, 0, x + rx, y - ry, rx * 4);
     gradient.addColorStop(0, "rgba(255,255,255,0.6");
@@ -7439,10 +7445,8 @@ function currentCursorPos(e) {
 /**
 * map tooltip */
 function canvasMouseMove(e) {
-    if (drawdat === undefined) {
-        return false;
-    }
-    // no drawing, no tooltip!
+    // doesn't work, fix or ignore, not critical (console errors when map is not ready)
+    //if(drawdat === undefined) { return false; } // no drawing, no tooltip!
     /*var cc = cco();
 	var x = cc[0],
 		y = cc[1];
@@ -7456,9 +7460,11 @@ function canvasMouseMove(e) {
     highlightCell(i);
     $("#hud").text("(" + gc.x.toFixed(5) + ", " + gc.y.toFixed(5) + ")");
     if (cell !== undefined) {
+        var p = index2geoCoord(i);
+        var x = (p[0] + drawdat.reso / 2).toFixed(2), y = (p[1] + drawdat.reso / 2).toFixed(2);
         // display the info bubble
         clearTimeout(bubbleTimer);
-        $("div#bubble").css("opacity", "1").css("bottom", viewportH - e.originalEvent.pageY + drawdat.wy + M_BUBBLE_OFFSET + "px").css("right", viewportW - e.originalEvent.pageX + drawdat.wy + M_BUBBLE_OFFSET * resoFactor + "px").html(cell.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + gc.x.toFixed(2) + ", " + gc.y.toFixed(2) + "]</span>");
+        $("div#bubble").css("opacity", "1").css("bottom", viewportH - e.originalEvent.pageY + drawdat.wy + M_BUBBLE_OFFSET + "px").css("right", viewportW - e.originalEvent.pageX + drawdat.wy + M_BUBBLE_OFFSET * resoFactor + "px").html(cell.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + x + ", " + y + "]</span>");
     } else {
         // hide the info bubble
         //highlightCell(false);
@@ -7469,10 +7475,8 @@ function canvasMouseMove(e) {
 }
 
 function canvasMouseClick(e) {
-    if (drawdat === undefined) {
-        return false;
-    }
-    // no drawing, no info!
+    // doesn't work, fix or ignore, not critical (console errors when map is not ready)
+    //if(drawdat === undefined) { return false; } // no drawing, no info!
     /*var cc = cco();
 	var x = cc[0],
 		y = cc[1];

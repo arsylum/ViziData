@@ -389,11 +389,14 @@ function highlightCell(c) {
   		x = p.x;
   		y = p.y;
 
-  		wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
-		ry = wy/2;
+  		//wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
+		//ry = wy/2;
 
   		overctx.fillStyle = "rgba(255,120,0,0.8)";
-		overctx.fillRect(x,y-wy,wx,wy);
+		//overctx.fillRect(x,y-wy,wx,wy);
+		overctx.beginPath();
+		overctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+		overctx.fill();
 
 		overctx.strokeStyle = "rgba(255,255,255,0.4)";
 		overctx.lineWidth = 3/lastTransformState.scale * linewidth;
@@ -421,8 +424,8 @@ function highlightCell(c) {
 	x = p.x;
 	y = p.y;
 	
-	wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
-	ry = wy/2;
+	//wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
+	//ry = wy/2;
 
 /*	} else {
 		console.warn("highlightCell: invalid first argument");
@@ -432,7 +435,11 @@ function highlightCell(c) {
 
   	// highlight cell rect
   	overctx.fillStyle = "rgba(255,130,0,0.7)";
-	overctx.fillRect(x,y-wy,wx,wy);
+	//overctx.fillRect(x,y-wy,wx,wy);
+	overctx.beginPath();
+	overctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+	overctx.fill();
+
 
 	// glow circle
 	var gradient = overctx.createRadialGradient(x+rx,y-ry,0, x+rx, y-ry, rx*4);
