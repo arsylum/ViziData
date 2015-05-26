@@ -44,18 +44,14 @@ function generateGrid(reso, mAE, data) {
 		// get axisExtremes
 		var cAE = getTimeSelection();
 
-		/*// boundary enforcement
-		if(mAE[0].min < C_WMIN) { mAE[0].min = C_WMIN; }
-		if(mAE[0].max > C_WMAX) { mAE[0].max = C_WMAX; }
-		if(mAE[1].min < C_HMIN) { mAE[1].min = C_HMIN; }
-		if(mAE[1].max > C_HMAX) { mAE[1].max = C_HMAX; }*/
-
 		// min and max tile
 		var mmt = getMinMaxTile(mAE);
 		var tMin = mmt.min,
 			tMax = mmt.max;
 		console.log("  # will iterate over tiles "+tMin+" to "+tMax);
 		
+		// tile processing direction
+		renderRTL = lastMapCenter.lng > (lastMapCenter = leafly.getCenter()).lng;
 
 		/// finish
 		var finish = function() {
@@ -65,7 +61,7 @@ function generateGrid(reso, mAE, data) {
 			calcPlotDat(cellmap, reso);
 			console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
 
-			filledTiles = [tMin+1,tMax-1];
+			//filledTiles = [tMin+1,tMax-1];
 
 			$("#legend").html("<em>inside the visible area</em><br>"+
 				//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
@@ -108,9 +104,11 @@ function generateGrid(reso, mAE, data) {
 					}
 				}
 				// draw each tile after aggregating (if not already drawn)
-				if(i < filledTiles[0] || i > filledTiles[1]) {
+				//if(i < filledTiles[0] || i > filledTiles[1]) {
 					//progBM += drawPlot(i, cellmapprog, reso) +',';
-				}
+					calcPlotDat(cellmapprog, reso, i);
+					leaflaggrid._redraw();
+				//}
 				setTimeout(function() {
 					iterate(++offset);
 				},1);
@@ -169,7 +167,7 @@ function testing_aggregator(tmap,obj,reso) {
 
 /**
 * calculate new plot drawing object */
-function calcPlotDat(newmap, reso) {
+function calcPlotDat(newmap, reso, tile) {
 	if(newmap !== undefined && reso === undefined) { 
 		conslole.warn('drawPlot(): newmap given but no resolution. Using old drawing data.');
 	} 
@@ -197,11 +195,13 @@ function calcPlotDat(newmap, reso) {
 		});
 		drawdat = {draw: draw, min: min, max: max, reso: reso};
 	}
+	drawdat.tile = tile;
 	//if(typeof clear !== "number" && newmap !== undefined) {
+	if(tile === undefined) {
 		console.log("  ~ drawing "+drawdat.draw.length+" shapes");
 		console.log("  # data extreme values - min: "+drawdat.min+", max: "+drawdat.max);
 		console.log("  |BM| (dataset generation in "+(new Date()-uMBM)+"ms)");
-	//}
+	}
 }
 
 /**
@@ -212,7 +212,7 @@ function calcPlotDat(newmap, reso) {
 //function drawPlot(clear, newmap, reso) { //TODO remove param?
 function drawPlot(leavas, params) {
 	if(drawdat.draw === undefined) { return false; }
-	console.log(Date.now()+': drawing..');
+	//console.log(Date.now()+': drawing..');
 
 	// console.log(leavas);
 	// console.log(params);
@@ -220,7 +220,7 @@ function drawPlot(leavas, params) {
 	// dont redraw the first time when zoom is changed
 	// (redraw when it is called again at the end of genGrid)
 	//if(lastMapZoom !== (lastMapZoom = leafly.getZoom())) { return false; }
-	if(mutexGenGrid !== 0) { return false; }
+	//if(mutexGenGrid !== 0) { return false; }
 
 	// if(clear === undefined) { clear = true; }
 
@@ -233,9 +233,9 @@ function drawPlot(leavas, params) {
 	var mapctx = params.canvas.getContext('2d');
 
 	// mapctx.save();
-	//if(clear === true) {
-	mapctx.clearRect(0,0,params.canvas.width, params.canvas.height);
-	//}
+	if(drawdat.tile === undefined) {
+		mapctx.clearRect(0,0,params.canvas.width, params.canvas.height);
+	}
 
 
 	// color defs
@@ -293,8 +293,8 @@ function drawPlot(leavas, params) {
   	// mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
   	// mapctx.scale(lastTransformState.scale, lastTransformState.scale);
 
-  	if(typeof clear === "number") {
-  		clearTile(clear);
+  	if(typeof drawdat.tile === "number") {
+  		clearTile(drawdat.tile);
   	}
 
   	var galph = 1.0 - ((bleed - 1) * 0.15);
@@ -359,13 +359,13 @@ function drawPlot(leavas, params) {
 		mapctx.strokeRect(c[0],c[1]-wy,wx,wy);
 	}*/
 
-	if(typeof clear !== "number") {
+	if(drawdat.tile === undefined) {
 		console.log("  |BM| canvas rendering of "+drawdat.draw.length+" shapes took "+(Date.now()-bm)+"ms");
 	}
 	mapctx.globalAlpha = 1.0;
 	mapctx.restore();
 
-	return (Date.now()-bm);
+	//return (Date.now()-bm);
 }
 
 
@@ -403,12 +403,12 @@ function highlightCell(c) {
 		overctx.fill();
 
 		overctx.strokeStyle = "rgba(255,255,255,0.4)";
-		overctx.lineWidth = 3/lastTransformState.scale * linewidth;
+		overctx.lineWidth = 3 * linewidth;
 		overctx.beginPath();
 		overctx.ellipse(x+rx,y-ry,rx*1.5,ry*1.5,0,0,TPI);
 		overctx.stroke();
 		overctx.strokeStyle = "rgba(0,0,0,0.5)";
-		overctx.lineWidth = 1/lastTransformState.scale * linewidth;
+		overctx.lineWidth = 1 * linewidth;
 		overctx.beginPath();
 		overctx.ellipse(x+rx,y-ry,rx*1.5,ry*1.5,0,0,TPI);
 		overctx.stroke();

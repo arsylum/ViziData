@@ -6651,9 +6651,9 @@ chartdat = [], // timeline rendering data
 timeSel, // current timeline selection
 cellmap, // latest generated tilemap
 drawdat = {}, // latest generated drawing data
-filledTiles = [ 9999 ], // don't need to draw whats already there [min,max]
+//filledTiles = [9999], // don't need to draw whats already there [min,max]
 selectedCell = false, // currently selected cell
-renderRTL = false, // flag for tile iteration direction
+renderRTL = false, // flag for progressive tile iteration direction
 resoFactor;
 
 // current value of the reso slider
@@ -6672,6 +6672,7 @@ var //mapcan,	mapctx,
 canvasW, canvasH, canvasT, canvasL;
 
 var //lastTransformState; // remember map scaling (only redraw on changes)
+lastMapCenter, // to determine direction of panning
 lastMapZoom;
 
 // keep track if zoom changes
@@ -6682,9 +6683,10 @@ var langCodes = [ "aa", "ab", "ace", "aeb", "af", "ak", "aln", "als", "am", "an"
 ///////////////////
 $(function() {
     // init stuff
-    lastTransformState = {
-        scale: 1,
-        translate: [ 0, 0 ]
+    //lastTransformState = {scale: 1, translate: [0,0]};
+    lastMapCenter = {
+        lat: 0,
+        lng: 0
     };
     resoFactor = parseFloat($("#reso-slider").val());
     $("#zoom-slider").attr("min", M_ZOOM_RANGE[0]).attr("max", M_ZOOM_RANGE[1]);
@@ -6807,15 +6809,12 @@ function generateGrid(reso, mAE, data) {
         setColorScale(reso);
         // get axisExtremes
         var cAE = getTimeSelection();
-        /*// boundary enforcement
-		if(mAE[0].min < C_WMIN) { mAE[0].min = C_WMIN; }
-		if(mAE[0].max > C_WMAX) { mAE[0].max = C_WMAX; }
-		if(mAE[1].min < C_HMIN) { mAE[1].min = C_HMIN; }
-		if(mAE[1].max > C_HMAX) { mAE[1].max = C_HMAX; }*/
         // min and max tile
         var mmt = getMinMaxTile(mAE);
         var tMin = mmt.min, tMax = mmt.max;
         console.log("  # will iterate over tiles " + tMin + " to " + tMax);
+        // tile processing direction
+        renderRTL = lastMapCenter.lng > (lastMapCenter = leafly.getCenter()).lng;
         /// finish
         var finish = function() {
             console.log("  |BM| progressive drawing(ms): " + progBM);
@@ -6823,7 +6822,7 @@ function generateGrid(reso, mAE, data) {
             //drawPlot(true, cellmap, reso);
             calcPlotDat(cellmap, reso);
             console.log("  |BM| finished genGrid (total of " + (new Date() - bms) + "ms)");
-            filledTiles = [ tMin + 1, tMax - 1 ];
+            //filledTiles = [tMin+1,tMax-1];
             $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
             "we have registered a total of<br>" + "<em>" + count + " " + data.parent.label + "</em><br>" + "that <em>" + data.strings.term + "</em><br>" + "between <em>" + cAE.min + "</em> and <em>" + cAE.max + "</em>");
             selectCell();
@@ -6871,7 +6870,11 @@ function generateGrid(reso, mAE, data) {
                     }
                 }
                 // draw each tile after aggregating (if not already drawn)
-                if (i < filledTiles[0] || i > filledTiles[1]) {}
+                //if(i < filledTiles[0] || i > filledTiles[1]) {
+                //progBM += drawPlot(i, cellmapprog, reso) +',';
+                calcPlotDat(cellmapprog, reso, i);
+                leaflaggrid._redraw();
+                //}
                 setTimeout(function() {
                     iterate(++offset);
                 }, 1);
@@ -6922,7 +6925,7 @@ function testing_aggregator(tmap,obj,reso) {
 */
 /**
 * calculate new plot drawing object */
-function calcPlotDat(newmap, reso) {
+function calcPlotDat(newmap, reso, tile) {
     if (newmap !== undefined && reso === undefined) {
         conslole.warn("drawPlot(): newmap given but no resolution. Using old drawing data.");
     }
@@ -6952,10 +6955,13 @@ function calcPlotDat(newmap, reso) {
             reso: reso
         };
     }
+    drawdat.tile = tile;
     //if(typeof clear !== "number" && newmap !== undefined) {
-    console.log("  ~ drawing " + drawdat.draw.length + " shapes");
-    console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
-    console.log("  |BM| (dataset generation in " + (new Date() - uMBM) + "ms)");
+    if (tile === undefined) {
+        console.log("  ~ drawing " + drawdat.draw.length + " shapes");
+        console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
+        console.log("  |BM| (dataset generation in " + (new Date() - uMBM) + "ms)");
+    }
 }
 
 /**
@@ -6968,15 +6974,13 @@ function drawPlot(leavas, params) {
     if (drawdat.draw === undefined) {
         return false;
     }
-    console.log(Date.now() + ": drawing..");
+    //console.log(Date.now()+': drawing..');
     // console.log(leavas);
     // console.log(params);
     // dont redraw the first time when zoom is changed
     // (redraw when it is called again at the end of genGrid)
     //if(lastMapZoom !== (lastMapZoom = leafly.getZoom())) { return false; }
-    if (mutexGenGrid !== 0) {
-        return false;
-    }
+    //if(mutexGenGrid !== 0) { return false; }
     // if(clear === undefined) { clear = true; }
     // if(newmap !== undefined && reso === undefined) { 
     // 	conslole.warn('drawPlot(): newmap given but no resolution. Using old drawing data.');
@@ -6984,9 +6988,9 @@ function drawPlot(leavas, params) {
     var bm = Date.now();
     var mapctx = params.canvas.getContext("2d");
     // mapctx.save();
-    //if(clear === true) {
-    mapctx.clearRect(0, 0, params.canvas.width, params.canvas.height);
-    //}
+    if (drawdat.tile === undefined) {
+        mapctx.clearRect(0, 0, params.canvas.width, params.canvas.height);
+    }
     // color defs
     /*// TODO color calculation is buggy
 		// (using hsl model might be good idea)
@@ -7034,8 +7038,8 @@ function drawPlot(leavas, params) {
     //var col;
     // mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
     // mapctx.scale(lastTransformState.scale, lastTransformState.scale);
-    if (typeof clear === "number") {
-        clearTile(clear);
+    if (typeof drawdat.tile === "number") {
+        clearTile(drawdat.tile);
     }
     var galph = 1 - (bleed - 1) * .15;
     if (galph > 1) {
@@ -7085,12 +7089,11 @@ function drawPlot(leavas, params) {
 		mapctx.strokeStyle = "rgba(255,127,0,0.75)"; //orange";
 		mapctx.strokeRect(c[0],c[1]-wy,wx,wy);
 	}*/
-    if (typeof clear !== "number") {
+    if (drawdat.tile === undefined) {
         console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (Date.now() - bm) + "ms");
     }
     mapctx.globalAlpha = 1;
     mapctx.restore();
-    return Date.now() - bm;
 }
 
 function highlightCell(c) {
@@ -7113,12 +7116,12 @@ function highlightCell(c) {
         overctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
         overctx.fill();
         overctx.strokeStyle = "rgba(255,255,255,0.4)";
-        overctx.lineWidth = 3 / lastTransformState.scale * linewidth;
+        overctx.lineWidth = 3 * linewidth;
         overctx.beginPath();
         overctx.ellipse(x + rx, y - ry, rx * 1.5, ry * 1.5, 0, 0, TPI);
         overctx.stroke();
         overctx.strokeStyle = "rgba(0,0,0,0.5)";
-        overctx.lineWidth = 1 / lastTransformState.scale * linewidth;
+        overctx.lineWidth = 1 * linewidth;
         overctx.beginPath();
         overctx.ellipse(x + rx, y - ry, rx * 1.5, ry * 1.5, 0, 0, TPI);
         overctx.stroke();
@@ -7426,9 +7429,17 @@ function canvasCoord2geoCoord(x, y) {
 /**
 * clears the area of tile i on map canvas */
 function clearTile(i) {
-    var ppd = canvasW / (C_WMAX - C_WMIN);
-    mapctx.clearRect(current_datsel.tile_width * i * ppd, 0, // x, y
-    current_datsel.tile_width * ppd, canvasH);
+    /*var ppd = canvasW / (C_WMAX - C_WMIN);
+	mapctx.clearRect(
+		current_datsel.tile_width*i*ppd, 0,		// x, y
+		current_datsel.tile_width*ppd, canvasH	// w, h
+	);*/
+    var mapctx = leaflaggrid._canvas.getContext("2d");
+    var bounds = getBounds();
+    var nw = L.latLng(bounds[1].max, current_datsel.tile_width * i), se = L.latLng(bounds[1].min, current_datsel.tile_width * (i + 1));
+    nw = leafly.latLngToContainerPoint(nw);
+    se = leafly.latLngToContainerPoint(se);
+    mapctx.clearRect(nw.x, nw.y, se.x - nw.x, nw.y - se.y);
 }
 
 /**
@@ -8096,8 +8107,8 @@ function urlifyState() {
     hash += "&e=" + time.min + "_" + time.max;
     // grid resolution
     hash += "&g=" + resoFactor;
-    // map transformation
-    hash += "&t=" + lastTransformState.translate[0] + "_" + lastTransformState.translate[1] + "&s=" + lastTransformState.scale;
+    // TODO map transformation
+    //hash += "&t=" + lastTransformState.translate[0] + "_" + lastTransformState.translate[1] + "&s=" + lastTransformState.scale;
     // selected cell
     hash += "&c=" + selectedCell;
     window.location.hash = hash;
@@ -8154,14 +8165,14 @@ function statifyUrl() {
             break;
 
           case "t":
-            // map translation
+            // map translation TODO
             var t = val.split("_");
-            lastTransformState.translate = [ parseFloat(t[0]), parseFloat(t[1]) ];
+            //lastTransformState.translate = [parseFloat(t[0]),parseFloat(t[1])];
             break;
 
           case "s":
-            // map scale
-            lastTransformState.scale = parseFloat(val);
+            // map scale TODO
+            //lastTransformState.scale = parseFloat(val);
             break;
 
           case "c":
@@ -8191,9 +8202,9 @@ function statifyUrl() {
         fmax: 0
     };
     // recreate map state
-    zoombh.scale(lastTransformState.scale);
-    zoombh.translate(lastTransformState.translate);
-    $("#ctrl-zoom>input").val((Math.log(lastTransformState.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
+    // zoombh.scale(lastTransformState.scale);
+    // zoombh.translate(lastTransformState.translate);
+    // $("#ctrl-zoom>input").val((Math.log(lastTransformState.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
     // select dataset
     if ($("#filter input").get(ds) === undefined) {
         return false;

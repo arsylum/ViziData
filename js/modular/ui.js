@@ -142,8 +142,8 @@ function urlifyState() {
 	hash += "&e=" + time.min + "_" + time.max;
 	// grid resolution
 	hash += "&g=" + resoFactor;
-	// map transformation
-	hash += "&t=" + lastTransformState.translate[0] + "_" + lastTransformState.translate[1] + "&s=" + lastTransformState.scale;
+	// TODO map transformation
+	//hash += "&t=" + lastTransformState.translate[0] + "_" + lastTransformState.translate[1] + "&s=" + lastTransformState.scale;
 	// selected cell
 	hash += "&c=" + selectedCell;
 
@@ -188,12 +188,12 @@ function statifyUrl() {
 			case "g": // grid resolution
 				$("#reso-slider").val(parseFloat(val)).trigger("input").trigger("change");
 				break;
-			case "t": // map translation
+			case "t": // map translation TODO
 				var t = val.split("_");
-				lastTransformState.translate = [parseFloat(t[0]),parseFloat(t[1])];
+				//lastTransformState.translate = [parseFloat(t[0]),parseFloat(t[1])];
 				break;
-			case "s": // map scale
-				lastTransformState.scale = parseFloat(val);
+			case "s": // map scale TODO
+				//lastTransformState.scale = parseFloat(val);
 				break;
 			case "c": // selected cell
 				selectedCell = parseFloat(val);
@@ -219,9 +219,9 @@ function statifyUrl() {
     	}  	}, fmin: 0, fmax: 0   };
 
 	// recreate map state
-	zoombh.scale(lastTransformState.scale);
-	zoombh.translate(lastTransformState.translate);
-	$("#ctrl-zoom>input").val((Math.log(lastTransformState.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
+	// zoombh.scale(lastTransformState.scale);
+	// zoombh.translate(lastTransformState.translate);
+	// $("#ctrl-zoom>input").val((Math.log(lastTransformState.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
 	// select dataset
 	if($("#filter input").get(ds) === undefined) { return false; }

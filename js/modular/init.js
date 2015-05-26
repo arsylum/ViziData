@@ -3,7 +3,8 @@
 ///////////////////
 $(function(){
 	// init stuff
-	lastTransformState = {scale: 1, translate: [0,0]};
+	//lastTransformState = {scale: 1, translate: [0,0]};
+	lastMapCenter = { lat: 0, lng: 0 };
 
 	resoFactor = parseFloat($("#reso-slider").val());
 	$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);

@@ -134,11 +134,21 @@ function canvasCoord2geoCoord(x, y){
 /**
 * clears the area of tile i on map canvas */
 function clearTile(i) {
-	var ppd = canvasW / (C_WMAX - C_WMIN);
+	/*var ppd = canvasW / (C_WMAX - C_WMIN);
 	mapctx.clearRect(
 		current_datsel.tile_width*i*ppd, 0,		// x, y
 		current_datsel.tile_width*ppd, canvasH	// w, h
-	);
+	);*/
+
+	var mapctx = leaflaggrid._canvas.getContext('2d');
+
+	var bounds = getBounds();
+	var nw = L.latLng(bounds[1].max, current_datsel.tile_width*i),
+		se = L.latLng(bounds[1].min, current_datsel.tile_width*(i+1));
+	nw = leafly.latLngToContainerPoint(nw);
+	se = leafly.latLngToContainerPoint(se);
+
+	mapctx.clearRect(nw.x, nw.y, se.x - nw.x, nw.y - se.y);
 }
 
 /**

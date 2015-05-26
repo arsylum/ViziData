@@ -89,9 +89,9 @@ var gdata = [],		// global rawdata
 	timeSel, // current timeline selection
 	cellmap, // latest generated tilemap
 	drawdat = {}, // latest generated drawing data
-	filledTiles = [9999], // don't need to draw whats already there [min,max]
+	//filledTiles = [9999], // don't need to draw whats already there [min,max]
 	selectedCell = false, // currently selected cell
-	renderRTL = false, // flag for tile iteration direction
+	renderRTL = false, // flag for progressive tile iteration direction
 	resoFactor; // current value of the reso slider
 
 
@@ -113,6 +113,7 @@ var //mapcan,	mapctx,
 	canvasL;
 
 var //lastTransformState; // remember map scaling (only redraw on changes)
+	lastMapCenter, // to determine direction of panning
 	lastMapZoom; // keep track if zoom changes
 
 
