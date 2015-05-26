@@ -214,6 +214,9 @@ function drawPlot(leavas, params) {
 	if(drawdat.draw === undefined) { return false; }
 	console.log(Date.now()+': drawing..');
 
+	// console.log(leavas);
+	// console.log(params);
+
 	// dont redraw the first time when zoom is changed
 	// (redraw when it is called again at the end of genGrid)
 	//if(lastMapZoom !== (lastMapZoom = leafly.getZoom())) { return false; }
@@ -361,7 +364,7 @@ function drawPlot(leavas, params) {
 	}
 	mapctx.globalAlpha = 1.0;
 	mapctx.restore();
-	// todo - return benchmark
+
 	return (Date.now()-bm);
 }
 

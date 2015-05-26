@@ -348,6 +348,7 @@ function infolistScrollFkt() {
 /**
 * zoom or move the map */
 function zoom() {
+	/* (not in use)
 	if( d3.event.translate[0] !== lastTransformState.translate[0] ||
 		d3.event.translate[1] !== lastTransformState.translate[1] ||
 		d3.event.scale !== lastTransformState.scale) {
@@ -367,6 +368,7 @@ function zoom() {
 		genGrid();
 		updateChartData();
 	}
+	*/
 }
 
 /**

@@ -6969,6 +6969,8 @@ function drawPlot(leavas, params) {
         return false;
     }
     console.log(Date.now() + ": drawing..");
+    // console.log(leavas);
+    // console.log(params);
     // dont redraw the first time when zoom is changed
     // (redraw when it is called again at the end of genGrid)
     //if(lastMapZoom !== (lastMapZoom = leafly.getZoom())) { return false; }
@@ -7088,7 +7090,6 @@ function drawPlot(leavas, params) {
     }
     mapctx.globalAlpha = 1;
     mapctx.restore();
-    // todo - return benchmark
     return Date.now() - bm;
 }
 
@@ -7616,21 +7617,7 @@ function infolistScrollFkt() {
 
 /**
 * zoom or move the map */
-function zoom() {
-    if (d3.event.translate[0] !== lastTransformState.translate[0] || d3.event.translate[1] !== lastTransformState.translate[1] || d3.event.scale !== lastTransformState.scale) {
-        if (d3.event.scale !== lastTransformState.scale) {
-            filledTiles = [ 9999 ];
-        }
-        renderRTL = d3.event.translate[0] < lastTransformState.translate[0];
-        lastTransformState = d3.event;
-        $("#zoom-slider").val((Math.log(d3.event.scale) / Math.log(2) + 1).toFixed(1)).trigger("input");
-        drawPlot(undefined, undefined);
-        // TODO function parameters (?)
-        //forceBounds();
-        genGrid();
-        updateChartData();
-    }
-}
+function zoom() {}
 
 /**
 * determine proper color scale based on current reso*/
