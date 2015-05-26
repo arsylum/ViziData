@@ -170,6 +170,7 @@ function currentCursorPos(e) {
 function canvasMouseMove(e) {
 	// doesn't work, fix or ignore, not critical (console errors when map is not ready)
 	//if(drawdat === undefined) { return false; } // no drawing, no tooltip!
+	if(mutexGenGrid !== 0) { return false; } // don't bother while working hard
 
 	/*var cc = cco();
 	var x = cc[0],
@@ -213,6 +214,7 @@ function canvasMouseMove(e) {
 function canvasMouseClick(e) {
 	// doesn't work, fix or ignore, not critical (console errors when map is not ready)
 	//if(drawdat === undefined) { return false; } // no drawing, no info!
+	if(mutexGenGrid !== 0) { return false; } // don't bother while working hard
 
 	/*var cc = cco();
 	var x = cc[0],

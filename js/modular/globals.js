@@ -102,10 +102,11 @@ var viewportH,
 /// leaflet layers
 var leafloor,		// tilemap layer
 	leaflaggrid,	// grid layer
-	leavlover;		// overlay layer
+	//leavlover;		// overlay layer
+	overcan, overctx;
 // map canvas
 var //mapcan,	mapctx,
-	overcan, overctx,
+	//overcan, overctx,
 	canvasW,
 	canvasH,
 	canvasT,

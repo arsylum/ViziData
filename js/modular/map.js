@@ -212,6 +212,7 @@ function calcPlotDat(newmap, reso) {
 //function drawPlot(clear, newmap, reso) { //TODO remove param?
 function drawPlot(leavas, params) {
 	if(drawdat.draw === undefined) { return false; }
+	console.log(Date.now()+': drawing..');
 
 	// dont redraw the first time when zoom is changed
 	// (redraw when it is called again at the end of genGrid)
@@ -489,26 +490,31 @@ function highlightCellsFor(key) {
 	overctx.save();
 	overctx.clearRect(0,0,canvasW,canvasH);
 
-	overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
-  	overctx.scale(lastTransformState.scale, lastTransformState.scale);
+	//overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
+  	//overctx.scale(lastTransformState.scale, lastTransformState.scale);
 
   	var wx = drawdat.wx * 1,
 		wy = drawdat.wy * 1,
 		rx = drawdat.rx * 1,
 		ry = drawdat.ry * 1;
 
-	overctx.fillStyle = "rgba(255,255,0,0.4)";
-	overctx.strokeStyle = "rgba(255,255,0,1)";
-	overctx.lineWidth = rx/4;
+	// overctx.fillStyle = "rgba(255,255,0,0.4)";
+	// overctx.strokeStyle = "rgba(255,255,0,1)";
+	overctx.fillStyle = "rgba(255,255,255,0.7)";
+	overctx.strokeStyle = "rgba(0,0,0,1)";
+	overctx.lineWidth = rx/2;
 
-  	var cc, x, y;
-  	for(i = 0; i< ca.length; i++) {
-  		cc = index2canvasCoord(ca[i], reso);
-  		x = cc[0];
-  		y = cc[1] - wy;
+  	var x, y, g, p,	n = ca.length;
+	i = -1;
+  	while(++i < n) {
+  		g = index2geoCoord(ca[i], reso);
+  		p = leafly.latLngToContainerPoint(g);
+  		x = p.x + rx;
+  		y = p.y - rx;
  
   		overctx.beginPath();
-  		overctx.rect(x,y,wx,wy);
+  		//overctx.rect(x,y,wx,wy);
+  		overctx.arc(x, y, rx, 0, TPI);
   		overctx.fill();
   		overctx.stroke();
   	}
@@ -556,6 +562,7 @@ function initLeaflet() {
 	leaflaggrid
 		.drawing(drawPlot)
 		.addTo(leafly);
+
 
         /*function drawingOnCanvas(canvasOverlay, params) {
         	var bm = Date.now();

@@ -6663,12 +6663,13 @@ var viewportH, viewportW;
 /// leaflet layers
 var leafloor, // tilemap layer
 leaflaggrid, // grid layer
-leavlover;
+//leavlover;		// overlay layer
+overcan, overctx;
 
-// overlay layer
 // map canvas
 var //mapcan,	mapctx,
-overcan, overctx, canvasW, canvasH, canvasT, canvasL;
+//overcan, overctx,
+canvasW, canvasH, canvasT, canvasL;
 
 var //lastTransformState; // remember map scaling (only redraw on changes)
 lastMapZoom;
@@ -6695,8 +6696,7 @@ $(function() {
     // zoombehaviour
     zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
     // setup canvas
-    mapcan = d3.select("#map").append("canvas");
-    //.call(zoombh)
+    //mapcan = d3.select("#map").append("canvas");//.call(zoombh)
     //.on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
     overcan = d3.select("#map").append("canvas").classed("overlay", true);
     // init color scale
@@ -6747,7 +6747,7 @@ function onResize() {
     canvasW = Math.floor($("#map").width());
     canvasH = Math.floor($("#map").height());
     //d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
-    $([ mapcan.node(), overcan.node() ]).attr("width", canvasW).attr("height", canvasH);
+    $(overcan.node()).attr("width", canvasW).attr("height", canvasH);
     $("#leaflet").css("width", canvasW).css("height", canvasH);
     //mapctx = mapcan.node().getContext("2d");
     overctx = overcan.node().getContext("2d");
@@ -6968,6 +6968,7 @@ function drawPlot(leavas, params) {
     if (drawdat.draw === undefined) {
         return false;
     }
+    console.log(Date.now() + ": drawing..");
     // dont redraw the first time when zoom is changed
     // (redraw when it is called again at the end of genGrid)
     //if(lastMapZoom !== (lastMapZoom = leafly.getZoom())) { return false; }
@@ -7184,19 +7185,24 @@ function highlightCellsFor(key) {
     });
     overctx.save();
     overctx.clearRect(0, 0, canvasW, canvasH);
-    overctx.translate(lastTransformState.translate[0], lastTransformState.translate[1]);
-    overctx.scale(lastTransformState.scale, lastTransformState.scale);
+    //overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
+    //overctx.scale(lastTransformState.scale, lastTransformState.scale);
     var wx = drawdat.wx * 1, wy = drawdat.wy * 1, rx = drawdat.rx * 1, ry = drawdat.ry * 1;
-    overctx.fillStyle = "rgba(255,255,0,0.4)";
-    overctx.strokeStyle = "rgba(255,255,0,1)";
-    overctx.lineWidth = rx / 4;
-    var cc, x, y;
-    for (i = 0; i < ca.length; i++) {
-        cc = index2canvasCoord(ca[i], reso);
-        x = cc[0];
-        y = cc[1] - wy;
+    // overctx.fillStyle = "rgba(255,255,0,0.4)";
+    // overctx.strokeStyle = "rgba(255,255,0,1)";
+    overctx.fillStyle = "rgba(255,255,255,0.7)";
+    overctx.strokeStyle = "rgba(0,0,0,1)";
+    overctx.lineWidth = rx / 2;
+    var x, y, g, p, n = ca.length;
+    i = -1;
+    while (++i < n) {
+        g = index2geoCoord(ca[i], reso);
+        p = leafly.latLngToContainerPoint(g);
+        x = p.x + rx;
+        y = p.y - rx;
         overctx.beginPath();
-        overctx.rect(x, y, wx, wy);
+        //overctx.rect(x,y,wx,wy);
+        overctx.arc(x, y, rx, 0, TPI);
         overctx.fill();
         overctx.stroke();
     }
@@ -7450,6 +7456,10 @@ function currentCursorPos(e) {
 function canvasMouseMove(e) {
     // doesn't work, fix or ignore, not critical (console errors when map is not ready)
     //if(drawdat === undefined) { return false; } // no drawing, no tooltip!
+    if (mutexGenGrid !== 0) {
+        return false;
+    }
+    // don't bother while working hard
     /*var cc = cco();
 	var x = cc[0],
 		y = cc[1];
@@ -7480,6 +7490,10 @@ function canvasMouseMove(e) {
 function canvasMouseClick(e) {
     // doesn't work, fix or ignore, not critical (console errors when map is not ready)
     //if(drawdat === undefined) { return false; } // no drawing, no info!
+    if (mutexGenGrid !== 0) {
+        return false;
+    }
+    // don't bother while working hard
     /*var cc = cco();
 	var x = cc[0],
 		y = cc[1];
