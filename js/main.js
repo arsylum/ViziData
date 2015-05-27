@@ -6623,15 +6623,19 @@ var M_COLOR_SCALE = [ // provided by colorbrewer2.org
 "#ccddff", "#aacc66", "#aa6611", "#800", "#300" ];
 
 // "Timeline" (can be almost anything)
-var T_YAXIS_MAX_EXPAND = 1.21, // faktor for top margin
-T_DEFAULT_TOOLTIP = "%l in %x: %v", // default timeline hover tooltip
-T_DEFAULT_ZPROP = "#";
+var T_YAXIS_MAX_EXPAND = 1.21;
 
-// default label for the chart data axis
+// faktor for top margin
 // timing, responsiveness
 var CALC_TIMEOUT = 200;
 
 // default timeout before large operations are run
+// UI labels
+var T_DEFAULT_TOOLTIP = "%l in %x: %v", // default timeline hover tooltip
+T_DEFAULT_ZPROP = "#", // default label for the chart data axis
+L_DEFAULT_TERM = "between %l and %h";
+
+// default legend suffix
 // DATA
 var DATA_DIR = "./data/", META_FILES = [ "humans.json", "items.json" ];
 
@@ -6856,8 +6860,9 @@ function generateGrid(reso, mAE, data) {
             calcPlotDat(cellmap, reso);
             console.log("  |BM| finished genGrid (total of " + (new Date() - bms) + "ms)");
             //filledTiles = [tMin+1,tMax-1];
+            var term = data.strings.term || L_DEFAULT_TERM;
             $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
-            "we have registered a total of<br>" + "<em>" + count + " " + data.parent.label + "</em><br>" + data.strings.term.replace("%l", "<em>" + cAE.min + "</em>").replace("%h", "<em>" + cAE.max + "</em>"));
+            "we have registered a total of<br>" + "<em>" + count + " " + data.strings.label + "</em><br>" + term.replace("%l", "<em>" + cAE.min + "</em>").replace("%h", "<em>" + cAE.max + "</em>"));
             // "that <em>"+data.strings.term+"</em><br>"+
             // "between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
             selectCell();
@@ -7195,7 +7200,8 @@ function highlightCell(c) {
 		return false;
 	}*/
     // highlight cell rect
-    overctx.fillStyle = "rgba(255,130,0,0.7)";
+    //overctx.fillStyle = "rgba(255,130,0,0.7)";
+    overctx.fillStyle = "rgba(255,244,10,0.7)";
     //overctx.fillRect(x,y-wy,wx,wy);
     overctx.beginPath();
     overctx.arc(x, y, rx, 0, TPI);

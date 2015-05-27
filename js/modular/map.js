@@ -62,13 +62,12 @@ function generateGrid(reso, mAE, data) {
 			console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
 
 			//filledTiles = [tMin+1,tMax-1];
-
+			var term = data.strings.term || L_DEFAULT_TERM;
 			$("#legend").html("<em>inside the visible area</em><br>"+
 				//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
 				"we have registered a total of<br>"+
-				"<em>"+count+" "+data.parent.label+"</em><br>"+
-				data.strings.term
-					.replace("%l", "<em>"+cAE.min+"</em>")
+				"<em>"+count+" "+data.strings.label+"</em><br>"+
+				term.replace("%l", "<em>"+cAE.min+"</em>")
 					.replace("%h", "<em>"+cAE.max+"</em>"));
 				// "that <em>"+data.strings.term+"</em><br>"+
 				// "between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
@@ -463,7 +462,8 @@ function highlightCell(c) {
 
 
   	// highlight cell rect
-  	overctx.fillStyle = "rgba(255,130,0,0.7)";
+  	//overctx.fillStyle = "rgba(255,130,0,0.7)";
+  	overctx.fillStyle = "rgba(255,244,10,0.7)";
 	//overctx.fillRect(x,y-wy,wx,wy);
 	overctx.beginPath();
 	overctx.arc(x, y, rx, 0, TPI);
