@@ -6606,7 +6606,7 @@ var CALC_TIMEOUT = 200;
 
 // default timeout before large operations are run
 // DATA
-var DATA_DIR = "./data/", META_FILES = [ "humans.json", "any.json" ];
+var DATA_DIR = "./data/", META_FILES = [ "humans.json", "items.json" ];
 
 var DEFAULT_DATASET = 0, // dataset to load up initially
 DEFAULT_LABELLANG = "en";
@@ -7390,6 +7390,7 @@ function coord2index(longi, lati, reso) {
     // prevent 
     if (lati === C_HMAX) lati -= reso;
     // out of bounds cells
+    //var proj = leafly.latLngToContainerPoint([lati,longi]);
     return Math.floor(lati / reso) * ((C_WMAX - C_WMIN) / reso) + Math.floor(longi / reso);
 }
 
@@ -7459,6 +7460,7 @@ function cco() {
 /**
 * adjust the currently pointed at geo coordinates */
 function currentCursorPos(e) {
+    //console.log(e);
     var z = leafly.getZoom(), p = e.containerPoint;
     p.x -= M_HOVER_OFFSET.l;
     p.y -= M_HOVER_OFFSET.t;

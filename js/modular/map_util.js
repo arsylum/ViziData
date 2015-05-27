@@ -87,6 +87,7 @@ function getMinMaxTile(mAE) {
 function coord2index(longi, lati, reso) {
 	if(longi === C_WMAX) longi -= reso;	// prevent 
 	if(lati  === C_HMAX) lati  -= reso; // out of bounds cells
+	//var proj = leafly.latLngToContainerPoint([lati,longi]);
 
 	return (Math.floor(lati/reso)*((C_WMAX-C_WMIN)/reso) + Math.floor(longi/reso));
 }
@@ -163,6 +164,7 @@ function cco() {
 /**
 * adjust the currently pointed at geo coordinates */
 function currentCursorPos(e) {
+	//console.log(e);
 	var z = leafly.getZoom(),
 		p = e.containerPoint;
 		p.x -= M_HOVER_OFFSET.l;
