@@ -45,7 +45,7 @@ var CALC_TIMEOUT = 200; // default timeout before large operations are run
 var DATA_DIR = "./data/",
 	META_FILES = [
 		"humans.json",
-		//"any.json"
+		"any.json"
 	];
 var DEFAULT_DATASET = 0,	// dataset to load up initially
 	DEFAULT_LABELLANG = 'en';// default language for item labels

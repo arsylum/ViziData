@@ -6,10 +6,12 @@
 function setupControlHandlers() {
 
 	// build filter menu
-	var fn = function() { setSetSel(this.value); };
+	var fn = function() { 
+		setSetSel(this.value, $(this).parent().parent().attr("data-g")); 
+	};
 	var filter = $("#filter");
 	for(var i = 0; i<gdata.length; i++) {
-		var fs = $("<fieldset>");
+		var fs = $("<fieldset>").attr("data-g", i);
 		fs.append('<legend>'+gdata[i].title+'</legend>');
 		for(var j=0; j<gdata[i].datasets.length; j++) {
 			

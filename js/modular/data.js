@@ -4,7 +4,10 @@
 /**
 * loads data
 * for dataset with given index */
-function setSetSel(dsi) { //, callback){
+function setSetSel(dsi, dgi) { //, callback){
+
+	current_datsel = gdata[dgi];
+
 	// load properties if missing
 	if(current_datsel.props === undefined) {
 		// TODO ? more loading feedback
@@ -46,7 +49,7 @@ function setSetSel(dsi) { //, callback){
 
 		var lBM = new Date();
 		console.log("~~ starting to load dataset "+current_datsel.datasets[dsi].strings.label+" ~~ ");
-		$.getJSON(DATA_DIR+gdata[0].datasets[dsi].file, function(data){
+		$.getJSON(DATA_DIR+current_datsel.datasets[dsi].file, function(data){
 			console.log(" |BM| finished loading "+current_datsel.datasets[dsi].strings.label+" data (took "+(new Date()-lBM)+"ms)");
 			clearInterval(lAnim);
 			

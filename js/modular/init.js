@@ -17,7 +17,7 @@ $(function(){
 	});
 
 	// zoombehaviour
-	zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
+	//zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
 
 	// setup canvas
 	//mapcan = d3.select("#map").append("canvas");//.call(zoombh)
@@ -32,11 +32,14 @@ $(function(){
 
 	// Load default dataset once ready
 	$(document).on("meta_files_ready", function() {
-		current_datsel = gdata[0]; // TODO [get from dom] (depends on data management)
-		if(!statifyUrl()) {
-			$("#filter input")[DEFAULT_DATASET].click(); // select&load initial dataset
-		}
-		onResize(); // set canvas dimensions
+		onResize(true); // set canvas dimensions
+		//current_datsel = gdata[0]; // TODO [get from dom] (depends on data management)
+		//if(!statifyUrl()) {
+			// TODO put all the defaults in globals and apply them in statifyUrl
+			//$("#filter input")[DEFAULT_DATASET].click(); // select&load initial dataset
+		//}
+		statifyUrl(); // revert state from url parameters and get things going
+		
 	});
 
 	/// TODO
@@ -65,7 +68,7 @@ $(function(){
 ////////////////
 /// on resize //
 ////////////////
-function onResize() {
+function onResize(firstTime) {
 
 	// get new viewport size
 	viewportW = $(window).width();
@@ -82,8 +85,10 @@ function onResize() {
 	//mapctx = mapcan.node().getContext("2d");
 	overctx = overcan.node().getContext("2d");
 
-	initLeaflet();
-	
-	genChart();
-	genGrid();
+	if(firstTime === true) {
+		initLeaflet();
+	} else {
+		genChart();
+		genGrid();
+	}
 }

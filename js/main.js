@@ -6529,8 +6529,9 @@ L.canvasOverlay = function(userDrawFunc, options) {
 /**
 * loads data
 * for dataset with given index */
-function setSetSel(dsi) {
+function setSetSel(dsi, dgi) {
     //, callback){
+    current_datsel = gdata[dgi];
     // load properties if missing
     if (current_datsel.props === undefined) {
         // TODO ? more loading feedback
@@ -6553,7 +6554,7 @@ function setSetSel(dsi) {
         }, 180);
         var lBM = new Date();
         console.log("~~ starting to load dataset " + current_datsel.datasets[dsi].strings.label + " ~~ ");
-        $.getJSON(DATA_DIR + gdata[0].datasets[dsi].file, function(data) {
+        $.getJSON(DATA_DIR + current_datsel.datasets[dsi].file, function(data) {
             console.log(" |BM| finished loading " + current_datsel.datasets[dsi].strings.label + " data (took " + (new Date() - lBM) + "ms)");
             clearInterval(lAnim);
             current_datsel.datasets[dsi].data = data;
@@ -6605,7 +6606,7 @@ var CALC_TIMEOUT = 200;
 
 // default timeout before large operations are run
 // DATA
-var DATA_DIR = "./data/", META_FILES = [ "humans.json" ];
+var DATA_DIR = "./data/", META_FILES = [ "humans.json", "any.json" ];
 
 var DEFAULT_DATASET = 0, // dataset to load up initially
 DEFAULT_LABELLANG = "en";
@@ -6696,7 +6697,7 @@ $(function() {
         resizeTimer = setTimeout(onResize, 400);
     });
     // zoombehaviour
-    zoombh = d3.behavior.zoom().scaleExtent([ Math.pow(2, M_ZOOM_RANGE[0] - 1), Math.pow(2, M_ZOOM_RANGE[1] - 1) ]).on("zoom", zoom);
+    //zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
     // setup canvas
     //mapcan = d3.select("#map").append("canvas");//.call(zoombh)
     //.on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
@@ -6705,12 +6706,14 @@ $(function() {
     colorScale = d3.scale.log().range(M_COLOR_SCALE);
     // Load default dataset once ready
     $(document).on("meta_files_ready", function() {
-        current_datsel = gdata[0];
-        // TODO [get from dom] (depends on data management)
-        if (!statifyUrl()) {
-            $("#filter input")[DEFAULT_DATASET].click();
-        }
-        onResize();
+        onResize(true);
+        // set canvas dimensions
+        //current_datsel = gdata[0]; // TODO [get from dom] (depends on data management)
+        //if(!statifyUrl()) {
+        // TODO put all the defaults in globals and apply them in statifyUrl
+        //$("#filter input")[DEFAULT_DATASET].click(); // select&load initial dataset
+        //}
+        statifyUrl();
     });
     /// TODO
     // load all the meta data meta files
@@ -6738,7 +6741,7 @@ $(function() {
 ////////////////
 /// on resize //
 ////////////////
-function onResize() {
+function onResize(firstTime) {
     // get new viewport size
     viewportW = $(window).width();
     viewportH = $(window).height();
@@ -6753,9 +6756,12 @@ function onResize() {
     $("#leaflet").css("width", canvasW).css("height", canvasH);
     //mapctx = mapcan.node().getContext("2d");
     overctx = overcan.node().getContext("2d");
-    initLeaflet();
-    genChart();
-    genGrid();
+    if (firstTime === true) {
+        initLeaflet();
+    } else {
+        genChart();
+        genGrid();
+    }
 }
 
 /////////////////////////
@@ -7985,11 +7991,11 @@ function updateChart(seriez) {}
 function setupControlHandlers() {
     // build filter menu
     var fn = function() {
-        setSetSel(this.value);
+        setSetSel(this.value, $(this).parent().parent().attr("data-g"));
     };
     var filter = $("#filter");
     for (var i = 0; i < gdata.length; i++) {
-        var fs = $("<fieldset>");
+        var fs = $("<fieldset>").attr("data-g", i);
         fs.append("<legend>" + gdata[i].title + "</legend>");
         for (var j = 0; j < gdata[i].datasets.length; j++) {
             var b = $('<input type="radio" name="radio" value="' + j + '" />').on("change", fn);
