@@ -6556,13 +6556,35 @@ function setSetSel(dsi, dgi) {
         console.log("~~ starting to load dataset " + current_datsel.datasets[dsi].strings.label + " ~~ ");
         $.getJSON(DATA_DIR + current_datsel.datasets[dsi].file, function(data) {
             console.log(" |BM| finished loading " + current_datsel.datasets[dsi].strings.label + " data (took " + (new Date() - lBM) + "ms)");
-            clearInterval(lAnim);
             current_datsel.datasets[dsi].data = data;
             current_setsel = current_datsel.datasets[dsi];
+            lBM = Date.now();
+            preprocess(current_setsel);
+            console.log(" |BM| finished preprocessing object iterators (" + (Date.now() - lBM) + "ms)");
+            clearInterval(lAnim);
             genChart();
             genGrid();
         });
     }
+}
+
+function preprocess(ds) {
+    if (ds.ready === true) {
+        return false;
+    }
+    if (ds.itarraytor === undefined) {
+        ds.itarraytor = [];
+    }
+    var i = (C_WMAX - C_WMIN) / ds.parent.tile_width;
+    while (i--) {
+        if (ds.itarraytor[i] === undefined) {
+            ds.itarraytor[i] = [];
+            for (var k in ds.data[i]) {
+                ds.itarraytor[i].push(k);
+            }
+        }
+    }
+    ds.ready = true;
 }
 
 ////////////////////
@@ -6576,7 +6598,8 @@ var C_WMIN = -180, C_WMAX = 180, C_HMIN = -90, C_HMAX = 90, C_W = C_WMAX - C_WMI
 
 // map parameters
 var M_BOUNDING_THRESHOLD = 0, // grid clipping tolerance
-M_ZOOM_RANGE = [ 1, 8 ], // zoom range (results in svg scale 2^(v-1))
+//M_ZOOM_RANGE = [1,8],		// zoom range (results in svg scale 2^(v-1))
+M_BASE_GRIDROWS = 300, // number of horizontal grid cells
 M_BUBBLE_OFFSET = 10, // distance of map tooltip from pointer
 M_HOVER_OFFSET = {
     // pointer selection offset
@@ -6674,9 +6697,10 @@ canvasW, canvasH, canvasT, canvasL;
 
 var //lastTransformState; // remember map scaling (only redraw on changes)
 lastMapCenter, // to determine direction of panning
-lastMapZoom;
+lastMapZoom, // keep track if zoom changes
+lastAgPos = [ 0, 0 ];
 
-// keep track if zoom changes
+// css positioning of aggrid layer
 var langCodes = [ "aa", "ab", "ace", "aeb", "af", "ak", "aln", "als", "am", "an", "ang", "anp", "ar", "arc", "arn", "arq", "ary", "arz", "as", "ast", "av", "avk", "ay", "az", "azb", "ba", "bar", "bbc", "bbc-latn", "bcc", "bcl", "be", "be-tarask", "be-x-old", "bg", "bh", "bho", "bi", "bjn", "bm", "bn", "bo", "bpy", "bqi", "br", "brh", "bs", "bug", "bxr", "ca", "cbk-zam", "cdo", "ce", "ceb", "ch", "cho", "chr", "chy", "ckb", "co", "cps", "cr", "crh-cyrl", "crh-latn", "cs", "csb", "cu", "cv", "cy", "da", "de", "de-at", "de-ch", "de-formal", "diq", "dsb", "dtp", "dv", "dz", "ee", "egl", "el", "eml", "en", "en-ca", "en-gb", "eo", "es", "et", "eu", "ext", "fa", "ff", "fi", "fit", "fiu-vro", "fj", "fo", "fr", "frc", "frp", "frr", "fur", "fy", "ga", "gag", "gan", "gan-hans", "gan-hant", "gd", "gl", "glk", "gn", "gom-latn", "got", "grc", "gsw", "gu", "gv", "ha", "hak", "haw", "he", "hi", "hif", "hif-latn", "hil", "ho", "hr", "hrx", "hsb", "ht", "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", "ik", "ike-cans", "ike-latn", "ilo", "inh", "io", "is", "it", "iu", "ja", "jam", "jbo", "jut", "jv", "ka", "kaa", "kab", "kbd", "kbd-cyrl", "kg", "khw", "ki", "kiu", "kj", "kk", "kk-arab", "kk-cn", "kk-cyrl", "kk-kz", "kk-latn", "kk-tr", "kl", "km", "kn", "ko", "ko-kp", "koi", "kr", "krc", "kri", "krj", "ks", "ks-arab", "ks-deva", "ksh", "ku", "ku-arab", "ku-latn", "kv", "kw", "ky", "la", "lad", "lb", "lbe", "lez", "lfn", "lg", "li", "lij", "liv", "lmo", "ln", "lo", "loz", "lrc", "lt", "ltg", "lus", "lv", "lzh", "lzz", "mai", "map-bms", "mdf", "mg", "mh", "mhr", "mi", "min", "mk", "ml", "mn", "mo", "mr", "mrj", "ms", "mt", "mus", "mwl", "my", "myv", "mzn", "na", "nah", "nan", "nap", "nb", "nds", "nds-nl", "ne", "new", "ng", "niu", "nl", "nl-informal", "nn", "no", "nov", "nrm", "nso", "nv", "ny", "oc", "om", "or", "os", "ota", "pa", "pag", "pam", "pap", "pcd", "pdc", "pdt", "pfl", "pi", "pih", "pl", "pms", "pnb", "pnt", "prg", "ps", "pt", "pt-br", "qu", "qug", "rgn", "rif", "rm", "rmy", "rn", "ro", "roa-tara", "ru", "rue", "rup", "ruq", "ruq-cyrl", "ruq-latn", "rw", "rwr", "sa", "sah", "sat", "sc", "scn", "sco", "sd", "sdc", "se", "sei", "sg", "sgs", "sh", "shi", "shi-latn", "shi-tfng", "si", "simple", "sk", "sl", "sli", "sm", "sma", "sn", "so", "sq", "sr", "sr-ec", "sr-el", "srn", "ss", "st", "stq", "su", "sv", "sw", "szl", "ta", "tcy", "te", "tet", "tg", "tg-cyrl", "tg-latn", "th", "ti", "tk", "tl", "tly", "tn", "to", "tokipona", "tpi", "tr", "tru", "ts", "tt", "tt-cyrl", "tt-latn", "tum", "tw", "ty", "tyv", "udm", "ug", "ug-arab", "ug-latn", "uk", "ur", "uz", "ve", "vec", "vep", "vi", "vls", "vmf", "vo", "vot", "vro", "wa", "war", "wo", "wuu", "xal", "xh", "xmf", "yi", "yo", "yue", "za", "zea", "zh", "zh-cn", "zh-hans", "zh-hant", "zh-hk", "zh-min-nan", "zh-mo", "zh-my", "zh-sg", "zh-tw", "zu" ];
 
 ///////////////////
@@ -6690,7 +6714,7 @@ $(function() {
         lng: 0
     };
     resoFactor = parseFloat($("#reso-slider").val());
-    $("#zoom-slider").attr("min", M_ZOOM_RANGE[0]).attr("max", M_ZOOM_RANGE[1]);
+    //$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);
     // bind window resize handling
     $(window).resize(function() {
         clearTimeout(resizeTimer);
@@ -6803,7 +6827,6 @@ function generateGrid(reso, mAE, data) {
     }
     /// main function body
     var worker = function() {
-        //timeout for dom redraw
         console.log("/~~ generating new grid with resolution " + reso + " ~~\\");
         var bms = new Date();
         var progBM = "";
@@ -6845,7 +6868,7 @@ function generateGrid(reso, mAE, data) {
                 // if new function call
                 return 0;
             }
-            var cellmapprog = {}, l, a, ti, i;
+            var cellmapprog = {}, l, a, ti, i, j, k, it;
             if (!renderRTL) {
                 i = tMin + offset;
             } else {
@@ -6853,12 +6876,14 @@ function generateGrid(reso, mAE, data) {
             }
             if (i <= tMax && i >= tMin) {
                 // still work to do			// for each map tile in visible area
-                for (var j = cAE.min; j <= cAE.max; j++) {
-                    // go over each key in range
-                    if (data.data[i][j] !== undefined) {
-                        // if it is defined
+                //for(var j = cAE.min; j <= cAE.max; j++) { 					// go over each key in range
+                //	if(data.data[i][j] !== undefined) {							// if it is defined
+                it = data.itarraytor[i].length;
+                while (it--) {
+                    j = data.itarraytor[i][it];
+                    if (j >= cAE.min && j <= cAE.max) {
                         l = data.data[i][j].length;
-                        for (var k = 0; k < l; k++) {
+                        for (k = 0; k < l; k++) {
                             // go over each event in key and
                             a = data.data[i][j][k];
                             if (section_filter(a, mAE)) {
@@ -6941,7 +6966,7 @@ function calcPlotDat(newmap, reso, tile) {
         var draw = [], min = Infinity, max = -Infinity;
         $.each(newmap, function(k, v) {
             //var c = index2canvasCoord(k, reso);
-            var c = index2geoCoord(k, reso);
+            var c = index2canvasCoord(k, reso);
             //var p = tileMap.latLngToLayerPoint([c[0],c[1]]);
             v = v.length;
             //draw.push([[c[0],c[1]],v]);
@@ -6993,6 +7018,8 @@ function drawPlot(leavas, params) {
     // } 
     var bm = Date.now();
     var mapctx = params.canvas.getContext("2d");
+    var can = $(params.canvas);
+    var curAgPos = [ parseInt(can.css("left")), parseInt(can.css("top")) ];
     // mapctx.save();
     if (drawdat.tile === undefined) {
         mapctx.clearRect(0, 0, params.canvas.width, params.canvas.height);
@@ -7029,7 +7056,8 @@ function drawPlot(leavas, params) {
     //var gb = leafly.getBounds();
     //var ccount = (gb._northEast.lat - gb._southWest.lat) / drawdat.reso;
     var b = leafly.getPixelBounds();
-    var r = (b.max.x - b.min.x) / 360 * resoFactor;
+    var r = drawdat.reso;
+    //(b.max.x - b.min.x) / 360 * resoFactor;
     var wx = r * bleed;
     var wy = wx, rx = wx / 2, ry = wy / 2;
     //wy = r; //params.canvas.height / ccount;
@@ -7042,6 +7070,7 @@ function drawPlot(leavas, params) {
     var i = -1, n = drawdat.draw.length, d, cx, cy, fc, gradient;
     // TODO keep only what is used
     //var col;
+    var dx = curAgPos[0] - lastAgPos[0], dy = curAgPos[1] - lastAgPos[1];
     // mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
     // mapctx.scale(lastTransformState.scale, lastTransformState.scale);
     if (typeof drawdat.tile === "number") {
@@ -7054,7 +7083,11 @@ function drawPlot(leavas, params) {
     mapctx.globalAlpha = galph;
     while (++i < n) {
         d = drawdat.draw[i];
-        p = leavas._map.latLngToContainerPoint(d[0]);
+        //p = leavas._map.latLngToContainerPoint(d[0]);
+        //p = leafly.layerPointToContainerPoint(d[0]);
+        p = d[0];
+        cx = p.x - dx;
+        cy = p.y - dy;
         // cx = d.x; //d[0][0];
         // cy = d.y; //[0][1];
         //wy =  2*r * (Math.abs(d[0][0])/45);
@@ -7079,7 +7112,7 @@ function drawPlot(leavas, params) {
 		gradient.addColorStop(1,fc+"1)");*/
         //ctx.fillStyle = gradient;
         mapctx.beginPath();
-        mapctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+        mapctx.arc(cx + rx, cy + rx, rx, 0, TPI);
         mapctx.fill();
     }
     /*if(highlight !== undefined) {
@@ -7100,6 +7133,7 @@ function drawPlot(leavas, params) {
     }
     mapctx.globalAlpha = 1;
     mapctx.restore();
+    lastAgPos = curAgPos;
 }
 
 function highlightCell(c) {
@@ -7119,7 +7153,7 @@ function highlightCell(c) {
         overctx.fillStyle = "rgba(255,120,0,0.8)";
         //overctx.fillRect(x,y-wy,wx,wy);
         overctx.beginPath();
-        overctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+        overctx.arc(p.x + rx, p.y + rx, rx, 0, TPI);
         overctx.fill();
         overctx.strokeStyle = "rgba(255,255,255,0.4)";
         overctx.lineWidth = 3 * linewidth;
@@ -7140,10 +7174,11 @@ function highlightCell(c) {
         overctx.restore();
         return false;
     }
-    g = index2geoCoord(c);
-    p = leafly.latLngToContainerPoint(g);
-    x = p.x;
-    y = p.y;
+    //g = index2geoCoord(c);
+    //p = leafly.latLngToContainerPoint(g);
+    p = index2canvasCoord(c);
+    x = p.x + rx;
+    y = p.y + rx;
     //wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
     //ry = wy/2;
     /*	} else {
@@ -7154,7 +7189,7 @@ function highlightCell(c) {
     overctx.fillStyle = "rgba(255,130,0,0.7)";
     //overctx.fillRect(x,y-wy,wx,wy);
     overctx.beginPath();
-    overctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+    overctx.arc(x, y, rx, 0, TPI);
     overctx.fill();
     // glow circle
     var gradient = overctx.createRadialGradient(x + rx, y - ry, 0, x + rx, y - ry, rx * 4);
@@ -7163,7 +7198,8 @@ function highlightCell(c) {
     gradient.addColorStop(1, "rgba(255,255,255,0.1");
     overctx.fillStyle = gradient;
     overctx.beginPath();
-    overctx.ellipse(x + rx, y - ry, rx * 4, ry * 4, 0, 0, TPI);
+    //overctx.ellipse(x+rx,y-ry,rx*4,ry*4,0,0,TPI);
+    overctx.arc(x, y, rx * 4, 0, TPI);
     overctx.fill();
     // text bubble?..
     /*overctx.fillStyle = "rgba(0,0,0,.9)";
@@ -7244,6 +7280,9 @@ function initLeaflet() {
     leafloor.addTo(leafly);
     leafly.on("moveend", function() {
         genGrid();
+    }).on("zoomend", function() {
+        drawdat.draw = undefined;
+        clearGrid();
     }).on("mousemove", function(e) {
         //console.log(e.latlng);
         canvasMouseMove(e);
@@ -7289,8 +7328,11 @@ function calcReso() {
     //return (1/lastTransformState.scale)*resoFactor;
     //console.log((1/(leafly.getZoom()+1)) * resoFactor);
     //return (1/(leafly.getZoom()+1)) * resoFactor;
-    var b = leafly.getBounds();
-    var r = (b._northEast.lng - b._southWest.lng) / 360 * resoFactor;
+    // var b = leafly.getBounds();
+    // var r = (b._northEast.lng - b._southWest.lng) / 360 * resoFactor;
+    var w = canvasW;
+    //leafly.getSize().y;
+    var r = w / M_BASE_GRIDROWS * resoFactor;
     return r;
 }
 
@@ -7386,40 +7428,63 @@ function getMinMaxTile(mAE) {
 * returns the index value for the cell of a grid with given resolution
 * where the given geocoordinate pair lies in*/
 function coord2index(longi, lati, reso) {
-    if (longi === C_WMAX) longi -= reso;
-    // prevent 
-    if (lati === C_HMAX) lati -= reso;
-    // out of bounds cells
-    //var proj = leafly.latLngToContainerPoint([lati,longi]);
-    return Math.floor(lati / reso) * ((C_WMAX - C_WMIN) / reso) + Math.floor(longi / reso);
+    //if(longi === C_WMAX) longi -= reso;	// prevent 
+    //if(lati  === C_HMAX) lati  -= reso; // out of bounds cells
+    var proj = leafly.latLngToContainerPoint(L.latLng(lati, longi));
+    return Math.floor(proj.y / reso) * (canvasW / reso) + Math.floor(proj.x / reso);
+}
+
+/**
+* returns the index value for given canvas (container) coordinates */
+function canvasCoord2index(p, reso) {
+    return Math.floor(p.y / reso) * (canvasW / reso) + Math.floor(p.x / reso);
 }
 
 /**
 * returns the geo coordinates for a given index
 * (for the bottom left corner of the gridcells rect)*/
 function index2geoCoord(i, reso) {
-    if (reso === undefined) {
-        reso = drawdat.reso;
-    }
-    var cpr = (C_WMAX - C_WMIN) / reso;
-    var rowpos = (i - cpr / 2) % cpr;
-    if (rowpos < 0) rowpos += cpr;
-    rowpos -= cpr / 2;
-    var lbx = rowpos * reso, //+(C_WMIN), //+reso/2,
-    lby = Math.floor((+i + cpr / 2) / cpr) * reso;
-    //*(-1));//+(-C_HMIN); //+reso/2;
-    return [ lby, lbx ];
+    /*	if(reso === undefined) { reso = drawdat.reso; }
+	var cpr = (C_WMAX-C_WMIN)/reso;
+
+	var rowpos = (i-cpr/2)%cpr;
+	if(rowpos<0) rowpos += cpr;
+	rowpos -= cpr/2;
+
+	var lbx = (rowpos*reso),//+(C_WMIN), //+reso/2,
+		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)); //*(-1));//+(-C_HMIN); //+reso/2;*/
+    var cc = index2canvasCoord(i, reso);
+    var gc = leafly.containerPointToLatLng([ cc.x, cc.y ]);
+    return [ gc.lat, gc.lng ];
 }
 
 /**
 * returns the canvas rendering coordinates for a given index 
-* (for the bottom left corner of the gridscells rect) */
+* (for the top left corner of the gridscells rect) */
 function index2canvasCoord(i, reso) {
     // get geocoordinates
-    var gc = index2geoCoord(i, reso);
-    // canvas normalization
-    var lbx = (gc[0] + -C_WMIN) / 360 * canvasW, lby = (gc[1] * -1 + -C_HMIN) / 180 * canvasH;
-    return [ lbx, lby ];
+    /*var gc = index2geoCoord(i, reso);
+	// canvas normalization
+	var lbx = ((gc[0]+(-C_WMIN)) / 360) * canvasW,
+		lby = (((gc[1]*(-1))+(-C_HMIN)) / 180) * canvasH;
+	return [lbx,lby];
+*/
+    if (reso === undefined) {
+        reso = drawdat.reso;
+    }
+    var cpr = canvasW / reso;
+    // var rowpos = (i-cpr/2)%cpr;
+    // if(rowpos<0) rowpos += cpr;
+    // rowpos -= cpr/2;
+    var rowpos = i % cpr;
+    var lbx = rowpos * reso, lby = Math.floor(i / cpr) * reso;
+    /*var nums = i.split(",");
+	var lbx = Number(nums[1]),
+		lby = Number(nums[0]);*/
+    return {
+        x: lbx,
+        y: lby
+    };
 }
 
 /**
@@ -7431,6 +7496,11 @@ function canvasCoord2geoCoord(x, y) {
         x: -180 + (-t.translate[0] + x) / (canvasW * t.scale) * 360,
         y: 90 - (-t.translate[1] + y) / (canvasH * t.scale) * 180
     };
+}
+
+function clearGrid() {
+    var ctx = leaflaggrid._canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvasW, canvasH);
 }
 
 /**
@@ -7460,14 +7530,19 @@ function cco() {
 /**
 * adjust the currently pointed at geo coordinates */
 function currentCursorPos(e) {
-    //console.log(e);
+    // console.log(e.containerPoint);
+    // console.log(e.layerPoint);
     var z = leafly.getZoom(), p = e.containerPoint;
-    p.x -= M_HOVER_OFFSET.l;
-    p.y -= M_HOVER_OFFSET.t;
-    var ll = leafly.containerPointToLatLng(p);
+    // p.x -= M_HOVER_OFFSET.l;
+    // p.y -= M_HOVER_OFFSET.t;
+    // var ll = leafly.containerPointToLatLng(p);
+    // return { 
+    // 	x: ll.lng,
+    // 	y: ll.lat
+    // };
     return {
-        x: ll.lng,
-        y: ll.lat
+        x: p.x - M_HOVER_OFFSET.l,
+        y: p.y - M_HOVER_OFFSET.t
     };
 }
 
@@ -7486,19 +7561,21 @@ function canvasMouseMove(e) {
 	//console.log(d3.event);
 	//console.log('Position in canvas: ('+x+','+y+')');
 	var gc = canvasCoord2geoCoord(x,y);*/
-    var gc = currentCursorPos(e);
-    var i = coord2index(gc.x, gc.y, drawdat.reso);
+    var cc = currentCursorPos(e);
+    //var i = coord2index(gc.x, gc.y, drawdat.reso);
+    var i = canvasCoord2index(cc, drawdat.reso);
     var cell = cellmap[i];
     // hover highlight
     highlightCell(i);
-    $("#hud").text("(" + gc.x.toFixed(5) + ", " + gc.y.toFixed(5) + ")");
+    $("#hud").text("(" + cc.x.toFixed(5) + ", " + cc.y.toFixed(5) + ")");
     if (cell !== undefined) {
-        var p = index2geoCoord(i);
+        var p = index2geoCoord(i, drawdat.reso);
         var x = (p[0] + drawdat.reso / 2).toFixed(2), y = (p[1] + drawdat.reso / 2).toFixed(2);
         // display the info bubble
         clearTimeout(bubbleTimer);
+        bubbleTimer = true;
         $("div#bubble").css("opacity", "1").css("bottom", viewportH - e.originalEvent.pageY + drawdat.wy + M_BUBBLE_OFFSET + "px").css("right", viewportW - e.originalEvent.pageX + drawdat.wy + M_BUBBLE_OFFSET * resoFactor + "px").html(cell.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + x + ", " + y + "]</span>");
-    } else {
+    } else if (bubbleTimer === true) {
         // hide the info bubble
         //highlightCell(false);
         bubbleTimer = setTimeout(function() {
@@ -7519,8 +7596,8 @@ function canvasMouseClick(e) {
 		y = cc[1];
 
 	var gc = canvasCoord2geoCoord(x,y);*/
-    var gc = currentCursorPos(e);
-    var i = coord2index(gc.x, gc.y, drawdat.reso);
+    var cc = currentCursorPos(e);
+    var i = canvasCoord2index(cc, drawdat.reso);
     selectCell(i);
 }
 
@@ -7701,20 +7778,22 @@ function updateChartDataFkt(data) {
     // TODO refurbish when upgrading timeline
     // still TODO? check if it can improved
     var x = [], y = [], ticks = [];
-    var dat_obj = {}, i, j, l, k, d;
+    var dat_obj = {}, i, j, l, k, d, it;
     if (!timelineIsGlobal) {
         for (i = mmt.min; i <= mmt.max; i++) {
-            for (j = data.min; j <= data.max; j++) {
-                if (data.data[i][j] !== undefined) {
-                    l = data.data[i][j].length;
-                    if (dat_obj[j] === undefined) {
-                        dat_obj[j] = 0;
-                    }
-                    for (k = 0; k < l; k++) {
-                        d = data.data[i][j][k];
-                        if (section_filter(d, mAE)) {
-                            dat_obj[j]++;
-                        }
+            it = data.itarraytor[i].length;
+            while (it--) {
+                j = data.itarraytor[i][it];
+                // for(j=data.min; j<=data.max; j++) {
+                // 	if(data.data[i][j] !== undefined) {
+                l = data.data[i][j].length;
+                if (dat_obj[j] === undefined) {
+                    dat_obj[j] = 0;
+                }
+                for (k = 0; k < l; k++) {
+                    d = data.data[i][j][k];
+                    if (section_filter(d, mAE)) {
+                        dat_obj[j]++;
                     }
                 }
             }
@@ -7722,14 +7801,16 @@ function updateChartDataFkt(data) {
     } else {
         var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
         for (i = 0; i < tilecount; i++) {
-            for (j = data.min; j <= data.max; j++) {
+            it = data.itarraytor[i].length;
+            while (it--) {
+                j = data.itarraytor[i][it];
+                // for(j=data.min; j<=data.max; j++) {
                 d = data.data[i][j];
-                if (d !== undefined) {
-                    if (dat_obj[j] === undefined) {
-                        dat_obj[j] = d.length;
-                    } else {
-                        dat_obj[j] += d.length;
-                    }
+                //if(d !== undefined) {
+                if (dat_obj[j] === undefined) {
+                    dat_obj[j] = d.length;
+                } else {
+                    dat_obj[j] += d.length;
                 }
             }
         }

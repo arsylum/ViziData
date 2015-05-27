@@ -51,14 +51,39 @@ function setSetSel(dsi, dgi) { //, callback){
 		console.log("~~ starting to load dataset "+current_datsel.datasets[dsi].strings.label+" ~~ ");
 		$.getJSON(DATA_DIR+current_datsel.datasets[dsi].file, function(data){
 			console.log(" |BM| finished loading "+current_datsel.datasets[dsi].strings.label+" data (took "+(new Date()-lBM)+"ms)");
-			clearInterval(lAnim);
-			
+						
 			current_datsel.datasets[dsi].data = data;
-
 			current_setsel = current_datsel.datasets[dsi];
+			lBM = Date.now();
+			preprocess(current_setsel);
+
+			console.log(" |BM| finished preprocessing object iterators ("+(Date.now()-lBM)+"ms)");
+
+			clearInterval(lAnim);
+
 			genChart();
 			genGrid();
 
 		});
 	}
+}
+
+function preprocess(ds) {
+	if(ds.ready === true) { return false; }
+
+	if(ds.itarraytor === undefined) {
+		ds.itarraytor = [];
+	}
+
+	var i = (C_WMAX - C_WMIN) / ds.parent.tile_width;
+	while(i--) {
+		if(ds.itarraytor[i] === undefined) {
+			ds.itarraytor[i] = [];
+			for(var k in ds.data[i]) {
+				ds.itarraytor[i].push(k);
+			}
+		}
+	}
+
+	ds.ready = true;
 }

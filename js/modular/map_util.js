@@ -14,8 +14,12 @@ function calcReso() {
 	//console.log((1/(leafly.getZoom()+1)) * resoFactor);
 	//return (1/(leafly.getZoom()+1)) * resoFactor;
 
-	var b = leafly.getBounds();
-	var r = (b._northEast.lng - b._southWest.lng) / 360 * resoFactor;
+	// var b = leafly.getBounds();
+	// var r = (b._northEast.lng - b._southWest.lng) / 360 * resoFactor;
+
+	var w = canvasW; //leafly.getSize().y;
+	var r = (w / M_BASE_GRIDROWS) * resoFactor; 
+
 	return r;
 }
 
@@ -85,18 +89,25 @@ function getMinMaxTile(mAE) {
 * returns the index value for the cell of a grid with given resolution
 * where the given geocoordinate pair lies in*/
 function coord2index(longi, lati, reso) {
-	if(longi === C_WMAX) longi -= reso;	// prevent 
-	if(lati  === C_HMAX) lati  -= reso; // out of bounds cells
-	//var proj = leafly.latLngToContainerPoint([lati,longi]);
+	//if(longi === C_WMAX) longi -= reso;	// prevent 
+	//if(lati  === C_HMAX) lati  -= reso; // out of bounds cells
 
-	return (Math.floor(lati/reso)*((C_WMAX-C_WMIN)/reso) + Math.floor(longi/reso));
+	var proj = leafly.latLngToContainerPoint(L.latLng(lati,longi));
+
+	return (Math.floor(proj.y/reso)*(canvasW/reso) + Math.floor(proj.x/reso));
+}
+
+/**
+* returns the index value for given canvas (container) coordinates */
+function canvasCoord2index(p, reso) {
+	return (Math.floor(p.y/reso)*(canvasW/reso) + Math.floor(p.x/reso));
 }
 
 /**
 * returns the geo coordinates for a given index
 * (for the bottom left corner of the gridcells rect)*/
 function index2geoCoord(i, reso) {
-	if(reso === undefined) { reso = drawdat.reso; }
+/*	if(reso === undefined) { reso = drawdat.reso; }
 	var cpr = (C_WMAX-C_WMIN)/reso;
 
 	var rowpos = (i-cpr/2)%cpr;
@@ -104,21 +115,40 @@ function index2geoCoord(i, reso) {
 	rowpos -= cpr/2;
 
 	var lbx = (rowpos*reso),//+(C_WMIN), //+reso/2,
-		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)); //*(-1));//+(-C_HMIN); //+reso/2;
+		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)); //*(-1));//+(-C_HMIN); //+reso/2;*/
+	var cc = index2canvasCoord(i, reso);
+	var gc = leafly.containerPointToLatLng([cc.x,cc.y]);
 
-	return [lby,lbx];
+	return [gc.lat,gc.lng];
 }
 
 /**
 * returns the canvas rendering coordinates for a given index 
-* (for the bottom left corner of the gridscells rect) */
+* (for the top left corner of the gridscells rect) */
 function index2canvasCoord(i, reso) {
 	// get geocoordinates
-	var gc = index2geoCoord(i, reso);
+	/*var gc = index2geoCoord(i, reso);
 	// canvas normalization
 	var lbx = ((gc[0]+(-C_WMIN)) / 360) * canvasW,
 		lby = (((gc[1]*(-1))+(-C_HMIN)) / 180) * canvasH;
 	return [lbx,lby];
+*/
+	if(reso === undefined) { reso = drawdat.reso; }
+	var cpr = canvasW / reso;
+
+	// var rowpos = (i-cpr/2)%cpr;
+	// if(rowpos<0) rowpos += cpr;
+	// rowpos -= cpr/2;
+	var rowpos = (i%cpr);
+
+	var lbx = (rowpos*reso),
+		lby = (Math.floor(i/cpr)*reso);
+
+
+	/*var nums = i.split(",");
+	var lbx = Number(nums[1]),
+		lby = Number(nums[0]);*/
+	return { x: lbx, y: lby };
 }
 
 /**
@@ -130,6 +160,12 @@ function canvasCoord2geoCoord(x, y){
 		x: -180 + ((-t.translate[0] + x) / (canvasW * t.scale) * 360),
 		y:   90 - ((-t.translate[1] + y) / (canvasH * t.scale) * 180)
 	};
+}
+
+
+function clearGrid() {
+	var ctx = leaflaggrid._canvas.getContext('2d');
+	ctx.clearRect(0,0,canvasW,canvasH);
 }
 
 /**
@@ -164,16 +200,21 @@ function cco() {
 /**
 * adjust the currently pointed at geo coordinates */
 function currentCursorPos(e) {
-	//console.log(e);
+	// console.log(e.containerPoint);
+	// console.log(e.layerPoint);
 	var z = leafly.getZoom(),
 		p = e.containerPoint;
-		p.x -= M_HOVER_OFFSET.l;
-		p.y -= M_HOVER_OFFSET.t;
+		// p.x -= M_HOVER_OFFSET.l;
+		// p.y -= M_HOVER_OFFSET.t;
 
-	var ll = leafly.containerPointToLatLng(p);
-	return { 
-		x: ll.lng,
-		y: ll.lat
+	// var ll = leafly.containerPointToLatLng(p);
+	// return { 
+	// 	x: ll.lng,
+	// 	y: ll.lat
+	// };
+	return {
+		x: p.x - M_HOVER_OFFSET.l,
+		y: p.y - M_HOVER_OFFSET.t
 	};
 }
 
@@ -191,30 +232,32 @@ function canvasMouseMove(e) {
 	//console.log('Position in canvas: ('+x+','+y+')');
 	var gc = canvasCoord2geoCoord(x,y);*/
 
-	var gc = currentCursorPos(e);
-	var i = coord2index(gc.x, gc.y, drawdat.reso);
+	var cc = currentCursorPos(e);
+	//var i = coord2index(gc.x, gc.y, drawdat.reso);
+	var i = canvasCoord2index(cc, drawdat.reso);
 	var cell = cellmap[i];
 
 	// hover highlight
 	highlightCell(i);
 
-	$("#hud").text('(' + gc.x.toFixed(5) + ', ' + gc.y.toFixed(5) + ')');
+	$("#hud").text('(' + cc.x.toFixed(5) + ', ' + cc.y.toFixed(5) + ')');
 
 	if(cell !== undefined) {
 
-		var p = index2geoCoord(i);
+		var p = index2geoCoord(i, drawdat.reso);
 		var x = (p[0] + drawdat.reso/2).toFixed(2),
 			y = (p[1] + drawdat.reso/2).toFixed(2);
 
 		// display the info bubble
 		clearTimeout(bubbleTimer);
+		bubbleTimer = true;
 		$("div#bubble").css("opacity","1")
 			.css("bottom", (viewportH - e.originalEvent.pageY + drawdat.wy + M_BUBBLE_OFFSET) + "px")
 			.css("right", (viewportW - e.originalEvent.pageX + drawdat.wy + M_BUBBLE_OFFSET*resoFactor) + "px")
 			.html(cell.length +" <em>"+current_setsel.strings.label+"</em><br>"+
 				"<span>["+x+", "+y+"]</span>");
 
-	} else {
+	} else if(bubbleTimer === true) {
 		// hide the info bubble
 		//highlightCell(false);
 		bubbleTimer = setTimeout(function() {
@@ -233,8 +276,8 @@ function canvasMouseClick(e) {
 		y = cc[1];
 
 	var gc = canvasCoord2geoCoord(x,y);*/
-	var gc = currentCursorPos(e);
-	var i = coord2index(gc.x, gc.y, drawdat.reso);
+	var cc = currentCursorPos(e);
+	var i = canvasCoord2index(cc, drawdat.reso);
 
 	selectCell(i);
 }

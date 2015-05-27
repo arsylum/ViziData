@@ -16,7 +16,8 @@ var C_WMIN = -180,
 
 // map parameters
 var M_BOUNDING_THRESHOLD = 0,	// grid clipping tolerance
-	M_ZOOM_RANGE = [1,8],		// zoom range (results in svg scale 2^(v-1))
+	//M_ZOOM_RANGE = [1,8],		// zoom range (results in svg scale 2^(v-1))
+	M_BASE_GRIDROWS = 300,		// number of horizontal grid cells
 	M_BUBBLE_OFFSET = 10,		// distance of map tooltip from pointer
 	M_HOVER_OFFSET = {			// pointer selection offset
 		l: 5, 
@@ -114,7 +115,8 @@ var //mapcan,	mapctx,
 
 var //lastTransformState; // remember map scaling (only redraw on changes)
 	lastMapCenter, // to determine direction of panning
-	lastMapZoom; // keep track if zoom changes
+	lastMapZoom, // keep track if zoom changes
+	lastAgPos = [0,0]; // css positioning of aggrid layer
 
 
 var langCodes = [

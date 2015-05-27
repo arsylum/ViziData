@@ -28,7 +28,7 @@ function generateGrid(reso, mAE, data) {
 
 
 	/// main function body
-	var worker = function() { //timeout for dom redraw
+	var worker = function() {
 		
 		console.log("/~~ generating new grid with resolution "+reso+" ~~\\");
 		var bms = new Date();
@@ -84,14 +84,18 @@ function generateGrid(reso, mAE, data) {
 				mutexGenGrid = 0;		// if new function call
 				return 0;				// has been made
 			}
-			var cellmapprog = {}, l, a, ti, i;
+			var cellmapprog = {}, l, a, ti, i, j, k, it;
 			if(!renderRTL) { i = tMin + offset; }
 					  else { i = tMax - offset; }
 			if(i <= tMax && i >= tMin) {	// still work to do			// for each map tile in visible area
-				for(var j = cAE.min; j <= cAE.max; j++) { 					// go over each key in range
-					if(data.data[i][j] !== undefined) {							// if it is defined
+				//for(var j = cAE.min; j <= cAE.max; j++) { 					// go over each key in range
+				//	if(data.data[i][j] !== undefined) {							// if it is defined
+				it = data.itarraytor[i].length;
+				while(it--) {
+					j = data.itarraytor[i][it];
+					if(j >= cAE.min && j <= cAE.max) {
 						l = data.data[i][j].length;
-						for(var k = 0; k < l; k++) {								// go over each event in key and
+						for(k = 0; k < l; k++) {								// go over each event in key and
 							a = data.data[i][j][k];
 							if(section_filter(a,mAE)) {									// if it actually lies within map bounds
 								ti = coord2index(a[ARR_M_LON],a[ARR_M_LAT],reso);
@@ -126,7 +130,7 @@ function generateGrid(reso, mAE, data) {
 		else {
 			mutexGenGrid = 1;
 			$("#legend").html("<em>massive calculations...</em>");
-			setTimeout(worker,1);
+			setTimeout(worker,1); //timeout for dom redraw
 	}	};
 	goOn();
 }
@@ -181,7 +185,7 @@ function calcPlotDat(newmap, reso, tile) {
 		
 		$.each(newmap, function(k,v) {
 			//var c = index2canvasCoord(k, reso);
-			var c = index2geoCoord(k,reso);
+			var c = index2canvasCoord(k,reso);
 			//var p = tileMap.latLngToLayerPoint([c[0],c[1]]);
 
 			v = v.length;
@@ -232,6 +236,10 @@ function drawPlot(leavas, params) {
 
 	var mapctx = params.canvas.getContext('2d');
 
+	var can = $(params.canvas);
+	var curAgPos = [parseInt(can.css("left")), parseInt(can.css("top"))];
+	
+
 	// mapctx.save();
 	if(drawdat.tile === undefined) {
 		mapctx.clearRect(0,0,params.canvas.width, params.canvas.height);
@@ -275,7 +283,7 @@ function drawPlot(leavas, params) {
 	//var ccount = (gb._northEast.lat - gb._southWest.lat) / drawdat.reso;
 
 	var b = leafly.getPixelBounds();
-	var r = (b.max.x - b.min.x) / 360 * resoFactor;
+	var r = drawdat.reso; //(b.max.x - b.min.x) / 360 * resoFactor;
 	var wx = r*bleed;
 	var wy = wx, rx = wx/2, ry = wy/2;
 	//wy = r; //params.canvas.height / ccount;
@@ -289,6 +297,8 @@ function drawPlot(leavas, params) {
 
 	var i= -1, n = drawdat.draw.length, d, cx, cy, fc, gradient; // TODO keep only what is used
 	//var col;
+	var dx = curAgPos[0] - lastAgPos[0],
+		dy = curAgPos[1] - lastAgPos[1];
 
   	// mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
   	// mapctx.scale(lastTransformState.scale, lastTransformState.scale);
@@ -303,7 +313,12 @@ function drawPlot(leavas, params) {
 
 	while(++i < n) {
 		d = drawdat.draw[i];
-		p = leavas._map.latLngToContainerPoint(d[0]);
+		//p = leavas._map.latLngToContainerPoint(d[0]);
+		//p = leafly.layerPointToContainerPoint(d[0]);
+		p = d[0];
+
+		cx = p.x - dx;
+		cy = p.y - dy;
 		// cx = d.x; //d[0][0];
 		// cy = d.y; //[0][1];
 		//wy =  2*r * (Math.abs(d[0][0])/45);
@@ -332,7 +347,7 @@ function drawPlot(leavas, params) {
 		//ctx.fillStyle = gradient;
 
 		mapctx.beginPath();
-		mapctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+		mapctx.arc(cx + rx, cy + rx, rx, 0, TPI);
 		mapctx.fill();
 
 		//ctx.fillRect(cx-rx,cy-rx,wx,wy);
@@ -364,6 +379,8 @@ function drawPlot(leavas, params) {
 	}
 	mapctx.globalAlpha = 1.0;
 	mapctx.restore();
+
+	lastAgPos = curAgPos;
 
 	//return (Date.now()-bm);
 }
@@ -399,7 +416,7 @@ function highlightCell(c) {
   		overctx.fillStyle = "rgba(255,120,0,0.8)";
 		//overctx.fillRect(x,y-wy,wx,wy);
 		overctx.beginPath();
-		overctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+		overctx.arc(p.x + rx, p.y + rx, rx, 0, TPI);
 		overctx.fill();
 
 		overctx.strokeStyle = "rgba(255,255,255,0.4)";
@@ -423,10 +440,11 @@ function highlightCell(c) {
 		return false; 
 	}
 	
-	g = index2geoCoord(c);
-	p = leafly.latLngToContainerPoint(g);
-	x = p.x;
-	y = p.y;
+	//g = index2geoCoord(c);
+	//p = leafly.latLngToContainerPoint(g);
+	p = index2canvasCoord(c);
+	x = p.x + rx;
+	y = p.y + rx;
 	
 	//wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
 	//ry = wy/2;
@@ -441,7 +459,7 @@ function highlightCell(c) {
   	overctx.fillStyle = "rgba(255,130,0,0.7)";
 	//overctx.fillRect(x,y-wy,wx,wy);
 	overctx.beginPath();
-	overctx.arc(p.x + rx, p.y - rx, rx, 0, TPI);
+	overctx.arc(x, y, rx, 0, TPI);
 	overctx.fill();
 
 
@@ -452,7 +470,8 @@ function highlightCell(c) {
 	gradient.addColorStop(1,"rgba(255,255,255,0.1");
 	overctx.fillStyle = gradient;
 	overctx.beginPath();
-	overctx.ellipse(x+rx,y-ry,rx*4,ry*4,0,0,TPI);
+	//overctx.ellipse(x+rx,y-ry,rx*4,ry*4,0,0,TPI);
+	overctx.arc(x,y,rx*4,0, TPI);
 	overctx.fill();
 
 	// text bubble?..
@@ -554,6 +573,9 @@ function initLeaflet() {
 	
 	leafly.on("moveend", function() {
 		genGrid();
+	}).on("zoomend", function() {
+		drawdat.draw = undefined;
+		clearGrid();
 	}).on("mousemove", function(e) {
 		//console.log(e.latlng);
 		canvasMouseMove(e);

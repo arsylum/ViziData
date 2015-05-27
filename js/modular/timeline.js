@@ -45,35 +45,42 @@ function updateChartDataFkt(data) {
 	// still TODO? check if it can improved
 	var x = [], y = [], ticks = [];
 	var dat_obj = {},
-		i,j,l,k,d;
+		i,j,l,k,d,it;
 	
 	if(!timelineIsGlobal) {
 		for(i = mmt.min; i<= mmt.max; i++) {
-			for(j=data.min; j<=data.max; j++) {
-				if(data.data[i][j] !== undefined) {
-					l = data.data[i][j].length;
-					if(dat_obj[j] === undefined) { dat_obj[j] = 0; }
-					for(k = 0; k < l; k++) {
-						d = data.data[i][j][k];
-						if(section_filter(d,mAE)) {
-							dat_obj[j]++;
-						}
+			it = data.itarraytor[i].length;
+			while(it--) {
+				j = data.itarraytor[i][it];
+			// for(j=data.min; j<=data.max; j++) {
+			// 	if(data.data[i][j] !== undefined) {
+				l = data.data[i][j].length;
+				if(dat_obj[j] === undefined) { dat_obj[j] = 0; }
+				for(k = 0; k < l; k++) {
+					d = data.data[i][j][k];
+					if(section_filter(d,mAE)) {
+						dat_obj[j]++;
 					}
 				}
+				// }
 			}
 		}
 	} else {
 		var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
 		for(i = 0; i < tilecount; i++) {
-			for(j=data.min; j<=data.max; j++) {
+			it = data.itarraytor[i].length;
+			while(it--) {
+				j = data.itarraytor[i][it];
+			// for(j=data.min; j<=data.max; j++) {
+
 				d = data.data[i][j];
-				if(d !== undefined) {
+				//if(d !== undefined) {
 					if(dat_obj[j] === undefined) {
 						dat_obj[j] = d.length;
 					} else {
 						dat_obj[j] += d.length;
 					}
-				}
+				//}
 			}
 		}
 	}
