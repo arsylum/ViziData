@@ -168,12 +168,35 @@ function initChart() {
 				lineColor: '#ff9900',
 				fillColor: '#ff9900',
 				fillOpacity: 0.6,
-				trackFormatter : function (o) {
-					var k = parseInt(o.x);
-					//console.log("na sieh an!");
-					highlightCellsFor(k); // hooking here for our highlight function
-			    	return "<em>" + current_setsel.strings.label + "</em> in " + k + ": <em>"+ parseInt(o.y) + "</em>";
-			    }
+				trackFormatter : (function() {
+					var str = current_setsel.strings.timelineToolTip || T_DEFAULT_TOOLTIP;
+					str = str.match(/(.*)(\%.)(.*)(\%.)(.*)(\%.)(.*)/);
+					
+					var fkt = 'var k = parseInt(o.x);' +
+						'highlightCellsFor(k);' +
+						'return "';
+
+					for(var i = 1; i<str.length; i++) {
+						if(str[i] === "%l") {
+							fkt += '<em>'+current_setsel.strings.label+'</em> ';
+						} else if(str[i] === "%x") {
+							fkt += '" + k + " ';
+						} else if(str[i] === "%v") {
+							fkt += '<em>" + parseInt(o.y) + "</em> ';
+						} else {
+							fkt += str[i];
+						}
+					}
+					fkt += '";';
+					return Function('o', fkt);
+
+					/*return function (o) {
+						var k = parseInt(o.x);
+						//console.log("na sieh an!");
+						highlightCellsFor(k); // hooking here for our highlight function
+				    	return "<em>" + current_setsel.strings.label + "</em> in " + k + ": <em>"+ parseInt(o.y) + "</em>";
+			    	};*/
+				})()
 	        },
 	        yaxis : { 
 	          	autoscale : normalize,

@@ -86,6 +86,9 @@ function setupControlHandlers() {
 	$("#infolist").on("scroll", infolistScroll);
 
 	
+	$("#map").on("mouseleave", function() {
+		$("div#bubble").css("opacity", "0");
+	});
 
 	// $(window).resize(function() {
 	// 	viewportW = $(this).width();
@@ -112,6 +115,13 @@ function setupControlHandlers() {
 	});
 }
 
+/**
+* update UI labels etc
+* (so far only right column of item table) */
+function updateUI() {
+	var zprop = current_setsel.strings.zprop || T_DEFAULT_ZPROP;
+	$("#cellinfo th:last-child").text(zprop);
+}
 
 ////////////////////////////////
 /// url parameters key overview:

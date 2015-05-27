@@ -18,6 +18,7 @@ function setSetSel(dsi, dgi) { //, callback){
 	}
 	if(current_datsel.datasets[dsi].data !== undefined) {
 		current_setsel = current_datsel.datasets[dsi];
+		updateUI();
 		genChart();
 		genGrid();
 	} else {
@@ -61,6 +62,7 @@ function setSetSel(dsi, dgi) { //, callback){
 
 			clearInterval(lAnim);
 
+			updateUI();
 			genChart();
 			genGrid();
 

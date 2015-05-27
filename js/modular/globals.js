@@ -36,8 +36,10 @@ var M_COLOR_SCALE = [	// provided by colorbrewer2.org
 	'rgb(8,29,88)'];*/
 	'#ccddff', '#aacc66', '#aa6611', '#800', '#300'];
 
-// Timeline
-var T_YAXIS_MAX_EXPAND = 1.21; // faktor for top margin
+// "Timeline" (can be almost anything)
+var T_YAXIS_MAX_EXPAND = 1.21, // faktor for top margin
+	T_DEFAULT_TOOLTIP = '%l in %x: %v', // default timeline hover tooltip
+	T_DEFAULT_ZPROP = '#'; // default label for the chart data axis
 
 // timing, responsiveness
 var CALC_TIMEOUT = 200; // default timeout before large operations are run

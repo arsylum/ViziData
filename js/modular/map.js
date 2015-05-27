@@ -67,8 +67,11 @@ function generateGrid(reso, mAE, data) {
 				//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
 				"we have registered a total of<br>"+
 				"<em>"+count+" "+data.parent.label+"</em><br>"+
-				"that <em>"+data.strings.term+"</em><br>"+
-				"between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
+				data.strings.term
+					.replace("%l", "<em>"+cAE.min+"</em>")
+					.replace("%h", "<em>"+cAE.max+"</em>"));
+				// "that <em>"+data.strings.term+"</em><br>"+
+				// "between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
 
 			selectCell();
 			//urlifyState(); // is always called in selectCell

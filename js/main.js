@@ -6542,6 +6542,7 @@ function setSetSel(dsi, dgi) {
     }
     if (current_datsel.datasets[dsi].data !== undefined) {
         current_setsel = current_datsel.datasets[dsi];
+        updateUI();
         genChart();
         genGrid();
     } else {
@@ -6562,6 +6563,7 @@ function setSetSel(dsi, dgi) {
             preprocess(current_setsel);
             console.log(" |BM| finished preprocessing object iterators (" + (Date.now() - lBM) + "ms)");
             clearInterval(lAnim);
+            updateUI();
             genChart();
             genGrid();
         });
@@ -6620,10 +6622,12 @@ var M_COLOR_SCALE = [ // provided by colorbrewer2.org
 	'rgb(8,29,88)'];*/
 "#ccddff", "#aacc66", "#aa6611", "#800", "#300" ];
 
-// Timeline
-var T_YAXIS_MAX_EXPAND = 1.21;
+// "Timeline" (can be almost anything)
+var T_YAXIS_MAX_EXPAND = 1.21, // faktor for top margin
+T_DEFAULT_TOOLTIP = "%l in %x: %v", // default timeline hover tooltip
+T_DEFAULT_ZPROP = "#";
 
-// faktor for top margin
+// default label for the chart data axis
 // timing, responsiveness
 var CALC_TIMEOUT = 200;
 
@@ -6853,7 +6857,9 @@ function generateGrid(reso, mAE, data) {
             console.log("  |BM| finished genGrid (total of " + (new Date() - bms) + "ms)");
             //filledTiles = [tMin+1,tMax-1];
             $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
-            "we have registered a total of<br>" + "<em>" + count + " " + data.parent.label + "</em><br>" + "that <em>" + data.strings.term + "</em><br>" + "between <em>" + cAE.min + "</em> and <em>" + cAE.max + "</em>");
+            "we have registered a total of<br>" + "<em>" + count + " " + data.parent.label + "</em><br>" + data.strings.term.replace("%l", "<em>" + cAE.min + "</em>").replace("%h", "<em>" + cAE.max + "</em>"));
+            // "that <em>"+data.strings.term+"</em><br>"+
+            // "between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
             selectCell();
             //urlifyState(); // is always called in selectCell
             console.log("\\~~ grid generation complete~~/ ");
@@ -7891,13 +7897,24 @@ function initChart() {
                 lineColor: "#ff9900",
                 fillColor: "#ff9900",
                 fillOpacity: .6,
-                trackFormatter: function(o) {
-                    var k = parseInt(o.x);
-                    //console.log("na sieh an!");
-                    highlightCellsFor(k);
-                    // hooking here for our highlight function
-                    return "<em>" + current_setsel.strings.label + "</em> in " + k + ": <em>" + parseInt(o.y) + "</em>";
-                }
+                trackFormatter: function() {
+                    var str = current_setsel.strings.timelineToolTip || T_DEFAULT_TOOLTIP;
+                    str = str.match(/(.*)(\%.)(.*)(\%.)(.*)(\%.)(.*)/);
+                    var fkt = "var k = parseInt(o.x);" + "highlightCellsFor(k);" + 'return "';
+                    for (var i = 1; i < str.length; i++) {
+                        if (str[i] === "%l") {
+                            fkt += "<em>" + current_setsel.strings.label + "</em> ";
+                        } else if (str[i] === "%x") {
+                            fkt += '" + k + " ';
+                        } else if (str[i] === "%v") {
+                            fkt += '<em>" + parseInt(o.y) + "</em> ';
+                        } else {
+                            fkt += str[i];
+                        }
+                    }
+                    fkt += '";';
+                    return Function("o", fkt);
+                }()
             },
             yaxis: {
                 autoscale: normalize,
@@ -8148,6 +8165,9 @@ function setupControlHandlers() {
     // 	genGrid();
     // });
     $("#infolist").on("scroll", infolistScroll);
+    $("#map").on("mouseleave", function() {
+        $("div#bubble").css("opacity", "0");
+    });
     // $(window).resize(function() {
     // 	viewportW = $(this).width();
     // 	viewportH = $(this).height();
@@ -8167,6 +8187,14 @@ function setupControlHandlers() {
         $("#infolist").trigger("scroll");
         urlifyState();
     });
+}
+
+/**
+* update UI labels etc
+* (so far only right column of item table) */
+function updateUI() {
+    var zprop = current_setsel.strings.zprop || T_DEFAULT_ZPROP;
+    $("#cellinfo th:last-child").text(zprop);
 }
 
 ////////////////////////////////
