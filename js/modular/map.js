@@ -236,8 +236,12 @@ function drawPlot(leavas, params) {
 
 	var mapctx = params.canvas.getContext('2d');
 
-	var can = $(params.canvas);
-	var curAgPos = [parseInt(can.css("left")), parseInt(can.css("top"))];
+	var transform = $(params.canvas).css("transform");
+	transform = transform.split(",");
+
+	var curAgPos = [
+		parseInt(transform[transform.length-2]),  // x
+		parseInt(transform[transform.length-1])]; // y
 	
 
 	// mapctx.save();
@@ -572,8 +576,11 @@ function initLeaflet() {
 	
 	
 	leafly.on("moveend", function() {
+		//clearGrid();
 		genGrid();
-	}).on("zoomend", function() {
+	})/*.on("dragend", function() {
+		clearGrid();
+	})*/.on("zoomend", function() {
 		drawdat.draw = undefined;
 		clearGrid();
 	}).on("mousemove", function(e) {
