@@ -91,7 +91,7 @@ var allow_redraw = true,
 
 var gdata = [],		// global rawdata
 	current_datsel,	// slected data group
-	current_setsel,	// selected dataset
+	current_setsel = {}, // selected dataset
 	chartdat = [], // timeline rendering data
 	timeSel, // current timeline selection
 	cellmap, // latest generated tilemap

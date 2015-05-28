@@ -161,6 +161,11 @@ menu#timefilter {
 					color: rgb(255, 219, 153);
 					margin-right: .2em;
 				}
+
+				span {
+					font-size: .8em;
+					color: #ddd;
+				}
 			}
 			&:active {
 				cursor: ew-resize;

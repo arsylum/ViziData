@@ -53,26 +53,27 @@ function setupControlHandlers() {
 
 	$("#ctrl-tlmode input").on("change", function() {
 		timelineIsGlobal = parseInt($(this).val());
-		updateChartData();
-		if(current_setsel !== undefined) { urlifyState(); }
+		//updateChartData();
+		genChart();
+		if(current_setsel.ready === true) { urlifyState(); }
 	});
 	//.filter("[value="+timelineIsGlobal+"]").prop("checked", true);
-	$("#tl-normalize").on("change", function() {
-		if(chart === undefined) {
-			return false;
-		}
-		var detail = chart.components[0],
-			ac = detail.options.config.yaxis;
-		if(this.checked) {
-			ac.autoscale = true;
-			delete(ac.max);
-		} else {
-			ac.autoscale = false;
-			ac.max = current_setsel.maxEventCount * T_YAXIS_MAX_EXPAND;
-		}
-		updateChartData();
-		urlifyState();
-	});
+	// $("#tl-normalize").on("change", function() {
+	// 	if(chart === undefined) {
+	// 		return false;
+	// 	}
+	// 	var detail = chart.components[0],
+	// 		ac = detail.options.config.yaxis;
+	// 	if(this.checked) {
+	// 		ac.autoscale = true;
+	// 		delete(ac.max);
+	// 	} else {
+	// 		ac.autoscale = false;
+	// 		ac.max = current_setsel.maxEventCount * T_YAXIS_MAX_EXPAND;
+	// 	}
+	// 	updateChartData();
+	// 	urlifyState();
+	// });
 
 	$("#sidebar>menu h2").on("click", function() {
 		$(this).toggleClass("closed");
@@ -148,7 +149,7 @@ function urlifyState() {
 	hash += "&l=" + $("#langsel").val();
 	// timeline settings
 	hash += "&f=" + timelineIsGlobal;
-	hash += "&n=" + $("#tl-normalize").get(0).checked;
+	//hash += "&n=" + $("#tl-normalize").get(0).checked;
 	// timeline selection
 	var time = getTimeSelection();
 	hash += "&e=" + time.min + "_" + time.max;
@@ -220,7 +221,7 @@ function statifyUrl() {
 
 	/// timeline settings
 	$("#ctrl-tlmode input[value="+tl_mode+"]").prop("checked", true).trigger("change");
-	$("#tl-normalize").get(0).checked = tl_normalize;
+	//$("#tl-normalize").get(0).checked = tl_normalize;
 
 	// time selection
 	timeSel = {

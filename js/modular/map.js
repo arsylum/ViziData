@@ -496,11 +496,13 @@ function highlightCellsFor(key) {
 		reso = drawdat.reso;
 
 	drawWhat();
-	var mmt = drawdat.mmt;
+	var mAE = drawdat.bounds,
+		mmt = drawdat.mmt;
 
 	//var bm = Date.now();
 
-	/* "improved" method is actually slower..
+	/* supposed to be better and more reliable
+	// but actually slower..
 	var k, l, ca = [];
 	$.each(cellmap, function(k) {
 		l = cellmap[k].length;
@@ -513,9 +515,10 @@ function highlightCellsFor(key) {
 		if((t = data[i][key]) !== undefined) {
 			j = t.length;
 			while(j--) {
-				ci = coord2index(t[j][ARR_M_LON],t[j][ARR_M_LAT],reso);
-				cmap[ci] = true;
-	}	}	}
+				if(section_filter(t[j],mAE)){
+					ci = coord2index(t[j][ARR_M_LON],t[j][ARR_M_LAT],reso);
+					cmap[ci] = true;
+	}	}	}	}
 	$.each(cmap, function(k) { ca.push(k); });
 
 	overctx.save();
@@ -576,8 +579,8 @@ function initLeaflet() {
 	leafly.on("moveend", function() {
 		//clearGrid();
 		genGrid();
-		updateChartData();
-		console.log("MOVEEND!");
+		genChart(); // maybe there is a less destructive way?
+		//updateChartData();
 	})/*.on("dragend", function() {
 		clearGrid();
 	})*/.on("zoomend", function() {

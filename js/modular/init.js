@@ -86,6 +86,7 @@ function onResize() {
 	overctx = overcan.node().getContext("2d");
 
 	initLeaflet();
-	genChart();
+	
 	genGrid();
+	genChart();
 }

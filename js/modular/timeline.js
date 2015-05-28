@@ -2,7 +2,7 @@
 /// timeline ///
 ////////////////
 function genChart(data){
-	if(current_setsel === undefined) { return false; }
+	if(current_setsel.ready !== true) { return false; }
 
 	var benchmark_chart = new Date();
 
@@ -14,7 +14,8 @@ function genChart(data){
 }
 
 /**
-* timeout wrapper */
+* timeout wrapper * /
+(not used right now)
 function updateChartData(data) {
 	if(current_setsel === undefined) { return false; }
 	clearTimeout(chartdatTimer);
@@ -27,7 +28,7 @@ function updateChartData(data) {
 			max: timeSel.data.x.max
 		}});
 	}, Math.max((CALC_TIMEOUT-100),100));
-}
+}*/
 
 
 function updateChartDataFkt(data) {
@@ -48,8 +49,10 @@ function updateChartDataFkt(data) {
 	chartdat = [];
 
 	var x; // = [], y = [], ticks = [];
-	var dat_obj = {},
-		i,j,l,k,d,it;
+	var dat_obj = {}, globob = {}, locob = {},
+		i,j,l,k,d,it, itl;
+	
+	
 
 	/// create envision data from the assembled object
 	var nvision = function(o) {
@@ -61,58 +64,85 @@ function updateChartDataFkt(data) {
 		l = kay.length;
 		for(i = 0; i < l; i++) {
 			x.push(kay[i]);
-			y.push(dat_obj[kay[i]]);
+			y.push(o[kay[i]]);
 		}
 		//chartdat[cdi] = [x,y];
 		chartdat.push([x,y]);
 	};
-	
-	
 
-	/*// get global dataelse {
+	// the following is a bit redundant because it's rolled out for performance
+	// to save a few milliseconds here and there
+	// (even though it turns out that it doesn't make that much of a difference)
+	if(timelineIsGlobal) { // collect all
+		var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
+		for(i = 0; i < tilecount; i++) {
+			itl = data.itarraytor[i].length;
+			it = -1;
+			if(i >= mmt.min && i <= mmt.max) { // in range, collect both
+				while(++it < itl) {
+					j = data.itarraytor[i][it];
+					d = data.data[i][j];
+					l = d.length;
+					// global part
+					if(globob[j] === undefined) { globob[j] = d.length; }
+					else { globob[j] += d.length; }
+					// local part
+					if(locob[j] === undefined) { locob[j] = 0; }
+					for(k = 0; k < l; k++) {
+						d = data.data[i][j][k];
+						if(section_filter(d,mAE)) {
+							locob[j]++;
+						}
+					}
+				}
+			} else { // out of range, just global
+				while(++it < itl) {
+					j = data.itarraytor[i][it];
+					d = data.data[i][j];
+					if(globob[j] === undefined) { globob[j] = d.length; }
+					else { globob[j] += d.length; }
+				}
+			}
+		}
+		nvision(globob);
+		nvision(locob);
+	} else { // collect map area data only
+
+	/*// get global data
+	if(timelineIsGlobal) {
 		var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
 		for(i = 0; i < tilecount; i++) {
 			it = data.itarraytor[i].length;
 			while(it--) {
 				j = data.itarraytor[i][it];
-			// for(j=data.min; j<=data.max; j++) {
-
 				d = data.data[i][j];
-				//if(d !== undefined) {
-					if(dat_obj[j] === undefined) {
-						dat_obj[j] = d.length;
-					} else {
-						dat_obj[j] += d.length;
-					}
-				//}
+				if(dat_obj[j] === undefined) {
+					dat_obj[j] = d.length;
+				} else {
+					dat_obj[j] += d.length;
+				}
 			}
 		}
 		nvision(dat_obj);
-	//}*/
+	}*/
 
-	dat_obj = {};
-	// get local data
-	if(!timelineIsGlobal) {
-		console.log(mAE,mmt);
+
 		for(i = mmt.min; i<= mmt.max; i++) {
 			it = data.itarraytor[i].length;
 			while(it--) {
 				j = data.itarraytor[i][it];
-			// for(j=data.min; j<=data.max; j++) {
-			// 	if(data.data[i][j] !== undefined) {
 				l = data.data[i][j].length;
-				if(dat_obj[j] === undefined) { dat_obj[j] = 0; }
+				if(locob[j] === undefined) { locob[j] = 0; }
 				for(k = 0; k < l; k++) {
 					d = data.data[i][j][k];
 					if(section_filter(d,mAE)) {
-						dat_obj[j]++;
+						locob[j]++;
 					}
 				}
-				// }
 			}
 		}
-		nvision(dat_obj);
-	} 
+		nvision(locob);
+	}
 
 	// create a sorted index for all dat_obj props
 	// var kay = [];
@@ -169,20 +199,20 @@ function initChart() {
 
     var selCallback = function() { // callback function for selection change
     	var range = getTimeSelection();
-    	timeSel.data.x = {
-    		min: range.min,
-    		max: range.max
-    	};
+    	if(timeSel.data.x.min !== range.min || timeSel.data.x.max !== range.max) {
+    		timeSel.data.x = { 	min: range.min,
+	    						max: range.max };
+    		genGrid();
+    	}
     	$("#range-tt-min>div").text(range.min);
     	$("#range-tt-max>div").text(range.max);
-		genGrid();
 	};
 
     var detail, detailOptions,
         summaryOptions, // summary, (global)
         connection, connectionOptions;
 
-    var normalize = $("#tl-normalize").get(0).checked;
+    //var normalize = $("#tl-normalize").get(0).checked;
 
     // Configuration for detail (top view):
     detailOptions = {
@@ -193,6 +223,8 @@ function initChart() {
         title: "Timeline",
         // Flotr Configuration
         config : {
+        	// envision default colors: ['#00A8F0', '#C0D800', '#CB4B4B', '#4DA74D', '#9440ED']
+        	colors: (timelineIsGlobal ? ['#00A8F0', '#C0D800'] : ['#A0D345']),
 	        'bars' : {
 	    	    lineWidth : 1,
 	          	show : true,
@@ -228,9 +260,12 @@ function initChart() {
 							fkt += str[i];
 						}
 					}
-
-					//fkt += '"+chart.components[0].options.config.data[1][o.index][1]+" in map area';
-					fkt += '";';
+					//.replace(/(\d)(?=(\d{3})+$)/g, "$1,")
+					fkt += ' <span>(';
+					if(timelineIsGlobal) {
+						fkt += '<em>"+chart.components[0].options.config.data[1][o.index][1]+"</em> ';
+					}
+					fkt += 'in map area)</span>";';
 					return Function('o', fkt);
 
 					/*return function (o) {
@@ -242,7 +277,7 @@ function initChart() {
 				})()
 	        },
 	        yaxis : { 
-	          	autoscale : normalize,
+	          	autoscale : true, //normalize,
 	          	autoscaleMargin : 0.05,
 	          	noTicks : 4,
 	          	showLabels : true,
@@ -251,9 +286,9 @@ function initChart() {
 	        }
 		}
     };
-    if(!normalize) { 
-    	detailOptions.config.yaxis.max = current_setsel.maxEventCount*T_YAXIS_MAX_EXPAND; 
-    }
+    //if(!normalize) { 
+    //	detailOptions.config.yaxis.max = current_setsel.maxEventCount*T_YAXIS_MAX_EXPAND; 
+    //}
 
     // Configuration for summary (bottom view):
     summaryOptions = {

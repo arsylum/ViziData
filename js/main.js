@@ -6678,7 +6678,7 @@ infolistTimer;
 // item table scroll handler
 var gdata = [], // global rawdata
 current_datsel, // slected data group
-current_setsel, // selected dataset
+current_setsel = {}, // selected dataset
 chartdat = [], // timeline rendering data
 timeSel, // current timeline selection
 cellmap, // latest generated tilemap
@@ -6789,8 +6789,8 @@ function onResize() {
     //mapctx = mapcan.node().getContext("2d");
     overctx = overcan.node().getContext("2d");
     initLeaflet();
-    genChart();
     genGrid();
+    genChart();
 }
 
 /////////////////////////
@@ -7225,9 +7225,10 @@ function highlightCell(c) {
 function highlightCellsFor(key) {
     var data = current_setsel.data, reso = drawdat.reso;
     drawWhat();
-    var mmt = drawdat.mmt;
+    var mAE = drawdat.bounds, mmt = drawdat.mmt;
     //var bm = Date.now();
-    /* "improved" method is actually slower..
+    /* supposed to be better and more reliable
+	// but actually slower..
 	var k, l, ca = [];
 	$.each(cellmap, function(k) {
 		l = cellmap[k].length;
@@ -7239,8 +7240,10 @@ function highlightCellsFor(key) {
         if ((t = data[i][key]) !== undefined) {
             j = t.length;
             while (j--) {
-                ci = coord2index(t[j][ARR_M_LON], t[j][ARR_M_LAT], reso);
-                cmap[ci] = true;
+                if (section_filter(t[j], mAE)) {
+                    ci = coord2index(t[j][ARR_M_LON], t[j][ARR_M_LAT], reso);
+                    cmap[ci] = true;
+                }
             }
         }
     }
@@ -7295,8 +7298,7 @@ function initLeaflet() {
     leafly.on("moveend", function() {
         //clearGrid();
         genGrid();
-        updateChartData();
-        console.log("MOVEEND!");
+        genChart();
     }).on("zoomend", function() {
         drawdat.draw = undefined;
         clearGrid();
@@ -7737,7 +7739,7 @@ function setColorScale(r) {
 /// timeline ///
 ////////////////
 function genChart(data) {
-    if (current_setsel === undefined) {
+    if (current_setsel.ready !== true) {
         return false;
     }
     var benchmark_chart = new Date();
@@ -7748,24 +7750,21 @@ function genChart(data) {
 }
 
 /**
-* timeout wrapper */
+* timeout wrapper * /
+(not used right now)
 function updateChartData(data) {
-    if (current_setsel === undefined) {
-        return false;
-    }
-    clearTimeout(chartdatTimer);
-    chartdatTimer = setTimeout(function() {
-        updateChartDataFkt(data);
-        //summary.trigger("select", timeSel); // to make envision redraw...
-        chart.components[0].draw(chartdat, {
-            xaxis: {
-                min: timeSel.data.x.min,
-                max: timeSel.data.x.max
-            }
-        });
-    }, Math.max(CALC_TIMEOUT - 100, 100));
-}
+	if(current_setsel === undefined) { return false; }
+	clearTimeout(chartdatTimer);
+	chartdatTimer = setTimeout(function() {
+		updateChartDataFkt(data);
+		//summary.trigger("select", timeSel); // to make envision redraw...
 
+		chart.components[0].draw(chartdat, { xaxis: {
+			min: timeSel.data.x.min,
+			max: timeSel.data.x.max
+		}});
+	}, Math.max((CALC_TIMEOUT-100),100));
+}*/
 function updateChartDataFkt(data) {
     if (data === undefined) {
         data = current_setsel;
@@ -7782,7 +7781,7 @@ function updateChartDataFkt(data) {
     chartdat = [];
     var x;
     // = [], y = [], ticks = [];
-    var dat_obj = {}, i, j, l, k, d, it;
+    var dat_obj = {}, globob = {}, locob = {}, i, j, l, k, d, it, itl;
     /// create envision data from the assembled object
     var nvision = function(o) {
         // create a sorted index for all dat_obj props
@@ -7797,54 +7796,94 @@ function updateChartDataFkt(data) {
         l = kay.length;
         for (i = 0; i < l; i++) {
             x.push(kay[i]);
-            y.push(dat_obj[kay[i]]);
+            y.push(o[kay[i]]);
         }
         //chartdat[cdi] = [x,y];
         chartdat.push([ x, y ]);
     };
-    /*// get global dataelse {
+    // the following is a bit redundant because it's rolled out for performance
+    // to save a few milliseconds here and there
+    // (even though it turns out that it doesn't make that much of a difference)
+    if (timelineIsGlobal) {
+        // collect all
+        var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
+        for (i = 0; i < tilecount; i++) {
+            itl = data.itarraytor[i].length;
+            it = -1;
+            if (i >= mmt.min && i <= mmt.max) {
+                // in range, collect both
+                while (++it < itl) {
+                    j = data.itarraytor[i][it];
+                    d = data.data[i][j];
+                    l = d.length;
+                    // global part
+                    if (globob[j] === undefined) {
+                        globob[j] = d.length;
+                    } else {
+                        globob[j] += d.length;
+                    }
+                    // local part
+                    if (locob[j] === undefined) {
+                        locob[j] = 0;
+                    }
+                    for (k = 0; k < l; k++) {
+                        d = data.data[i][j][k];
+                        if (section_filter(d, mAE)) {
+                            locob[j]++;
+                        }
+                    }
+                }
+            } else {
+                // out of range, just global
+                while (++it < itl) {
+                    j = data.itarraytor[i][it];
+                    d = data.data[i][j];
+                    if (globob[j] === undefined) {
+                        globob[j] = d.length;
+                    } else {
+                        globob[j] += d.length;
+                    }
+                }
+            }
+        }
+        nvision(globob);
+        nvision(locob);
+    } else {
+        // collect map area data only
+        /*// get global data
+	if(timelineIsGlobal) {
 		var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
 		for(i = 0; i < tilecount; i++) {
 			it = data.itarraytor[i].length;
 			while(it--) {
 				j = data.itarraytor[i][it];
-			// for(j=data.min; j<=data.max; j++) {
-
 				d = data.data[i][j];
-				//if(d !== undefined) {
-					if(dat_obj[j] === undefined) {
-						dat_obj[j] = d.length;
-					} else {
-						dat_obj[j] += d.length;
-					}
-				//}
+				if(dat_obj[j] === undefined) {
+					dat_obj[j] = d.length;
+				} else {
+					dat_obj[j] += d.length;
+				}
 			}
 		}
 		nvision(dat_obj);
-	//}*/
-    dat_obj = {};
-    // get local data
-    if (!timelineIsGlobal) {
-        console.log(mAE, mmt);
+	}*/
         for (i = mmt.min; i <= mmt.max; i++) {
             it = data.itarraytor[i].length;
             while (it--) {
                 j = data.itarraytor[i][it];
-                // for(j=data.min; j<=data.max; j++) {
-                // 	if(data.data[i][j] !== undefined) {
                 l = data.data[i][j].length;
-                if (dat_obj[j] === undefined) {
-                    dat_obj[j] = 0;
+                if (locob[j] === undefined) {
+                    locob[j] = 0;
                 }
                 for (k = 0; k < l; k++) {
                     d = data.data[i][j][k];
                     if (section_filter(d, mAE)) {
-                        dat_obj[j]++;
+                        locob[j]++;
                     }
                 }
             }
         }
-        nvision(dat_obj);
+        nvision(locob);
     }
     // create a sorted index for all dat_obj props
     // var kay = [];
@@ -7892,17 +7931,19 @@ function initChart() {
     var selCallback = function() {
         // callback function for selection change
         var range = getTimeSelection();
-        timeSel.data.x = {
-            min: range.min,
-            max: range.max
-        };
+        if (timeSel.data.x.min !== range.min || timeSel.data.x.max !== range.max) {
+            timeSel.data.x = {
+                min: range.min,
+                max: range.max
+            };
+            genGrid();
+        }
         $("#range-tt-min>div").text(range.min);
         $("#range-tt-max>div").text(range.max);
-        genGrid();
     };
     var detail, detailOptions, summaryOptions, // summary, (global)
     connection, connectionOptions;
-    var normalize = $("#tl-normalize").get(0).checked;
+    //var normalize = $("#tl-normalize").get(0).checked;
     // Configuration for detail (top view):
     detailOptions = {
         name: "detail",
@@ -7912,6 +7953,8 @@ function initChart() {
         title: "Timeline",
         // Flotr Configuration
         config: {
+            // envision default colors: ['#00A8F0', '#C0D800', '#CB4B4B', '#4DA74D', '#9440ED']
+            colors: timelineIsGlobal ? [ "#00A8F0", "#C0D800" ] : [ "#A0D345" ],
             bars: {
                 lineWidth: 1,
                 show: true,
@@ -7943,13 +7986,18 @@ function initChart() {
                             fkt += str[i];
                         }
                     }
-                    //fkt += '"+chart.components[0].options.config.data[1][o.index][1]+" in map area';
-                    fkt += '";';
+                    //.replace(/(\d)(?=(\d{3})+$)/g, "$1,")
+                    fkt += " <span>(";
+                    if (timelineIsGlobal) {
+                        fkt += '<em>"+chart.components[0].options.config.data[1][o.index][1]+"</em> ';
+                    }
+                    fkt += 'in map area)</span>";';
                     return Function("o", fkt);
                 }()
             },
             yaxis: {
-                autoscale: normalize,
+                autoscale: true,
+                //normalize,
                 autoscaleMargin: .05,
                 noTicks: 4,
                 showLabels: true,
@@ -7957,9 +8005,9 @@ function initChart() {
             }
         }
     };
-    if (!normalize) {
-        detailOptions.config.yaxis.max = current_setsel.maxEventCount * T_YAXIS_MAX_EXPAND;
-    }
+    //if(!normalize) { 
+    //	detailOptions.config.yaxis.max = current_setsel.maxEventCount*T_YAXIS_MAX_EXPAND; 
+    //}
     // Configuration for summary (bottom view):
     summaryOptions = {
         name: "summary",
@@ -8167,27 +8215,29 @@ function setupControlHandlers() {
     $("#ctrl-maplayer input[type=checkbox]").on("change", changeTileSrc);
     $("#ctrl-tlmode input").on("change", function() {
         timelineIsGlobal = parseInt($(this).val());
-        updateChartData();
-        if (current_setsel !== undefined) {
+        //updateChartData();
+        genChart();
+        if (current_setsel.ready === true) {
             urlifyState();
         }
     });
     //.filter("[value="+timelineIsGlobal+"]").prop("checked", true);
-    $("#tl-normalize").on("change", function() {
-        if (chart === undefined) {
-            return false;
-        }
-        var detail = chart.components[0], ac = detail.options.config.yaxis;
-        if (this.checked) {
-            ac.autoscale = true;
-            delete ac.max;
-        } else {
-            ac.autoscale = false;
-            ac.max = current_setsel.maxEventCount * T_YAXIS_MAX_EXPAND;
-        }
-        updateChartData();
-        urlifyState();
-    });
+    // $("#tl-normalize").on("change", function() {
+    // 	if(chart === undefined) {
+    // 		return false;
+    // 	}
+    // 	var detail = chart.components[0],
+    // 		ac = detail.options.config.yaxis;
+    // 	if(this.checked) {
+    // 		ac.autoscale = true;
+    // 		delete(ac.max);
+    // 	} else {
+    // 		ac.autoscale = false;
+    // 		ac.max = current_setsel.maxEventCount * T_YAXIS_MAX_EXPAND;
+    // 	}
+    // 	updateChartData();
+    // 	urlifyState();
+    // });
     $("#sidebar>menu h2").on("click", function() {
         $(this).toggleClass("closed");
         $(this).siblings("fieldset").slideToggle();
@@ -8254,7 +8304,7 @@ function urlifyState() {
     hash += "&l=" + $("#langsel").val();
     // timeline settings
     hash += "&f=" + timelineIsGlobal;
-    hash += "&n=" + $("#tl-normalize").get(0).checked;
+    //hash += "&n=" + $("#tl-normalize").get(0).checked;
     // timeline selection
     var time = getTimeSelection();
     hash += "&e=" + time.min + "_" + time.max;
@@ -8341,7 +8391,7 @@ function statifyUrl() {
     $("#langsel").val(labellang);
     /// timeline settings
     $("#ctrl-tlmode input[value=" + tl_mode + "]").prop("checked", true).trigger("change");
-    $("#tl-normalize").get(0).checked = tl_normalize;
+    //$("#tl-normalize").get(0).checked = tl_normalize;
     // time selection
     timeSel = {
         data: {
