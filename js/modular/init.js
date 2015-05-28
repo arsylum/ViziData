@@ -32,7 +32,7 @@ $(function(){
 
 	// Load default dataset once ready
 	$(document).on("meta_files_ready", function() {
-		onResize(true); // set canvas dimensions
+		onResize(); // set canvas dimensions
 		//current_datsel = gdata[0]; // TODO [get from dom] (depends on data management)
 		//if(!statifyUrl()) {
 			// TODO put all the defaults in globals and apply them in statifyUrl
@@ -68,7 +68,7 @@ $(function(){
 ////////////////
 /// on resize //
 ////////////////
-function onResize(firstTime) {
+function onResize() {
 
 	// get new viewport size
 	viewportW = $(window).width();
@@ -85,10 +85,7 @@ function onResize(firstTime) {
 	//mapctx = mapcan.node().getContext("2d");
 	overctx = overcan.node().getContext("2d");
 
-	if(firstTime === true) {
-		initLeaflet();
-	} else {
-		genChart();
-		genGrid();
-	}
+	initLeaflet();
+	genChart();
+	genGrid();
 }

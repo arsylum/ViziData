@@ -6582,7 +6582,7 @@ function preprocess(ds) {
         if (ds.itarraytor[i] === undefined) {
             ds.itarraytor[i] = [];
             for (var k in ds.data[i]) {
-                ds.itarraytor[i].push(k);
+                ds.itarraytor[i].push(parseInt(k));
             }
         }
     }
@@ -6738,7 +6738,7 @@ $(function() {
     colorScale = d3.scale.log().range(M_COLOR_SCALE);
     // Load default dataset once ready
     $(document).on("meta_files_ready", function() {
-        onResize(true);
+        onResize();
         // set canvas dimensions
         //current_datsel = gdata[0]; // TODO [get from dom] (depends on data management)
         //if(!statifyUrl()) {
@@ -6773,7 +6773,7 @@ $(function() {
 ////////////////
 /// on resize //
 ////////////////
-function onResize(firstTime) {
+function onResize() {
     // get new viewport size
     viewportW = $(window).width();
     viewportH = $(window).height();
@@ -6788,12 +6788,9 @@ function onResize(firstTime) {
     $("#leaflet").css("width", canvasW).css("height", canvasH);
     //mapctx = mapcan.node().getContext("2d");
     overctx = overcan.node().getContext("2d");
-    if (firstTime === true) {
-        initLeaflet();
-    } else {
-        genChart();
-        genGrid();
-    }
+    initLeaflet();
+    genChart();
+    genGrid();
 }
 
 /////////////////////////
@@ -7160,24 +7157,24 @@ function highlightCell(c) {
     if (selectedCell !== false) {
         g = index2geoCoord(selectedCell);
         p = leafly.latLngToContainerPoint(g);
-        x = p.x;
-        y = p.y;
+        x = p.x + rx;
+        y = p.y + ry;
         //wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
         //ry = wy/2;
         overctx.fillStyle = "rgba(255,120,0,0.8)";
         //overctx.fillRect(x,y-wy,wx,wy);
         overctx.beginPath();
-        overctx.arc(p.x + rx, p.y + rx, rx, 0, TPI);
+        overctx.arc(x, y, rx, 0, TPI);
         overctx.fill();
         overctx.strokeStyle = "rgba(255,255,255,0.4)";
         overctx.lineWidth = 3 * linewidth;
         overctx.beginPath();
-        overctx.ellipse(x + rx, y - ry, rx * 1.5, ry * 1.5, 0, 0, TPI);
+        overctx.arc(x, y, rx * 1.5, 0, TPI);
         overctx.stroke();
         overctx.strokeStyle = "rgba(0,0,0,0.5)";
         overctx.lineWidth = 1 * linewidth;
         overctx.beginPath();
-        overctx.ellipse(x + rx, y - ry, rx * 1.5, ry * 1.5, 0, 0, TPI);
+        overctx.arc(x, y, rx * 1.5, 0, TPI);
         overctx.stroke();
     }
     /*if(c.constructor === Array) {
@@ -7230,14 +7227,20 @@ function highlightCellsFor(key) {
     drawWhat();
     var mmt = drawdat.mmt;
     //var bm = Date.now();
+    /* "improved" method is actually slower..
+	var k, l, ca = [];
+	$.each(cellmap, function(k) {
+		l = cellmap[k].length;
+		while(l-- && (cellmap[k][l][1] !== key)) {}
+		if(l >= 0) { ca.push(k); }
+	});*/
     var i, t, j, ci, cmap = {}, ca = [];
     for (i = mmt.min; i <= mmt.max; i++) {
         if ((t = data[i][key]) !== undefined) {
-            for (j = 0; j < t.length; j++) {
+            j = t.length;
+            while (j--) {
                 ci = coord2index(t[j][ARR_M_LON], t[j][ARR_M_LAT], reso);
-                if (cmap[ci] === undefined) {
-                    cmap[ci] = true;
-                }
+                cmap[ci] = true;
             }
         }
     }
@@ -7246,21 +7249,16 @@ function highlightCellsFor(key) {
     });
     overctx.save();
     overctx.clearRect(0, 0, canvasW, canvasH);
-    //overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
-    //overctx.scale(lastTransformState.scale, lastTransformState.scale);
-    var wx = drawdat.wx * 1, wy = drawdat.wy * 1, rx = drawdat.rx * 1, ry = drawdat.ry * 1;
-    // overctx.fillStyle = "rgba(255,255,0,0.4)";
-    // overctx.strokeStyle = "rgba(255,255,0,1)";
+    var rx = drawdat.rx;
     overctx.fillStyle = "rgba(255,255,255,0.7)";
     overctx.strokeStyle = "rgba(0,0,0,1)";
     overctx.lineWidth = rx / 2;
-    var x, y, g, p, n = ca.length;
-    i = -1;
-    while (++i < n) {
-        g = index2geoCoord(ca[i], reso);
-        p = leafly.latLngToContainerPoint(g);
+    var x, y, p;
+    i = ca.length;
+    while (i--) {
+        p = index2canvasCoord(ca[i]);
         x = p.x + rx;
-        y = p.y - rx;
+        y = p.y + rx;
         overctx.beginPath();
         //overctx.rect(x,y,wx,wy);
         overctx.arc(x, y, rx, 0, TPI);
@@ -7272,6 +7270,7 @@ function highlightCellsFor(key) {
 
 function initLeaflet() {
     if (leafly !== undefined) {
+        leafly.invalidateSize();
         return false;
     }
     /*var tileUrl = "http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png";
@@ -7296,6 +7295,8 @@ function initLeaflet() {
     leafly.on("moveend", function() {
         //clearGrid();
         genGrid();
+        updateChartData();
+        console.log("MOVEEND!");
     }).on("zoomend", function() {
         drawdat.draw = undefined;
         clearGrid();
@@ -7478,28 +7479,13 @@ function index2geoCoord(i, reso) {
 * returns the canvas rendering coordinates for a given index 
 * (for the top left corner of the gridscells rect) */
 function index2canvasCoord(i, reso) {
-    // get geocoordinates
-    /*var gc = index2geoCoord(i, reso);
-	// canvas normalization
-	var lbx = ((gc[0]+(-C_WMIN)) / 360) * canvasW,
-		lby = (((gc[1]*(-1))+(-C_HMIN)) / 180) * canvasH;
-	return [lbx,lby];
-*/
     if (reso === undefined) {
         reso = drawdat.reso;
     }
     var cpr = canvasW / reso;
-    // var rowpos = (i-cpr/2)%cpr;
-    // if(rowpos<0) rowpos += cpr;
-    // rowpos -= cpr/2;
-    var rowpos = i % cpr;
-    var lbx = rowpos * reso, lby = Math.floor(i / cpr) * reso;
-    /*var nums = i.split(",");
-	var lbx = Number(nums[1]),
-		lby = Number(nums[0]);*/
     return {
-        x: lbx,
-        y: lby
+        x: i % cpr * reso,
+        y: Math.floor(i / cpr) * reso
     };
 }
 
@@ -7771,13 +7757,13 @@ function updateChartData(data) {
     chartdatTimer = setTimeout(function() {
         updateChartDataFkt(data);
         //summary.trigger("select", timeSel); // to make envision redraw...
-        chart.components[0].draw(null, {
+        chart.components[0].draw(chartdat, {
             xaxis: {
                 min: timeSel.data.x.min,
                 max: timeSel.data.x.max
             }
         });
-    }, CALC_TIMEOUT);
+    }, Math.max(CALC_TIMEOUT - 100, 100));
 }
 
 function updateChartDataFkt(data) {
@@ -7785,7 +7771,7 @@ function updateChartDataFkt(data) {
         data = current_setsel;
     }
     // TODO
-    //console.log("/~~ generating chart data ~~\\ ");
+    console.log("/~~ generating chart data ~~\\ ");
     var benchmark_chart = new Date();
     drawWhat();
     var mAE = drawdat.bounds, mmt = drawdat.mmt;
@@ -7793,9 +7779,53 @@ function updateChartDataFkt(data) {
     /// tomporary hacky timeline fix for changed data structure
     // TODO refurbish when upgrading timeline
     // still TODO? check if it can improved
-    var x = [], y = [], ticks = [];
+    chartdat = [];
+    var x;
+    // = [], y = [], ticks = [];
     var dat_obj = {}, i, j, l, k, d, it;
+    /// create envision data from the assembled object
+    var nvision = function(o) {
+        // create a sorted index for all dat_obj props
+        var x = [], y = [], kay = [];
+        for (i in o) {
+            kay.push(parseInt(i));
+        }
+        kay.sort(function(a, b) {
+            return a - b;
+        });
+        // and iterate over it
+        l = kay.length;
+        for (i = 0; i < l; i++) {
+            x.push(kay[i]);
+            y.push(dat_obj[kay[i]]);
+        }
+        //chartdat[cdi] = [x,y];
+        chartdat.push([ x, y ]);
+    };
+    /*// get global dataelse {
+		var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
+		for(i = 0; i < tilecount; i++) {
+			it = data.itarraytor[i].length;
+			while(it--) {
+				j = data.itarraytor[i][it];
+			// for(j=data.min; j<=data.max; j++) {
+
+				d = data.data[i][j];
+				//if(d !== undefined) {
+					if(dat_obj[j] === undefined) {
+						dat_obj[j] = d.length;
+					} else {
+						dat_obj[j] += d.length;
+					}
+				//}
+			}
+		}
+		nvision(dat_obj);
+	//}*/
+    dat_obj = {};
+    // get local data
     if (!timelineIsGlobal) {
+        console.log(mAE, mmt);
         for (i = mmt.min; i <= mmt.max; i++) {
             it = data.itarraytor[i].length;
             while (it--) {
@@ -7814,31 +7844,26 @@ function updateChartDataFkt(data) {
                 }
             }
         }
-    } else {
-        var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
-        for (i = 0; i < tilecount; i++) {
-            it = data.itarraytor[i].length;
-            while (it--) {
-                j = data.itarraytor[i][it];
-                // for(j=data.min; j<=data.max; j++) {
-                d = data.data[i][j];
-                //if(d !== undefined) {
-                if (dat_obj[j] === undefined) {
-                    dat_obj[j] = d.length;
-                } else {
-                    dat_obj[j] += d.length;
-                }
-            }
-        }
+        nvision(dat_obj);
     }
-    for (i = data.min; i <= data.max; i++) {
-        if (dat_obj[i] !== undefined) {
-            x.push(i);
-            y.push(dat_obj[i]);
-        }
-    }
+    // create a sorted index for all dat_obj props
+    // var kay = [];
+    // for(i in dat_obj) {	kay.push(parseInt(i));	}
+    // kay.sort(function(a,b) { return a-b; });
+    // // and iterate over it
+    // l = kay.length;
+    // for(i = 0; i < l; i++) {
+    // 	x.push(kay[i]);
+    // 	y.push(dat_obj[kay[i]]);
+    // }
+    // for(i=data.min; i<=data.max; i++) {
+    // 	if(dat_obj[i] !== undefined) {
+    // 		x.push(i);
+    // 		y.push(dat_obj[i]);
+    // 	}
+    // }
     //chartdat.push([x,y]);
-    chartdat[0] = [ x, y ];
+    //chartdat[0] = [x,y];
     console.log("  |BM| timeline data updated in " + (new Date() - benchmark_chart) + "ms");
 }
 
@@ -7918,6 +7943,7 @@ function initChart() {
                             fkt += str[i];
                         }
                     }
+                    //fkt += '"+chart.components[0].options.config.data[1][o.index][1]+" in map area';
                     fkt += '";';
                     return Function("o", fkt);
                 }()

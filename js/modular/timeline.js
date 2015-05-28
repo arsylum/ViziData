@@ -21,18 +21,19 @@ function updateChartData(data) {
 	chartdatTimer = setTimeout(function() {
 		updateChartDataFkt(data);
 		//summary.trigger("select", timeSel); // to make envision redraw...
-		chart.components[0].draw(null, { xaxis: {
+
+		chart.components[0].draw(chartdat, { xaxis: {
 			min: timeSel.data.x.min,
 			max: timeSel.data.x.max
 		}});
-	}, CALC_TIMEOUT);
+	}, Math.max((CALC_TIMEOUT-100),100));
 }
 
 
 function updateChartDataFkt(data) {
 	if(data === undefined) { data = current_setsel; } // TODO
 
-	//console.log("/~~ generating chart data ~~\\ ");
+	console.log("/~~ generating chart data ~~\\ ");
 	var benchmark_chart = new Date();
 
 	drawWhat();
@@ -43,29 +44,32 @@ function updateChartDataFkt(data) {
 	/// tomporary hacky timeline fix for changed data structure
 	// TODO refurbish when upgrading timeline
 	// still TODO? check if it can improved
-	var x = [], y = [], ticks = [];
+
+	chartdat = [];
+
+	var x; // = [], y = [], ticks = [];
 	var dat_obj = {},
 		i,j,l,k,d,it;
-	
-	if(!timelineIsGlobal) {
-		for(i = mmt.min; i<= mmt.max; i++) {
-			it = data.itarraytor[i].length;
-			while(it--) {
-				j = data.itarraytor[i][it];
-			// for(j=data.min; j<=data.max; j++) {
-			// 	if(data.data[i][j] !== undefined) {
-				l = data.data[i][j].length;
-				if(dat_obj[j] === undefined) { dat_obj[j] = 0; }
-				for(k = 0; k < l; k++) {
-					d = data.data[i][j][k];
-					if(section_filter(d,mAE)) {
-						dat_obj[j]++;
-					}
-				}
-				// }
-			}
+
+	/// create envision data from the assembled object
+	var nvision = function(o) {
+		// create a sorted index for all dat_obj props
+		var x = [], y = [], kay = [];
+		for(i in o) {	kay.push(parseInt(i));	}
+		kay.sort(function(a,b) { return a-b; });
+		// and iterate over it
+		l = kay.length;
+		for(i = 0; i < l; i++) {
+			x.push(kay[i]);
+			y.push(dat_obj[kay[i]]);
 		}
-	} else {
+		//chartdat[cdi] = [x,y];
+		chartdat.push([x,y]);
+	};
+	
+	
+
+	/*// get global dataelse {
 		var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
 		for(i = 0; i < tilecount; i++) {
 			it = data.itarraytor[i].length;
@@ -83,19 +87,56 @@ function updateChartDataFkt(data) {
 				//}
 			}
 		}
-	}
+		nvision(dat_obj);
+	//}*/
 
-	for(i=data.min; i<=data.max; i++) {
-		if(dat_obj[i] !== undefined) {
-			x.push(i);
-			y.push(dat_obj[i]);
+	dat_obj = {};
+	// get local data
+	if(!timelineIsGlobal) {
+		console.log(mAE,mmt);
+		for(i = mmt.min; i<= mmt.max; i++) {
+			it = data.itarraytor[i].length;
+			while(it--) {
+				j = data.itarraytor[i][it];
+			// for(j=data.min; j<=data.max; j++) {
+			// 	if(data.data[i][j] !== undefined) {
+				l = data.data[i][j].length;
+				if(dat_obj[j] === undefined) { dat_obj[j] = 0; }
+				for(k = 0; k < l; k++) {
+					d = data.data[i][j][k];
+					if(section_filter(d,mAE)) {
+						dat_obj[j]++;
+					}
+				}
+				// }
+			}
 		}
-	}
+		nvision(dat_obj);
+	} 
+
+	// create a sorted index for all dat_obj props
+	// var kay = [];
+	// for(i in dat_obj) {	kay.push(parseInt(i));	}
+	// kay.sort(function(a,b) { return a-b; });
+	// // and iterate over it
+	// l = kay.length;
+	// for(i = 0; i < l; i++) {
+	// 	x.push(kay[i]);
+	// 	y.push(dat_obj[kay[i]]);
+	// }
+
+	// for(i=data.min; i<=data.max; i++) {
+	// 	if(dat_obj[i] !== undefined) {
+	// 		x.push(i);
+	// 		y.push(dat_obj[i]);
+	// 	}
+	// }
 	
 	//chartdat.push([x,y]);
-	chartdat[0] = [x,y];
+	//chartdat[0] = [x,y];
 
 	console.log("  |BM| timeline data updated in "+(new Date()-benchmark_chart)+"ms");
+
 
 }
 
@@ -187,6 +228,8 @@ function initChart() {
 							fkt += str[i];
 						}
 					}
+
+					//fkt += '"+chart.components[0].options.config.data[1][o.index][1]+" in map area';
 					fkt += '";';
 					return Function('o', fkt);
 
@@ -284,6 +327,7 @@ function initChart() {
 
    	appendTimelineRangeTips();
    	appendListeners();
+
     // set to initial selection state
   	summary.trigger('select', timeSel);
 

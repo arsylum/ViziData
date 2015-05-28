@@ -82,7 +82,7 @@ function preprocess(ds) {
 		if(ds.itarraytor[i] === undefined) {
 			ds.itarraytor[i] = [];
 			for(var k in ds.data[i]) {
-				ds.itarraytor[i].push(k);
+				ds.itarraytor[i].push(parseInt(k));
 			}
 		}
 	}

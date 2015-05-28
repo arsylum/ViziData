@@ -126,29 +126,12 @@ function index2geoCoord(i, reso) {
 * returns the canvas rendering coordinates for a given index 
 * (for the top left corner of the gridscells rect) */
 function index2canvasCoord(i, reso) {
-	// get geocoordinates
-	/*var gc = index2geoCoord(i, reso);
-	// canvas normalization
-	var lbx = ((gc[0]+(-C_WMIN)) / 360) * canvasW,
-		lby = (((gc[1]*(-1))+(-C_HMIN)) / 180) * canvasH;
-	return [lbx,lby];
-*/
 	if(reso === undefined) { reso = drawdat.reso; }
 	var cpr = canvasW / reso;
-
-	// var rowpos = (i-cpr/2)%cpr;
-	// if(rowpos<0) rowpos += cpr;
-	// rowpos -= cpr/2;
-	var rowpos = (i%cpr);
-
-	var lbx = (rowpos*reso),
-		lby = (Math.floor(i/cpr)*reso);
-
-
-	/*var nums = i.split(",");
-	var lbx = Number(nums[1]),
-		lby = Number(nums[0]);*/
-	return { x: lbx, y: lby };
+	return { 
+		x: (i%cpr)*reso, 
+		y: Math.floor(i/cpr)*reso
+	};
 }
 
 /**
