@@ -568,14 +568,24 @@ function initLeaflet() {
 		worldCopyJump: true
 		//crs: L.CRS.EPSG4326
 	}).setView([0,0], 2);
-	leafloor = L.tileLayer();//tileUrl, {
+
+	leafloor = L.tileLayer('', {
 		//noWrap: true,
-	    //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-	//});
+	    //attribution: attribution	//});
+		subdomains: ["a", "b", "c", "d"],
+		minZoom: 1,
+		maxZoom: 12
+	});
 	changeTileSrc();
 	leafloor.addTo(leafly);
 	
-
+	L.control.attribution({prefix: false}).addAttribution(
+		'<a id="home-link" target="_top" href="http://maps.stamen.com/">Map tiles</a> by '+
+		'<a target="_top" href="http://stamen.com">Stamen Design</a>, '+
+		'under <a target="_top" href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. '+
+		'Data by <a target="_top" href="http://openstreetmap.org">OpenStreetMap</a>, '+
+		'under <a target="_top" href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.')
+		.addTo(leafly);
 	
 	
 	leafly.on("movestart", function() {

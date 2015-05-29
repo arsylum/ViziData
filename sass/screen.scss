@@ -27,8 +27,8 @@ $range-tt-arrow-distance: 5px;
 /************
 ** Layout **/
 $left-row-width: 250px;
-$filter-height: 500px;
-$legend-height: 250px;
+//$filter-height: 500px;
+//$legend-height: 250px;
 $timeline-height: 200px;
 $timeline-min-height: 100px;
 $controls-padding: 5px;
@@ -81,6 +81,57 @@ body {
 	background: $widget-tt-bg;
 	color: white;
 }
+
+
+.tooltip {
+  display: inline;
+  position: relative;
+
+  &:before, &:after {
+    transition: all  .2s;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &:hover:before, &:hover:after {
+    opacity: 1;
+    //pointer-events: auto;
+  }
+
+  &:after {
+    content: attr(data-tt);
+    display: block;
+    position: absolute;
+    background: rgba(246, 245, 244, 0.9);
+	color: black;
+    font-size: 1.2em;
+    line-height: 1.2em;
+    width: $left-row-width / 2;
+    top: -100%;
+	left: 115%;
+    padding: .4em; // .5em;
+    text-align: center;
+    border-radius: $outer-border-radius /2;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.25);
+    z-index: 9998;
+  }
+
+  &:before {
+    border: solid;
+    border-color: transparent #111 transparent;
+    border-color: transparent rgba(119, 119, 119, 0.7) transparent;
+	border-width: 6px 6px 6px 0;
+    content: "";
+    display: block;
+    width: 0;
+    left: 115%;
+    top: 50%;
+    margin: -6px;
+    position: absolute;
+    z-index: 9999;
+  }
+} 
+
 
 menu {
 	background: $control-bg-color;

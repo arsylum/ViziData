@@ -7,18 +7,21 @@ function setupControlHandlers() {
 
 	// build filter menu
 	var fn = function() { 
-		setSetSel(this.value, $(this).parent().parent().attr("data-g")); 
+		setSetSel(this.value, $(this).parent().parent().attr("data-gi")); 
 	};
 	var filter = $("#filter");
 	for(var i = 0; i<gdata.length; i++) {
-		var fs = $("<fieldset>").attr("data-g", i);
+		var fs = $("<fieldset>").attr("data-gid", gdata[i].id).attr("data-gi", i);
 		fs.append('<legend>'+gdata[i].title+'</legend>');
 		for(var j=0; j<gdata[i].datasets.length; j++) {
 			
 			var b = $('<input type="radio" name="radio" value="'+j+'" />')
 				.on("change", fn);
 
-			fs.append($('<label>'+gdata[i].datasets[j].strings.label+'</label>').prepend(b));
+			//var tt = $('<span class="tooltip">'+gdata[i].datasets[j].strings.desc+'</span>');
+
+			fs.append($('<label class="tooltip" data-tt="'+gdata[i].datasets[j].strings.desc+
+				'">'+gdata[i].datasets[j].strings.label+'</label>').prepend(b));
 		}
 		filter.append(fs);
 	}

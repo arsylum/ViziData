@@ -6750,22 +6750,23 @@ $(function() {
     // load all the meta data meta files
     var bmMETA = new Date();
     console.log("~~ started loading the meta files (total of " + META_FILES.length + ") ~~ ");
+    var callback = function(data) {
+        gdata[mfc] = data;
+        // TODO
+        for (var j = 0; j < gdata[mfc].datasets.length; j++) {
+            gdata[mfc].datasets[j].parent = gdata[mfc];
+        }
+        mfc++;
+        if (mfc === META_FILES.length) {
+            console.log(" |BM| got all the meta files (took " + (new Date() - bmMETA) + "ms)");
+            setupControlHandlers();
+            $(document).trigger("meta_files_ready");
+        }
+    };
     var mfc = 0;
     // meta file counter
     for (var i = 0; i < META_FILES.length; i++) {
-        $.getJSON(DATA_DIR + META_FILES[i], function(data) {
-            gdata[mfc] = data;
-            // TODO
-            for (var j = 0; j < gdata[mfc].datasets.length; j++) {
-                gdata[mfc].datasets[j].parent = gdata[mfc];
-            }
-            mfc++;
-            if (mfc === META_FILES.length) {
-                console.log(" |BM| got all the meta files (took " + (new Date() - bmMETA) + "ms)");
-                setupControlHandlers();
-                $(document).trigger("meta_files_ready");
-            }
-        });
+        $.getJSON(DATA_DIR + META_FILES[i], callback);
     }
 });
 
@@ -7288,13 +7289,18 @@ function initLeaflet() {
         attributionControl: false,
         worldCopyJump: true
     }).setView([ 0, 0 ], 2);
-    leafloor = L.tileLayer();
-    //tileUrl, {
-    //noWrap: true,
-    //attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-    //});
+    leafloor = L.tileLayer("", {
+        //noWrap: true,
+        //attribution: attribution	//});
+        subdomains: [ "a", "b", "c", "d" ],
+        minZoom: 1,
+        maxZoom: 12
+    });
     changeTileSrc();
     leafloor.addTo(leafly);
+    L.control.attribution({
+        prefix: false
+    }).addAttribution('<a id="home-link" target="_top" href="http://maps.stamen.com/">Map tiles</a> by ' + '<a target="_top" href="http://stamen.com">Stamen Design</a>, ' + 'under <a target="_top" href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ' + 'Data by <a target="_top" href="http://openstreetmap.org">OpenStreetMap</a>, ' + 'under <a target="_top" href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.').addTo(leafly);
     leafly.on("movestart", function() {
         selectCell(false);
     }).on("moveend", function() {
@@ -8175,15 +8181,16 @@ function updateChart(seriez) {}
 function setupControlHandlers() {
     // build filter menu
     var fn = function() {
-        setSetSel(this.value, $(this).parent().parent().attr("data-g"));
+        setSetSel(this.value, $(this).parent().parent().attr("data-gi"));
     };
     var filter = $("#filter");
     for (var i = 0; i < gdata.length; i++) {
-        var fs = $("<fieldset>").attr("data-g", i);
+        var fs = $("<fieldset>").attr("data-gid", gdata[i].id).attr("data-gi", i);
         fs.append("<legend>" + gdata[i].title + "</legend>");
         for (var j = 0; j < gdata[i].datasets.length; j++) {
             var b = $('<input type="radio" name="radio" value="' + j + '" />').on("change", fn);
-            fs.append($("<label>" + gdata[i].datasets[j].strings.label + "</label>").prepend(b));
+            //var tt = $('<span class="tooltip">'+gdata[i].datasets[j].strings.desc+'</span>');
+            fs.append($('<label class="tooltip" data-tt="' + gdata[i].datasets[j].strings.desc + '">' + gdata[i].datasets[j].strings.label + "</label>").prepend(b));
         }
         filter.append(fs);
     }

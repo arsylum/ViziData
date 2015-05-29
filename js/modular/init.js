@@ -46,20 +46,23 @@ $(function(){
 	// load all the meta data meta files
 	var bmMETA = new Date();
 	console.log("~~ started loading the meta files (total of "+META_FILES.length+") ~~ ");
+	
+	var callback = function(data) {
+		gdata[mfc] = data; // TODO
+		for(var j = 0; j<gdata[mfc].datasets.length; j++) {
+			gdata[mfc].datasets[j].parent = gdata[mfc];
+		}
+		mfc++;
+		if(mfc===META_FILES.length) {
+			console.log(" |BM| got all the meta files (took "+(new Date() -bmMETA)+"ms)");
+			setupControlHandlers();
+			$(document).trigger("meta_files_ready");
+		}
+	};
+
 	var mfc = 0; // meta file counter
 	for(var i = 0; i<META_FILES.length; i++) {
-		$.getJSON(DATA_DIR+META_FILES[i], function(data){
-			gdata[mfc] = data; // TODO
-			for(var j = 0; j<gdata[mfc].datasets.length; j++) {
-				gdata[mfc].datasets[j].parent = gdata[mfc];
-			}
-			mfc++;
-			if(mfc===META_FILES.length) {
-				console.log(" |BM| got all the meta files (took "+(new Date() -bmMETA)+"ms)");
-				setupControlHandlers();
-				$(document).trigger("meta_files_ready");
-			}
-		});
+		$.getJSON(DATA_DIR+META_FILES[i], callback);
 	}
 });
 
