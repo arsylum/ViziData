@@ -79,7 +79,6 @@ var chart,		// Timeline / dataLine
 
 var allow_redraw = true,
 	timelineIsGlobal = 0,
-	colorize = false, //true,
 	colorScale, // color scaling function
 	mutexGenGrid = 0, // genGrid mutex (0: free, 1: looping, -1: kill loop)
 	redrawTimer, // genGrid

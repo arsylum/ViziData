@@ -6665,8 +6665,7 @@ bubble, // popup bubble on map
 zoombh;
 
 // zoomBehavior
-var allow_redraw = true, timelineIsGlobal = 0, colorize = false, //true,
-colorScale, // color scaling function
+var allow_redraw = true, timelineIsGlobal = 0, colorScale, // color scaling function
 mutexGenGrid = 0, // genGrid mutex (0: free, 1: looping, -1: kill loop)
 redrawTimer, // genGrid
 chartdatTimer, // updateChartData
@@ -7574,7 +7573,7 @@ function canvasMouseMove(e) {
     var cell = cellmap[i];
     // hover highlight
     highlightCell(i);
-    $("#hud").text("(" + cc.x.toFixed(5) + ", " + cc.y.toFixed(5) + ")");
+    //$("#hud").text('(' + cc.x.toFixed(5) + ', ' + cc.y.toFixed(5) + ')');
     if (cell !== undefined) {
         var p = index2geoCoord(i, drawdat.reso);
         var x = (p[0] + drawdat.reso / 2).toFixed(2), y = (p[1] + drawdat.reso / 2).toFixed(2);
@@ -8243,10 +8242,6 @@ function setupControlHandlers() {
         $(this).toggleClass("closed");
         $(this).siblings("fieldset").slideToggle();
     });
-    // $("#colorizer>input").on("change", function() {
-    // 	colorize = !this.checked;
-    // 	genGrid();
-    // });
     $("#infolist").on("scroll", infolistScroll);
     $("#map").on("mouseleave", function() {
         $("div#bubble").css("opacity", "0");

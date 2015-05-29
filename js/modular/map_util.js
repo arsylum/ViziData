@@ -223,7 +223,7 @@ function canvasMouseMove(e) {
 	// hover highlight
 	highlightCell(i);
 
-	$("#hud").text('(' + cc.x.toFixed(5) + ', ' + cc.y.toFixed(5) + ')');
+	//$("#hud").text('(' + cc.x.toFixed(5) + ', ' + cc.y.toFixed(5) + ')');
 
 	if(cell !== undefined) {
 

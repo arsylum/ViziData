@@ -80,10 +80,6 @@ function setupControlHandlers() {
 		$(this).siblings("fieldset").slideToggle();
 	});
 
-	// $("#colorizer>input").on("change", function() {
-	// 	colorize = !this.checked;
-	// 	genGrid();
-	// });
 	$("#infolist").on("scroll", infolistScroll);
 
 	

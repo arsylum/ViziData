@@ -288,6 +288,10 @@ menu#timefilter {
 		&>legend {
 			font-family: sans-serif;
 		}
+
+		input[type=checkbox] {
+			margin-bottom: $box-padding;
+		}
 	}
 	h2+.fieldgroup {
 		margin-top: 0;
