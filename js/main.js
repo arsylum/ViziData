@@ -6606,7 +6606,7 @@ var CALC_TIMEOUT = 200;
 
 // default timeout before large operations are run
 // DATA
-var DATA_DIR = "./data/", META_FILES = [ "humans.json", "items.json" ];
+var DATA_DIR = "./data/", META_FILES = [ "humans.json" ];
 
 var DEFAULT_DATASET = 0, // dataset to load up initially
 DEFAULT_LABELLANG = "en";
