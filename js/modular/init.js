@@ -34,7 +34,7 @@ $(function(){
 			statifyUrl(); // revert state from url parameters and get things going
 		}
 	};
-
+	
 	var mfc = 0; // meta file counter
 	for(var i = 0; i<META_FILES.length; i++) {
 		$.getJSON(DATA_DIR+META_FILES[i], callback);

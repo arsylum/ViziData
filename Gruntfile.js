@@ -8,10 +8,10 @@ module.exports = function(grunt) {
     uglify: {
       dev: {
         options: {
-          mangle: true,
-          beautify: false,
-          compress: true,
-          preserveComments: false
+          mangle: false,
+          beautify: true,
+          compress: false,
+          preserveComments: 'all'
         },
         files: {
           'js/main.js': 'js/*/*.js'
@@ -25,8 +25,8 @@ module.exports = function(grunt) {
         options: {
           sassDir: 'sass',
           cssDir: 'stylesheets',
-          outputStyle: 'compressed',
-          environment: 'production'
+          //outputStyle: 'compressed',
+          environment: 'development'
         }
       }
     },
