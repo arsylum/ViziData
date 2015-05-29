@@ -6,66 +6,127 @@
 	<meta charset="utf-8">
 
 	<link href="./stylesheets/screen.css" media="screen, projection" rel="stylesheet" />
+	<!-- Leaflet -->
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
 
 	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
-	<script src="http://code.highcharts.com/stock/highstock.js"></script>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-	<!--<script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>-->
+	<script>//L_DISABLE_3D = true;</script>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
 	<script src="./js/main.js"></script>
 	
-	
-
 </head>
 <body>
 
-<div id="site_title">
-	<a id="github_link" href="https://github.com/gordelwig/ViziData" title="View on GitHub" target="github">
-		<img src="./github_logo.png" alt="GitHub">
-		<img src="./octocat.png" alt="GitHub">
-	</a>
-	<h1>ViziData <span>(Prototype)</span></h1>
-</div>
-
 <div id="sidebar">
 	<menu>
-		<div id="filter"></div>
-		<div id="controls">
-			<label id="ctrl-reso">
-				Grid resolution<br>
-				<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1" />
-			</label>
-			<input id="reso-display" type="text" readonly size="2" value="1" />
-			
-			<label id="ctrl-zoom">
-				Zoom<br>
-				<input id="zoom-slider" type="range" step="0.1" value="1" disabled />
-			</label>
-			<input id="zoom-display" type="text" readonly size="3" value="1.0" />
-
+		<div id="filter"><h2>Data Selection</h2></div>
+		<div id="controls-timeline" class="controls">
+			<h2>Timeline Settings</h2>
+			<!-- switch timeline mode -->
+			<fieldset id="ctrl-tlmode">
+				<legend>Timeline Data</legend>
+				<label>
+					<input type="radio" name="mapglob" value="1">
+					Global
+				</label>
+				<label>
+					<input type="radio" name="mapglob" value="0">
+					Map area only
+				</label>
+			</fieldset>
+			<!--<fieldset> not implemented
+				<label>
+					<input id="tl-savesel" type="checkbox">
+					Retain selection
+				</label>
+			</fieldset>-->
 		</div>
-		<div>
-			<label id="freezer">
-				<input type="checkbox" />
-				prevent redrawing
-			</label>
-			<label id="colorizer">
-				<input type="checkbox" />
-				disable individual colors
-			</label>
+		<div id="controls-map" class="controls">
+			<h2>Map Settings</h2>
+			<fieldset id="ctrl-maplayer" class="fieldgroup">
+				<legend>Map</legend>
+				<fieldset class="slider">
+					<legend>Opacity</legend>
+					<input type="range" id="map-opacity" min="0" max="1" step="0.1" value="1" />
+					<input type="text" id="map-opacity-display" readonly size="2" value="1" />
+				</fieldset>
+				<label>
+					<input id="maplayer-shape" type="checkbox" checked 
+						data-str="(watercolor,$fff[@30],$fff[hsl-saturation@80])[@50]" />
+					Shape
+				</label>
+				<label>
+					<input type="checkbox" id="maplayer-labels" checked
+						data-str="toner-labels[@40]" />
+					Labels
+				</label>
+			</fieldset>
+			<fieldset class="fieldgroup">
+				<legend>Grid</legend>
+				<fieldset class="slider">
+					<!--<label id="ctrl-reso" class="slider">-->
+					<legend>Size</legend>
+					<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1" />
+					<!--</label>-->
+					<input id="reso-display" type="text" readonly size="2" value="1" />
+				</fieldset>
+				<fieldset class="slider">
+					<legend>Drawing Overlap</legend>
+					<input id="bleed-slider" type="range" min="0.5" max="3" step="0.1" value="1.2" />
+					<input id="bleed-display" type="text" readonly size="2" value="1.2" />
+				</fieldset>
+				<!--<fieldset class="slider">
+					<legend>Zoom</legend>
+					<input id="zoom-slider" type="range" step="0.1" value="1" disabled />
+					<input id="zoom-display" type="text" readonly size="3" value="1.0" />
+				</fieldset>-->
+				<!--<fieldset>
+					<label id="freezer">
+						<input type="checkbox" />
+						prevent redrawing
+					</label>
+				</fieldset>-->
+			</fieldset>
 		</div>
 	</menu>
-	<div id="legend">
+	<!--<div id="stuff">
+	</div>-->
+	<div id="legend"></div>
+	<div id="cellinfo-desc"><div></div></div>
+	<div id="cellinfo">
+		<div class="table-wrapper">
+			<table>
+				<thead>
+					<tr>
+						<th>Item
+							<select id="langsel"></select>
+						</th>
+
+						<th></th>
+					</tr>
+				</thead>
+				<tbody id="infolist"></tbody>
+			</table>
+		</div>
 	</div>
-	<div id="stuff">
-		<button id="export" disabled>Export Map SVG</button>
-	</div>
+	<header>
+		<a id="github_link" href="https://github.com/gordelwig/ViziData" title="View on GitHub" target="github">
+			<img src="./github_logo.png" alt="GitHub">
+			<img src="./octocat.png" alt="GitHub">
+		</a>
+		<h1>ViziData <span>(Prototype)</span></h1>
+	</header>
 </div>
 
 <menu id="timefilter">
-	<div id="chart"></div>
+	<div id="chartwrapper">
+		<div id="chart"></div>
+	</div>
 </menu>
 <div id="map">
-	<!--<svg version="1.1" id="mapcanvas" xmlns="http://www.w3.org/2000/svg"></svg>-->
+	<div id ="leaflet"></div>
+	<!--<div id="hud" class="hover-tt"></div>-->
 </div>
 <div id="bubble"></div>
 

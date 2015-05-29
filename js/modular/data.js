@@ -4,10 +4,13 @@
 /**
 * loads data
 * for dataset with given index */
-function setSetSel(dsi) { //, callback){
+function setSetSel(dsi, dgi) { //, callback){
+
+	current_datsel = gdata[dgi];
+
 	// load properties if missing
 	if(current_datsel.props === undefined) {
-		// TODO ? more loading feedback
+		// TODO ? more loading feedback. maybe not as long as it's quick enough
 		$.getJSON(DATA_DIR+current_datsel.properties, function(data) {
 			current_datsel.props = data;
 			console.log('~~ Member properties of "'+current_datsel.id+'" have been loaded');
@@ -15,6 +18,7 @@ function setSetSel(dsi) { //, callback){
 	}
 	if(current_datsel.datasets[dsi].data !== undefined) {
 		current_setsel = current_datsel.datasets[dsi];
+		updateUI();
 		genChart();
 		genGrid();
 	} else {
@@ -46,16 +50,41 @@ function setSetSel(dsi) { //, callback){
 
 		var lBM = new Date();
 		console.log("~~ starting to load dataset "+current_datsel.datasets[dsi].strings.label+" ~~ ");
-		$.getJSON(DATA_DIR+gdata[0].datasets[dsi].file, function(data){
+		$.getJSON(DATA_DIR+current_datsel.datasets[dsi].file, function(data){
 			console.log(" |BM| finished loading "+current_datsel.datasets[dsi].strings.label+" data (took "+(new Date()-lBM)+"ms)");
-			clearInterval(lAnim);
-			
+						
 			current_datsel.datasets[dsi].data = data;
-
 			current_setsel = current_datsel.datasets[dsi];
-			genChart();
-			genGrid();
+			lBM = Date.now();
+			preprocess(current_setsel);
 
+			console.log(" |BM| finished preprocessing object iterators ("+(Date.now()-lBM)+"ms)");
+
+			clearInterval(lAnim);
+
+			updateUI();
+			genChart();
+			initComplete = true;
+			genGrid();
 		});
 	}
+}
+
+function preprocess(ds) {
+	if(ds.ready === true) { return false; }
+
+	if(ds.itarraytor === undefined) {
+		ds.itarraytor = [];
+	}
+
+	var i = (C_WMAX - C_WMIN) / ds.parent.tile_width;
+	while(i--) {
+		if(ds.itarraytor[i] === undefined) {
+			ds.itarraytor[i] = [];
+			for(var k in ds.data[i]) {
+				ds.itarraytor[i].push(parseInt(k));
+			}
+		}
+	}
+	ds.ready = true;
 }
