@@ -7148,6 +7148,7 @@ function drawPlot(leavas, params) {
 }
 
 function highlightCell(c) {
+    //var overctx = leaflover._canvas.getContext("2d");
     var x, y, g, p, linewidth = 2;
     var wx = drawdat.wx, wy = drawdat.wy, rx = drawdat.rx, ry = drawdat.ry;
     overctx.save();
@@ -7295,7 +7296,9 @@ function initLeaflet() {
     //});
     changeTileSrc();
     leafloor.addTo(leafly);
-    leafly.on("moveend", function() {
+    leafly.on("movestart", function() {
+        selectCell(false);
+    }).on("moveend", function() {
         //clearGrid();
         genGrid();
         genChart();
@@ -7611,16 +7614,16 @@ function selectCell(i) {
     if (i === undefined) {
         i = selectedCell;
     }
+    var tb = $("#infolist");
+    tb.html("");
+    // clear the list
     if (i === false) {
+        $("#cellinfo-desc>div").hide();
         selectedCell = false;
         highlightCell(false);
         urlifyState();
         return false;
     }
-    var tb = $("#infolist");
-    tb.html("");
-    // clear the list
-    //$("#legend div:last-child").remove();
     var cell = cellmap[i];
     if (cell !== undefined) {
         selectedCell = i;
@@ -7645,12 +7648,10 @@ function selectCell(i) {
             $("#cellinfo-desc>div").html("the <em>selected cell</em> <span>around " + "(" + x + ", " + y + ")</span> " + "contains <em>" + cell.length + "</em> of them:");
             tb.trigger("scroll");
         }, timeout);
+        urlifyState();
     } else {
-        $("#cellinfo-desc>div").hide();
-        selectedCell = false;
-        highlightCell(false);
+        selectCell(false);
     }
-    urlifyState();
 }
 
 /**

@@ -394,6 +394,8 @@ function drawPlot(leavas, params) {
 
 function highlightCell(c) {
 
+	//var overctx = leaflover._canvas.getContext("2d");
+
 	var x,y,g,p,
 		linewidth = 2;
 
@@ -576,7 +578,9 @@ function initLeaflet() {
 
 	
 	
-	leafly.on("moveend", function() {
+	leafly.on("movestart", function() {
+		selectCell(false);
+	}).on("moveend", function() {
 		//clearGrid();
 		genGrid();
 		genChart(); // maybe there is a less destructive way?
@@ -598,6 +602,10 @@ function initLeaflet() {
 		.drawing(drawPlot)
 		.addTo(leafly);
 
+	/*leaflover = L.canvasOverlay();
+	leaflover
+		//.drawing(highlightCell)
+		.addTo(leafly);*/
 
         /*function drawingOnCanvas(canvasOverlay, params) {
         	var bm = Date.now();

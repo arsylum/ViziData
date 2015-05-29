@@ -269,16 +269,17 @@ function canvasMouseClick(e) {
 * select cell i and fill the infolist table */
 function selectCell(i) {
 	if(i === undefined) { i = selectedCell; }
+
+	var tb = $("#infolist");
+	tb.html(""); // clear the list
+
 	if(i === false) {
+		$("#cellinfo-desc>div").hide();
 		selectedCell = false;
 		highlightCell(false);
 		urlifyState();
 		return false;
 	}
-	
-	var tb = $("#infolist");
-	tb.html(""); // clear the list
-	//$("#legend div:last-child").remove();
 
 	var cell = cellmap[i];
 
@@ -317,13 +318,8 @@ function selectCell(i) {
 
 			tb.trigger("scroll");
 		}, timeout);
-
-	} else {
-		$("#cellinfo-desc>div").hide();
-		selectedCell = false;
-		highlightCell(false);
-	}
-	urlifyState();
+		urlifyState();
+	} else { selectCell(false);	}
 }
 
 /**
