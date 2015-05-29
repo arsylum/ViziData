@@ -3,50 +3,25 @@
 ///////////////////
 $(function(){
 	// init stuff
-	//lastTransformState = {scale: 1, translate: [0,0]};
 	lastMapCenter = { lat: 0, lng: 0 };
 
 	resoFactor = parseFloat($("#reso-slider").val());
 	//$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);
 	
+	$bubble = $("#bubble");
 
-	// bind window resize handling
-	$(window).resize(function() {
-		clearTimeout(resizeTimer);
-		resizeTimer = setTimeout(onResize, 400);
-	});
-
-	// zoombehaviour
-	//zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
-
-	// setup canvas
-	//mapcan = d3.select("#map").append("canvas");//.call(zoombh)
-		//.on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
+	// setup overlay canvas
 	overcan = d3.select("#map").append("canvas").classed("overlay", true);
+	overctx = overcan.node().getContext("2d");
 
 	// init color scale
-	colorScale = d3.scale.log()
-		//.domain([0,1,2,3,4,5,6,7,8])
-		.range(M_COLOR_SCALE);
+	colorScale = d3.scale.log().range(M_COLOR_SCALE);
 
 
-	// Load default dataset once ready
-	$(document).on("meta_files_ready", function() {
-		onResize(); // set canvas dimensions
-		//current_datsel = gdata[0]; // TODO [get from dom] (depends on data management)
-		//if(!statifyUrl()) {
-			// TODO put all the defaults in globals and apply them in statifyUrl
-			//$("#filter input")[DEFAULT_DATASET].click(); // select&load initial dataset
-		//}
-		statifyUrl(); // revert state from url parameters and get things going
-		
-	});
-
-	/// TODO
-	// load all the meta data meta files
+	/// load all the meta data meta files
 	var bmMETA = new Date();
 	console.log("~~ started loading the meta files (total of "+META_FILES.length+") ~~ ");
-	
+
 	var callback = function(data) {
 		for(var j = 0; j< data.datasets.length; j++) {
 			data.datasets[j].parent = data;
@@ -55,7 +30,6 @@ $(function(){
 		if(mfc===META_FILES.length) {
 			console.log(" |BM| got all the meta files (took "+(new Date() -bmMETA)+"ms)");
 			setupControlHandlers();
-			//$(document).trigger("meta_files_ready");
 			onResize();
 			statifyUrl(); // revert state from url parameters and get things going
 		}
@@ -68,7 +42,6 @@ $(function(){
 });
 
 
-
 ////////////////
 /// on resize //
 ////////////////
@@ -79,16 +52,14 @@ function onResize() {
 	viewportH = $(window).height();
 
 	// set canvas dimensions
-	canvasT = Math.floor($("#map").position().top); 
-	canvasL = Math.floor($("#sidebar").width()); //doesen't change but is set here for code maintainability
+	//canvasT = Math.floor($("#map").position().top); 
+	//canvasL = Math.floor($("#sidebar").width()); //doesen't change but is set here for code maintainability
 	canvasW = Math.floor($("#map").width());
 	canvasH = Math.floor($("#map").height());
-	//d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
-	$(overcan.node()).attr("width", canvasW).attr("height", canvasH);
-	$("#leaflet").css("width", canvasW).css("height",canvasH);
-	//mapctx = mapcan.node().getContext("2d");
-	overctx = overcan.node().getContext("2d");
 
+	overcan.attr("width", canvasW).attr("height", canvasH);
+
+	$("#leaflet").css("width", canvasW).css("height",canvasH);
 	initLeaflet();
 	
 	genGrid();

@@ -6534,7 +6534,7 @@ function setSetSel(dsi, dgi) {
     current_datsel = gdata[dgi];
     // load properties if missing
     if (current_datsel.props === undefined) {
-        // TODO ? more loading feedback
+        // TODO ? more loading feedback. maybe not as long as it's quick enough
         $.getJSON(DATA_DIR + current_datsel.properties, function(data) {
             current_datsel.props = data;
             console.log('~~ Member properties of "' + current_datsel.id + '" have been loaded');
@@ -6596,52 +6596,49 @@ function preprocess(ds) {
 ////////////////////
 /// pseudo constants
 //^^^^^^^^^^^^^^^^^^
-// coord parameters
+/// coord parameters
 var C_WMIN = -180, C_WMAX = 180, C_HMIN = -90, C_HMAX = 90, C_W = C_WMAX - C_WMIN, C_H = C_HMAX - C_HMIN;
 
-// map parameters
-var M_BOUNDING_THRESHOLD = 0, // grid clipping tolerance
-//M_ZOOM_RANGE = [1,8],		// zoom range (results in svg scale 2^(v-1))
+/// map parameters
+var //M_BOUNDING_THRESHOLD = 0,	// grid clipping tolerance
+M_ZOOM_RANGE = [ 1, 12 ], // zoom range (results in svg scale 2^(v-1))
 M_BASE_GRIDROWS = 300, // number of horizontal grid cells
-M_BUBBLE_OFFSET = 10, // distance of map tooltip from pointer
+M_BUBBLE_OFFSET = 20, // distance of map tooltip from pointer
 M_HOVER_OFFSET = {
-    // pointer selection offset
-    l: 5,
-    t: 5
-};
-
-// color scale
-var M_COLOR_SCALE = [ // provided by colorbrewer2.org
-/*'rgb(248,251,207)', // http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
-	'rgb(237,248,177)',
-	'rgb(199,233,180)',
-	'rgb(127,205,187)',
-	'rgb(65,182,196)',
-	'rgb(29,145,192)',
-	'rgb(34,94,168)',
-	'rgb(37,52,148)',
-	'rgb(8,29,88)'];*/
-"#ccddff", "#aacc66", "#aa6611", "#800", "#300" ], M_DEFAULT_TILE_OPACITY = 1, // default visibility of tile layer
+    l: 8,
+    t: 8
+}, // pointer focus offset
+M_DEFAULT_TILE_OPACITY = 1, // default visibility of tile layer
 M_DEFAULT_TILE_CONF = 3;
 
 // default config tile layer ([2]shape [1]labels)
-// "Timeline" (can be almost anything)
-var T_YAXIS_MAX_EXPAND = 1.21;
+M_COLOR_SCALE = // color scale for grid
+[ "#ccddff", "#aacc66", "#aa6611", "#800", "#300" ];
 
-// faktor for top margin
-// timing, responsiveness
+// self made / experimental
+/*['rgb(248,251,207)',
+	'rgb(237,248,177)',
+	'rgb(199,233,180)',
+	'rgb(127,205,187)',	//
+	'rgb(65,182,196)',	// provided by colorbrewer2.org
+	'rgb(29,145,192)',	// http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
+	'rgb(34,94,168)',	//
+	'rgb(37,52,148)',
+	'rgb(8,29,88)'];*/
+/// timing, responsiveness
 var CALC_TIMEOUT = 200;
 
 // default timeout before large operations are run
-// UI labels
+/// UI labels
 var T_DEFAULT_TOOLTIP = "%l in %x: %v", // default timeline hover tooltip
 T_DEFAULT_ZPROP = "#", // default label for the chart data axis
 L_DEFAULT_TERM = "between %l and %h";
 
 // default legend suffix
-// DATA
+/// DATA
 var DATA_DIR = "./data/", META_FILES = [ "humans.json", "items.json" ];
 
+// available datagroups
 var DEFAULT_DATAGROUP = "humans", // default datagroup 
 DEFAULT_DATASET = 0, // dataset to load up initially
 DEFAULT_LABELLANG = "en";
@@ -6655,6 +6652,7 @@ ARR_M_I = 2;
 // ref to prop
 var TPI = Math.PI * 2;
 
+// for those saved nanoseconds
 ///_________________
 /// pseudo constants
 ////////////////////
@@ -6663,32 +6661,29 @@ var TPI = Math.PI * 2;
 //^^^^^^^^^^^^^
 var chart, // Timeline / dataLine
 summary, // summary component of timeline (interaction leader)
-//plotlayer,  // plot drawing layer (<g>)
 leafly, //leaflet map
-bubble, // popup bubble on map
-zoombh;
+$bubble;
 
-// zoomBehavior
+// popup bubble on map
 var allow_redraw = true, // global genGrid prevention switch
-timelineIsGlobal = 0, colorScale, // color scaling function
+timelineIsGlobal = 1, // switch controlled by Timeline Data settings
+colorScale, // d3 color scaling function
 mutexGenGrid = 0, // genGrid mutex (0: free, 1: looping, -1: kill loop)
 initComplete = false, // true after initial initialization
-redrawTimer, // genGrid
-chartdatTimer, // updateChartData
-bubbleTimer, // hide map tooltip bubble
-//boundsTimer, // forceBounds
-resizeTimer, // window resize handling
+redrawTimer, // for genGrid
+chartdatTimer, // for updateChartData
+bubbleTimer, // for hiding map tooltip bubble
+resizeTimer, // for window resize handling
 infolistTimer;
 
-// item table scroll handler
-var gdata = [], // global rawdata
+// for item table scroll handler
+var gdata = [], // global rawdata (array of datagroups)
 current_datsel, // slected data group
 current_setsel = {}, // selected dataset
 chartdat = [], // timeline rendering data
 timeSel, // current timeline selection
-cellmap, // latest generated tilemap
+cellmap, // latest generated grid map
 drawdat = {}, // latest generated drawing data
-//filledTiles = [9999], // don't need to draw whats already there [min,max]
 selectedCell = false, // currently selected cell
 renderRTL = false, // flag for progressive tile iteration direction
 resoFactor;
@@ -6700,20 +6695,21 @@ var viewportH, viewportW;
 /// leaflet layers
 var leafloor, // tilemap layer
 leaflaggrid, // grid layer
-//leavlover;		// overlay layer
+//leavlover;	
 overcan, overctx;
 
-// map canvas
-var //mapcan,	mapctx,
-//overcan, overctx,
-canvasW, canvasH, canvasT, canvasL;
+// overlay layer (not hooked to leaflet actually)
+var canvasW, canvasH;
 
-var //lastTransformState; // remember map scaling (only redraw on changes)
-lastMapCenter, // to determine direction of panning
+//canvasT,
+//canvasL;
+var lastMapCenter, // to determine direction of panning
 lastMapZoom, // keep track if zoom changes
 lastAgPos = [ 0, 0 ];
 
 // css positioning of aggrid layer
+// TODO probably don't need all of them. 
+// also, proper labels would be nice
 var langCodes = [ "aa", "ab", "ace", "aeb", "af", "ak", "aln", "als", "am", "an", "ang", "anp", "ar", "arc", "arn", "arq", "ary", "arz", "as", "ast", "av", "avk", "ay", "az", "azb", "ba", "bar", "bbc", "bbc-latn", "bcc", "bcl", "be", "be-tarask", "be-x-old", "bg", "bh", "bho", "bi", "bjn", "bm", "bn", "bo", "bpy", "bqi", "br", "brh", "bs", "bug", "bxr", "ca", "cbk-zam", "cdo", "ce", "ceb", "ch", "cho", "chr", "chy", "ckb", "co", "cps", "cr", "crh-cyrl", "crh-latn", "cs", "csb", "cu", "cv", "cy", "da", "de", "de-at", "de-ch", "de-formal", "diq", "dsb", "dtp", "dv", "dz", "ee", "egl", "el", "eml", "en", "en-ca", "en-gb", "eo", "es", "et", "eu", "ext", "fa", "ff", "fi", "fit", "fiu-vro", "fj", "fo", "fr", "frc", "frp", "frr", "fur", "fy", "ga", "gag", "gan", "gan-hans", "gan-hant", "gd", "gl", "glk", "gn", "gom-latn", "got", "grc", "gsw", "gu", "gv", "ha", "hak", "haw", "he", "hi", "hif", "hif-latn", "hil", "ho", "hr", "hrx", "hsb", "ht", "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", "ik", "ike-cans", "ike-latn", "ilo", "inh", "io", "is", "it", "iu", "ja", "jam", "jbo", "jut", "jv", "ka", "kaa", "kab", "kbd", "kbd-cyrl", "kg", "khw", "ki", "kiu", "kj", "kk", "kk-arab", "kk-cn", "kk-cyrl", "kk-kz", "kk-latn", "kk-tr", "kl", "km", "kn", "ko", "ko-kp", "koi", "kr", "krc", "kri", "krj", "ks", "ks-arab", "ks-deva", "ksh", "ku", "ku-arab", "ku-latn", "kv", "kw", "ky", "la", "lad", "lb", "lbe", "lez", "lfn", "lg", "li", "lij", "liv", "lmo", "ln", "lo", "loz", "lrc", "lt", "ltg", "lus", "lv", "lzh", "lzz", "mai", "map-bms", "mdf", "mg", "mh", "mhr", "mi", "min", "mk", "ml", "mn", "mo", "mr", "mrj", "ms", "mt", "mus", "mwl", "my", "myv", "mzn", "na", "nah", "nan", "nap", "nb", "nds", "nds-nl", "ne", "new", "ng", "niu", "nl", "nl-informal", "nn", "no", "nov", "nrm", "nso", "nv", "ny", "oc", "om", "or", "os", "ota", "pa", "pag", "pam", "pap", "pcd", "pdc", "pdt", "pfl", "pi", "pih", "pl", "pms", "pnb", "pnt", "prg", "ps", "pt", "pt-br", "qu", "qug", "rgn", "rif", "rm", "rmy", "rn", "ro", "roa-tara", "ru", "rue", "rup", "ruq", "ruq-cyrl", "ruq-latn", "rw", "rwr", "sa", "sah", "sat", "sc", "scn", "sco", "sd", "sdc", "se", "sei", "sg", "sgs", "sh", "shi", "shi-latn", "shi-tfng", "si", "simple", "sk", "sl", "sli", "sm", "sma", "sn", "so", "sq", "sr", "sr-ec", "sr-el", "srn", "ss", "st", "stq", "su", "sv", "sw", "szl", "ta", "tcy", "te", "tet", "tg", "tg-cyrl", "tg-latn", "th", "ti", "tk", "tl", "tly", "tn", "to", "tokipona", "tpi", "tr", "tru", "ts", "tt", "tt-cyrl", "tt-latn", "tum", "tw", "ty", "tyv", "udm", "ug", "ug-arab", "ug-latn", "uk", "ur", "uz", "ve", "vec", "vep", "vi", "vls", "vmf", "vo", "vot", "vro", "wa", "war", "wo", "wuu", "xal", "xh", "xmf", "yi", "yo", "yue", "za", "zea", "zh", "zh-cn", "zh-hans", "zh-hant", "zh-hk", "zh-min-nan", "zh-mo", "zh-my", "zh-sg", "zh-tw", "zu" ];
 
 ///////////////////
@@ -6721,39 +6717,19 @@ var langCodes = [ "aa", "ab", "ace", "aeb", "af", "ak", "aln", "als", "am", "an"
 ///////////////////
 $(function() {
     // init stuff
-    //lastTransformState = {scale: 1, translate: [0,0]};
     lastMapCenter = {
         lat: 0,
         lng: 0
     };
     resoFactor = parseFloat($("#reso-slider").val());
     //$("#zoom-slider").attr("min",M_ZOOM_RANGE[0]).attr("max",M_ZOOM_RANGE[1]);
-    // bind window resize handling
-    $(window).resize(function() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(onResize, 400);
-    });
-    // zoombehaviour
-    //zoombh = d3.behavior.zoom().scaleExtent([Math.pow(2,M_ZOOM_RANGE[0]-1), Math.pow(2,M_ZOOM_RANGE[1]-1)]).on("zoom", zoom);
-    // setup canvas
-    //mapcan = d3.select("#map").append("canvas");//.call(zoombh)
-    //.on("mousemove", canvasMouseMove).on("click", canvasMouseClick);
+    $bubble = $("#bubble");
+    // setup overlay canvas
     overcan = d3.select("#map").append("canvas").classed("overlay", true);
+    overctx = overcan.node().getContext("2d");
     // init color scale
     colorScale = d3.scale.log().range(M_COLOR_SCALE);
-    // Load default dataset once ready
-    $(document).on("meta_files_ready", function() {
-        onResize();
-        // set canvas dimensions
-        //current_datsel = gdata[0]; // TODO [get from dom] (depends on data management)
-        //if(!statifyUrl()) {
-        // TODO put all the defaults in globals and apply them in statifyUrl
-        //$("#filter input")[DEFAULT_DATASET].click(); // select&load initial dataset
-        //}
-        statifyUrl();
-    });
-    /// TODO
-    // load all the meta data meta files
+    /// load all the meta data meta files
     var bmMETA = new Date();
     console.log("~~ started loading the meta files (total of " + META_FILES.length + ") ~~ ");
     var callback = function(data) {
@@ -6764,7 +6740,6 @@ $(function() {
         if (mfc === META_FILES.length) {
             console.log(" |BM| got all the meta files (took " + (new Date() - bmMETA) + "ms)");
             setupControlHandlers();
-            //$(document).trigger("meta_files_ready");
             onResize();
             statifyUrl();
         }
@@ -6784,16 +6759,12 @@ function onResize() {
     viewportW = $(window).width();
     viewportH = $(window).height();
     // set canvas dimensions
-    canvasT = Math.floor($("#map").position().top);
-    canvasL = Math.floor($("#sidebar").width());
-    //doesen't change but is set here for code maintainability
+    //canvasT = Math.floor($("#map").position().top); 
+    //canvasL = Math.floor($("#sidebar").width()); //doesen't change but is set here for code maintainability
     canvasW = Math.floor($("#map").width());
     canvasH = Math.floor($("#map").height());
-    //d3.selectAll("#map canvas").attr("width", canvasW).attr("height", canvasH);
-    $(overcan.node()).attr("width", canvasW).attr("height", canvasH);
+    overcan.attr("width", canvasW).attr("height", canvasH);
     $("#leaflet").css("width", canvasW).css("height", canvasH);
-    //mapctx = mapcan.node().getContext("2d");
-    overctx = overcan.node().getContext("2d");
     initLeaflet();
     genGrid();
     genChart();
@@ -6806,8 +6777,8 @@ function onResize() {
 ** grid generation and 
 ** drawing functions 
 */
-/**
-* timeout wrapper*/
+/** 
+* genGrid timeout wrapper*/
 function genGrid(reso, mAE, data) {
     if (chart === undefined) {
         return 0;
@@ -6821,7 +6792,7 @@ function genGrid(reso, mAE, data) {
 
 /**
 * Generate data grid for the map
-* parameters optional */
+* all parameters optional */
 function generateGrid(reso, mAE, data) {
     if (!allow_redraw) {
         return false;
@@ -6829,7 +6800,6 @@ function generateGrid(reso, mAE, data) {
     if (data === undefined) {
         data = current_setsel;
     }
-    // todo dynamic from filter?
     if (mAE === undefined) {
         mAE = getBounds(true);
     }
@@ -6857,19 +6827,15 @@ function generateGrid(reso, mAE, data) {
         renderRTL = lastMapCenter.lng > (lastMapCenter = leafly.getCenter()).lng;
         /// finish
         var finish = function() {
-            console.log("  |BM| progressive drawing(ms): " + progBM);
+            //console.log("  |BM| progressive drawing(ms): " + progBM);
             console.log("  |BM| iteration complete (" + (new Date() - bms) + "ms)");
-            //drawPlot(true, cellmap, reso);
             calcPlotDat(cellmap, reso);
             console.log("  |BM| finished genGrid (total of " + (new Date() - bms) + "ms)");
-            //filledTiles = [tMin+1,tMax-1];
             var term = data.strings.term || L_DEFAULT_TERM;
             $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
             "we have registered a total of<br>" + "<em>" + count + " " + data.strings.label + "</em><br>" + term.replace("%l", "<em>" + cAE.min + "</em>").replace("%h", "<em>" + cAE.max + "</em>"));
-            // "that <em>"+data.strings.term+"</em><br>"+
-            // "between <em>"+cAE.min+"</em> and <em>"+cAE.max+"</em>");
             selectCell();
-            //urlifyState(); // is always called in selectCell
+            // urlifyState(); // is always called in selectCell
             console.log("\\~~ grid generation complete~~/ ");
             mutexGenGrid = 0;
             leaflaggrid._redraw();
@@ -6882,22 +6848,23 @@ function generateGrid(reso, mAE, data) {
                 // if new function call
                 return 0;
             }
-            var cellmapprog = {}, l, a, ti, i, j, k, it;
+            var cellmapprog = {}, a, ti, i, j, k, it;
             if (!renderRTL) {
                 i = tMin + offset;
             } else {
                 i = tMax - offset;
             }
             if (i <= tMax && i >= tMin) {
-                // still work to do			// for each map tile in visible area
-                //for(var j = cAE.min; j <= cAE.max; j++) { 					// go over each key in range
-                //	if(data.data[i][j] !== undefined) {							// if it is defined
+                // still work to do	
                 it = data.itarraytor[i].length;
+                // for each map tile in visible area
                 while (it--) {
                     j = data.itarraytor[i][it];
+                    // go over each key
                     if (j >= cAE.min && j <= cAE.max) {
-                        l = data.data[i][j].length;
-                        for (k = 0; k < l; k++) {
+                        // if it is in selection range
+                        k = data.data[i][j].length;
+                        while (k--) {
                             // go over each event in key and
                             a = data.data[i][j][k];
                             if (section_filter(a, mAE)) {
@@ -6914,12 +6881,9 @@ function generateGrid(reso, mAE, data) {
                         }
                     }
                 }
-                // draw each tile after aggregating (if not already drawn)
-                //if(i < filledTiles[0] || i > filledTiles[1]) {
-                //progBM += drawPlot(i, cellmapprog, reso) +',';
+                // draw each tile after aggregating 
                 calcPlotDat(cellmapprog, reso, i);
                 leaflaggrid._redraw();
-                //}
                 setTimeout(function() {
                     iterate(++offset);
                 }, 1);
@@ -6946,30 +6910,22 @@ function generateGrid(reso, mAE, data) {
     goOn();
 }
 
-///////////////
+////////////////
 /// filters ///
-///////////////
+//////////////
 // true if object geo lies within currently visible section
 function section_filter(obj, aE) {
     return obj[ARR_M_LAT] >= aE[1].min && obj[ARR_M_LAT] <= aE[1].max && (obj[ARR_M_LON] >= aE[0].min && obj[ARR_M_LON] <= aE[0].max);
 }
 
-//////////////////
-/// aggregators //
-/*/////////////////
-function testing_aggregator(tmap,obj,reso) {
-	var ti = coord2index(obj[ARR_M_LON],obj[ARR_M_LAT],reso);
-	if(tmap[ti] === undefined) {
-		tmap[ti] = [];
-		tmap[ti].push(obj[2]);
-	} else {
-		tmap[ti].push(obj[2]);
-	}
-	return tmap;
-}
-*/
+//////////////////////
+/// drawing logic ///
+////////////////////
 /**
-* calculate new plot drawing object */
+* calculate new plot drawing object 
+* [@param newmap] new cell mapping to derive drawing data from
+* [@param reso] required if newmap is given - resolution of new gridmap 
+* [@param tile] int if generating for a specific tile, undefined otherwise i*/
 function calcPlotDat(newmap, reso, tile) {
     if (newmap !== undefined && reso === undefined) {
         conslole.warn("drawPlot(): newmap given but no resolution. Using old drawing data.");
@@ -6979,11 +6935,8 @@ function calcPlotDat(newmap, reso, tile) {
         // calculate new drawing map
         var draw = [], min = Infinity, max = -Infinity;
         $.each(newmap, function(k, v) {
-            //var c = index2canvasCoord(k, reso);
             var c = index2canvasCoord(k, reso);
-            //var p = tileMap.latLngToLayerPoint([c[0],c[1]]);
             v = v.length;
-            //draw.push([[c[0],c[1]],v]);
             draw.push([ c, v ]);
             // get extreme values
             if (v < min) {
@@ -7001,7 +6954,6 @@ function calcPlotDat(newmap, reso, tile) {
         };
     }
     drawdat.tile = tile;
-    //if(typeof clear !== "number" && newmap !== undefined) {
     if (tile === undefined) {
         console.log("  ~ drawing " + drawdat.draw.length + " shapes");
         console.log("  # data extreme values - min: " + drawdat.min + ", max: " + drawdat.max);
@@ -7010,141 +6962,47 @@ function calcPlotDat(newmap, reso, tile) {
 }
 
 /**
-* draw the grid layer
-* [@param clear] clear before drawing, true: everything, false: nothing, i: tile i
-* [@param newmap] new cell mapping to derive drawing data from
-* [@param reso] required if newmap is given - resolution of new gridmap */
-//function drawPlot(clear, newmap, reso) { //TODO remove param?
+* mapgrid drawing function hooked to leaflet */
 function drawPlot(leavas, params) {
     if (drawdat.draw === undefined) {
         return false;
     }
-    //console.log(Date.now()+': drawing..');
-    // console.log(leavas);
-    // console.log(params);
-    // dont redraw the first time when zoom is changed
-    // (redraw when it is called again at the end of genGrid)
-    //if(lastMapZoom !== (lastMapZoom = leafly.getZoom())) { return false; }
-    //if(mutexGenGrid !== 0) { return false; }
-    // if(clear === undefined) { clear = true; }
-    // if(newmap !== undefined && reso === undefined) { 
-    // 	conslole.warn('drawPlot(): newmap given but no resolution. Using old drawing data.');
-    // } 
     var bm = Date.now();
     var mapctx = params.canvas.getContext("2d");
+    // for compensating leaflets css transformation
     var transform = $(params.canvas).css("transform");
     transform = transform.split(",");
     var curAgPos = [ parseInt(transform[transform.length - 2]), // x
     parseInt(transform[transform.length - 1]) ];
     // y
-    // mapctx.save();
+    var dx = curAgPos[0] - lastAgPos[0], dy = curAgPos[1] - lastAgPos[1];
+    // sizes and radii of primitiva
+    var bleed = parseFloat($("#bleed-slider").val()), wx = drawdat.reso * bleed, rx = wx / 2, rr = drawdat.reso / 2;
+    drawdat.wx = wx;
+    drawdat.rx = rx;
+    drawdat.rr = rr;
+    mapctx.save();
     if (drawdat.tile === undefined) {
         mapctx.clearRect(0, 0, params.canvas.width, params.canvas.height);
-    }
-    // color defs
-    /*// TODO color calculation is buggy
-		// (using hsl model might be good idea)
-	var rmax, gmax, bmax, rlog_factorm, glog_factor, blog_factor;
-	if(colorize) {
-		rmax = current_setsel.colorScale.min[0];
-		rlog_factor = (rmax-current_setsel.colorScale.max[0])/Math.log(drawdat.max);
-		gmax = current_setsel.colorScale.min[1];
-		glog_factor = (gmax-current_setsel.colorScale.max[1])/Math.log(drawdat.max);
-		bmax = current_setsel.colorScale.min[2];
-		blog_factor = (bmax-current_setsel.colorScale.max[2])/Math.log(drawdat.max);
-	} else {
-		bmax = 255; //215;
-		blog_factor = bmax/drawdat.max;//Math.log(drawdat.max);
-		gmax = 235; //205;
-		glog_factor = gmax/Math.log(drawdat.max);
-		rmax = 185;//14;
-		rlog_factor = rmax/Math.log(drawdat.max);
-	}*/
-    //var canvasRenderBM = new Date();
-    // sizes and radii of primitiva
-    var bleed = parseFloat($("#bleed-slider").val());
-    // + 1/lastTransformState.scale*0.25; // 1.25; // larger size for bleeding with alpha channel
-    // var wx = ((drawdat.reso*canvasW)/360) * bleed,
-    // 	wy = ((drawdat.reso*canvasH)/180) * bleed, 
-    // 	//rx = ((drawdat.reso*canvasW)/360/2) * bleed,
-    // 	//ry = ((drawdat.reso*canvasH)/180/2) * bleed;
-    // 	rx = wx/2,
-    // 	ry = wy/2;
-    //var gb = leafly.getBounds();
-    //var ccount = (gb._northEast.lat - gb._southWest.lat) / drawdat.reso;
-    var b = leafly.getPixelBounds();
-    var r = drawdat.reso;
-    //(b.max.x - b.min.x) / 360 * resoFactor;
-    var wx = r * bleed;
-    var wy = wx, rx = wx / 2, ry = wy / 2;
-    //wy = r; //params.canvas.height / ccount;
-    //
-    //
-    drawdat.wx = wx;
-    drawdat.wy = wy;
-    drawdat.rx = rx;
-    drawdat.ry = ry;
-    var i = -1, n = drawdat.draw.length, d, cx, cy, fc, gradient;
-    // TODO keep only what is used
-    //var col;
-    var dx = curAgPos[0] - lastAgPos[0], dy = curAgPos[1] - lastAgPos[1];
-    // mapctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
-    // mapctx.scale(lastTransformState.scale, lastTransformState.scale);
-    if (typeof drawdat.tile === "number") {
+    } else if (typeof drawdat.tile === "number") {
         clearTile(drawdat.tile);
     }
+    // apply transparency when overlapping
     var galph = 1 - (bleed - 1) * .15;
     if (galph > 1) {
         galph = 1;
     }
     mapctx.globalAlpha = galph;
-    while (++i < n) {
+    var i = drawdat.draw.length, d, cx, cy;
+    while (i--) {
         d = drawdat.draw[i];
-        //p = leavas._map.latLngToContainerPoint(d[0]);
-        //p = leafly.layerPointToContainerPoint(d[0]);
-        p = d[0];
-        cx = p.x - dx;
-        cy = p.y - dy;
-        // cx = d.x; //d[0][0];
-        // cy = d.y; //[0][1];
-        //wy =  2*r * (Math.abs(d[0][0])/45);
-        //wy = p.y - leavas._map.latLngToContainerPoint([d[0][0]+drawdat.reso,d[0][1]]).y;
-        //ry = (p.y - leavas._map.latLngToContainerPoint([d[0][0]+drawdat.reso,d[0][1]]).y) / 2;
-        //console.log(d[0], wy);
-        //wy = p.y - (128 / Math.PI) * Math.pow(2,leafly.getZoom()) * (Math.PI - Math.log(Math.tan(Math.PI/4 + (p.y-1)/2)));
-        //console.log(p.y,wy);
-        //col = d3.rgb(colorScale(d[1]));
-        mapctx.fillStyle = //"rgba("+col.r+","+col.g+","+col.b+",0.8)";
-        //fc = 
-        /*"rgb("+
-			Math.floor(rmax -Math.floor(Math.log(d[1])*rlog_factor))+","+
-			Math.floor(gmax -Math.floor(Math.log(d[1])*glog_factor))+","+
-			Math.floor(bmax -Math.floor(d[1]*blog_factor))+")";//,"+
-			//".85)";//((d[1]/drawdat.max)/4+0.6)+")";*/
-        colorScale(d[1]);
-        /*gradient = ctx.createRadialGradient(cx,cy,rx,cx,cy,0);
-		gradient.addColorStop(0,fc+"0)");
-		gradient.addColorStop(0.6, fc+"0.4)");
-		gradient.addColorStop(0.7, fc+"1)");
-		gradient.addColorStop(1,fc+"1)");*/
-        //ctx.fillStyle = gradient;
+        cx = d[0].x - dx + rr;
+        cy = d[0].y - dy + rr;
+        mapctx.fillStyle = colorScale(d[1]);
         mapctx.beginPath();
-        mapctx.arc(cx + rx, cy + rx, rx, 0, TPI);
+        mapctx.arc(cx, cy, rx, 0, TPI);
         mapctx.fill();
     }
-    /*if(highlight !== undefined) {
-		if(reso === undefined) { reso = drawdat.reso; }
-		var c = index2canvasCoord(highlight, reso);
-
-		/*ctx.fillStyle = "rgba(150,250,150,0.3)";
-		ctx.beginPath();
-		ctx.arc(c[0]+rx,c[1]-ry,rx*2,0,TPI);
-		ctx.fill();* /
-
-		mapctx.lineWidth = 2/lastTransformState.scale;
-		mapctx.strokeStyle = "rgba(255,127,0,0.75)"; //orange";
-		mapctx.strokeRect(c[0],c[1]-wy,wx,wy);
-	}*/
     if (drawdat.tile === undefined) {
         console.log("  |BM| canvas rendering of " + drawdat.draw.length + " shapes took " + (Date.now() - bm) + "ms");
     }
@@ -7154,25 +7012,21 @@ function drawPlot(leavas, params) {
 }
 
 function highlightCell(c) {
-    //var overctx = leaflover._canvas.getContext("2d");
-    var x, y, g, p, linewidth = 2;
-    var wx = drawdat.wx, wy = drawdat.wy, rx = drawdat.rx, ry = drawdat.ry;
+    var x, y, p, linewidth = 2;
+    var wx = drawdat.wx, rx = drawdat.rx, rr = drawdat.rr;
     overctx.save();
     overctx.clearRect(0, 0, canvasW, canvasH);
-    // overctx.translate(lastTransformState.translate[0],lastTransformState.translate[1]);
-    //  	overctx.scale(lastTransformState.scale, lastTransformState.scale);
+    // highlight the currently selected cell
     if (selectedCell !== false) {
-        g = index2geoCoord(selectedCell);
-        p = leafly.latLngToContainerPoint(g);
-        x = p.x + rx;
-        y = p.y + ry;
-        //wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
-        //ry = wy/2;
+        p = index2canvasCoord(selectedCell, drawdat.reso);
+        x = p.x + rr;
+        y = p.y + rr;
+        // fill the point
         overctx.fillStyle = "rgba(255,120,0,0.8)";
-        //overctx.fillRect(x,y-wy,wx,wy);
         overctx.beginPath();
         overctx.arc(x, y, rx, 0, TPI);
         overctx.fill();
+        // draw 2 strokes around it
         overctx.strokeStyle = "rgba(255,255,255,0.4)";
         overctx.lineWidth = 3 * linewidth;
         overctx.beginPath();
@@ -7184,56 +7038,38 @@ function highlightCell(c) {
         overctx.arc(x, y, rx * 1.5, 0, TPI);
         overctx.stroke();
     }
-    /*if(c.constructor === Array) {
-		x = c[0];
-		y = c[1];
-	} else if (typeof c === "number") {*/
     if (c === false) {
         overctx.restore();
         return false;
     }
-    //g = index2geoCoord(c);
-    //p = leafly.latLngToContainerPoint(g);
-    p = index2canvasCoord(c);
-    x = p.x + rx;
-    y = p.y + rx;
-    //wy = y - leafly.latLngToContainerPoint([g[0]+drawdat.reso,g[1]]).y;
-    //ry = wy/2;
-    /*	} else {
-		console.warn("highlightCell: invalid first argument");
-		return false;
-	}*/
-    // highlight cell rect
-    //overctx.fillStyle = "rgba(255,130,0,0.7)";
-    overctx.fillStyle = "rgba(255,244,10,0.7)";
-    //overctx.fillRect(x,y-wy,wx,wy);
+    // highlight the currently hovered cell
+    p = index2canvasCoord(c, drawdat.reso);
+    x = p.x + rr;
+    y = p.y + rr;
+    // glow circle
+    var gradient = overctx.createRadialGradient(x, y, 0, x, y, wx * 2);
+    gradient.addColorStop(0, "rgba(255,255,255,0");
+    gradient.addColorStop(.25, "rgba(255,255,255,0.5");
+    gradient.addColorStop(1, "rgba(255,255,255,0");
+    overctx.fillStyle = gradient;
+    overctx.beginPath();
+    overctx.arc(x, y, rx * 4, 0, TPI);
+    overctx.fill();
+    // inner fill
+    overctx.fillStyle = "rgba(255,244,10,0.9)";
     overctx.beginPath();
     overctx.arc(x, y, rx, 0, TPI);
     overctx.fill();
-    // glow circle
-    var gradient = overctx.createRadialGradient(x + rx, y - ry, 0, x + rx, y - ry, rx * 4);
-    gradient.addColorStop(0, "rgba(255,255,255,0.6");
-    gradient.addColorStop(.25, "rgba(255,255,255,0.5");
-    gradient.addColorStop(1, "rgba(255,255,255,0.1");
-    overctx.fillStyle = gradient;
-    overctx.beginPath();
-    //overctx.ellipse(x+rx,y-ry,rx*4,ry*4,0,0,TPI);
-    overctx.arc(x, y, rx * 4, 0, TPI);
-    overctx.fill();
-    // text bubble?..
-    /*overctx.fillStyle = "rgba(0,0,0,.9)";
-	overctx.font = "sans-serif 12pt";
-	overctx.fillText("blabla", x, y);*/
     overctx.restore();
 }
 
 /**
  * highlight all cells that contain data in key */
 function highlightCellsFor(key) {
-    var data = current_setsel.data, reso = drawdat.reso;
+    var data = current_setsel.data, reso = drawdat.reso, rx = drawdat.rx, rr = drawdat.rr;
+    //var bm = Date.now();
     drawWhat();
     var mAE = drawdat.bounds, mmt = drawdat.mmt;
-    //var bm = Date.now();
     /* supposed to be better and more reliable
 	// but actually slower..
 	var k, l, ca = [];
@@ -7242,6 +7078,7 @@ function highlightCellsFor(key) {
 		while(l-- && (cellmap[k][l][1] !== key)) {}
 		if(l >= 0) { ca.push(k); }
 	});*/
+    // gather all visible cells that have content in key
     var i, t, j, ci, cmap = {}, ca = [];
     for (i = mmt.min; i <= mmt.max; i++) {
         if ((t = data[i][key]) !== undefined) {
@@ -7259,18 +7096,16 @@ function highlightCellsFor(key) {
     });
     overctx.save();
     overctx.clearRect(0, 0, canvasW, canvasH);
-    var rx = drawdat.rx;
     overctx.fillStyle = "rgba(255,255,255,0.7)";
     overctx.strokeStyle = "rgba(0,0,0,1)";
     overctx.lineWidth = rx / 2;
     var x, y, p;
     i = ca.length;
     while (i--) {
-        p = index2canvasCoord(ca[i]);
-        x = p.x + rx;
-        y = p.y + rx;
+        p = index2canvasCoord(ca[i], reso);
+        x = p.x + rr;
+        y = p.y + rr;
         overctx.beginPath();
-        //overctx.rect(x,y,wx,wy);
         overctx.arc(x, y, rx, 0, TPI);
         overctx.fill();
         overctx.stroke();
@@ -7283,33 +7118,24 @@ function initLeaflet() {
         leafly.invalidateSize();
         return false;
     }
-    /*var tileUrl = "http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png";
-	tileUrl = "http://{s}.sm.mapstack.stamen.com/((toner-background,$fff[@30],$002266[hsl-color@40]),(toner-labels,$fff[@10]))/{z}/{x}/{y}.png";
-	tileUrl = "http://{s}.sm.mapstack.stamen.com/((watercolor,$fff[@30],$fff[hsl-saturation@80])[@50])/{z}/{x}/{y}.png";
-	//tileUrl = "http://{s}.sm.mapstack.stamen.com/((watercolor,$fff[@30],$fff[hsl-saturation@80])[@50],toner-labels[@40])/{z}/{x}/{y}.png";
-	*/
-    //http://a.sm.mapstack.stamen.com/(water-mask,$000[@10],$00ff55[hsl-color])/3/3/6.png
-    //http://b.sm.mapstack.stamen.com/((toner-background,$fff[difference],$fff[@60]),(toner-labels,$000[@10])[@80])/11/330/795.png
     leafly = L.map("leaflet", {
         //maxBounds: [[-90,-180],[90,180]],
         attributionControl: false,
         worldCopyJump: true
     }).setView([ 0, 0 ], 2);
+    leafly.___eventHandlersAtached = false;
     leafloor = L.tileLayer("", {
         //noWrap: true,
-        //attribution: attribution	//});
         subdomains: [ "a", "b", "c", "d" ],
-        minZoom: 1,
-        maxZoom: 12
+        minZoom: M_ZOOM_RANGE[0],
+        maxZoom: M_ZOOM_RANGE[1]
     });
-    //changeTileSrc();
     leafloor.addTo(leafly);
     L.control.attribution({
         prefix: false
     }).addAttribution('<a id="home-link" target="_top" href="http://maps.stamen.com/">Map tiles</a> by ' + '<a target="_top" href="http://stamen.com">Stamen Design</a>, ' + 'under <a target="_top" href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ' + 'Data by <a target="_top" href="http://openstreetmap.org">OpenStreetMap</a>, ' + 'under <a target="_top" href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.').addTo(leafly);
     leaflaggrid = L.canvasOverlay();
     leaflaggrid.drawing(drawPlot).addTo(leafly);
-    leafly.___eventHandlersAtached = false;
 }
 
 function attachMapHandlers() {
@@ -7327,7 +7153,6 @@ function attachMapHandlers() {
         drawdat.draw = undefined;
         clearGrid();
     }).on("mousemove", function(e) {
-        //console.log(e.latlng);
         canvasMouseMove(e);
     }).on("click", function(e) {
         canvasMouseClick(e);
@@ -7366,16 +7191,7 @@ function changeTileSrc() {
 /**
 * returns current grid resolution*/
 function calcReso() {
-    //var rf = parseFloat($("#reso-slider").val());
-    //return (1/lastTransformState.scale)*resoFactor;
-    //console.log((1/(leafly.getZoom()+1)) * resoFactor);
-    //return (1/(leafly.getZoom()+1)) * resoFactor;
-    // var b = leafly.getBounds();
-    // var r = (b._northEast.lng - b._southWest.lng) / 360 * resoFactor;
-    var w = canvasW;
-    //leafly.getSize().y;
-    var r = w / M_BASE_GRIDROWS * resoFactor;
-    return r;
+    return canvasW / M_BASE_GRIDROWS * resoFactor;
 }
 
 /**
@@ -7394,20 +7210,6 @@ function drawWhat() {
 * returns the current map bounds (rectangle of the currently visible map area)
 * as real coordinate intervalls int the range [{min: -180, max: 180},{min: -90, max: 90}] */
 function getBounds(enforce) {
-    /*var tx = (-lastTransformState.translate[0]/canvasW)*360,
-		ty = (-lastTransformState.translate[1]/canvasH)*180;
-
-	var xmin = (tx)/lastTransformState.scale+C_WMIN,
-		ymin = (ty)/lastTransformState.scale+C_HMIN,
-		bth = M_BOUNDING_THRESHOLD/(lastTransformState.scale/2);
-
-	var bounds = [{
-		min: xmin - bth,
-		max: xmin+(C_WMAX-C_WMIN)/lastTransformState.scale + bth
-	},{
-		min: -(ymin+(C_HMAX-C_HMIN)/lastTransformState.scale) - bth,
-		max: -ymin + bth
-	}];*/
     var b = leafly.getBounds();
     var bounds = [ {
         min: b._southWest.lng,
@@ -7470,8 +7272,6 @@ function getMinMaxTile(mAE) {
 * returns the index value for the cell of a grid with given resolution
 * where the given geocoordinate pair lies in*/
 function coord2index(longi, lati, reso) {
-    //if(longi === C_WMAX) longi -= reso;	// prevent 
-    //if(lati  === C_HMAX) lati  -= reso; // out of bounds cells
     var proj = leafly.latLngToContainerPoint(L.latLng(lati, longi));
     return Math.floor(proj.y / reso) * (canvasW / reso) + Math.floor(proj.x / reso);
 }
@@ -7486,15 +7286,6 @@ function canvasCoord2index(p, reso) {
 * returns the geo coordinates for a given index
 * (for the bottom left corner of the gridcells rect)*/
 function index2geoCoord(i, reso) {
-    /*	if(reso === undefined) { reso = drawdat.reso; }
-	var cpr = (C_WMAX-C_WMIN)/reso;
-
-	var rowpos = (i-cpr/2)%cpr;
-	if(rowpos<0) rowpos += cpr;
-	rowpos -= cpr/2;
-
-	var lbx = (rowpos*reso),//+(C_WMIN), //+reso/2,
-		lby = ((Math.floor((+i+cpr/2)/cpr)*reso)); //*(-1));//+(-C_HMIN); //+reso/2;*/
     var cc = index2canvasCoord(i, reso);
     var gc = leafly.containerPointToLatLng([ cc.x, cc.y ]);
     return [ gc.lat, gc.lng ];
@@ -7504,9 +7295,6 @@ function index2geoCoord(i, reso) {
 * returns the canvas rendering coordinates for a given index 
 * (for the top left corner of the gridscells rect) */
 function index2canvasCoord(i, reso) {
-    if (reso === undefined) {
-        reso = drawdat.reso;
-    }
     var cpr = canvasW / reso;
     return {
         x: i % cpr * reso,
@@ -7515,16 +7303,7 @@ function index2canvasCoord(i, reso) {
 }
 
 /**
-* returns the aggrid cell index and real coords for a given canvas coordinate pair 
-* (!) for real canvas coords (like pointer pos) not virtual (on transformed map)*/
-function canvasCoord2geoCoord(x, y) {
-    var t = lastTransformState;
-    return {
-        x: -180 + (-t.translate[0] + x) / (canvasW * t.scale) * 360,
-        y: 90 - (-t.translate[1] + y) / (canvasH * t.scale) * 180
-    };
-}
-
+* wipe it clean */
 function clearGrid() {
     var ctx = leaflaggrid._canvas.getContext("2d");
     ctx.clearRect(0, 0, canvasW, canvasH);
@@ -7533,40 +7312,18 @@ function clearGrid() {
 /**
 * clears the area of tile i on map canvas */
 function clearTile(i) {
-    /*var ppd = canvasW / (C_WMAX - C_WMIN);
-	mapctx.clearRect(
-		current_datsel.tile_width*i*ppd, 0,		// x, y
-		current_datsel.tile_width*ppd, canvasH	// w, h
-	);*/
-    var mapctx = leaflaggrid._canvas.getContext("2d");
+    var ctx = leaflaggrid._canvas.getContext("2d");
     var bounds = getBounds();
     var nw = L.latLng(bounds[1].max, current_datsel.tile_width * i), se = L.latLng(bounds[1].min, current_datsel.tile_width * (i + 1));
     nw = leafly.latLngToContainerPoint(nw);
     se = leafly.latLngToContainerPoint(se);
-    mapctx.clearRect(nw.x, nw.y, se.x - nw.x, nw.y - se.y);
+    ctx.clearRect(nw.x, nw.y, se.x - nw.x, nw.y - se.y);
 }
 
 /**
-* returns the currently pointed at real canvas coordinates * /
-function cco() {
-	var s = lastTransformState.scale;
-	var x = d3.event.pageX - canvasL - drawdat.wx*s - M_HOVER_OFFSET.l*resoFactor;
-	var y = d3.event.pageY - canvasT - drawdat.wy*s - M_HOVER_OFFSET.t*resoFactor;
-	return [x,y];
-}*/
-/**
-* adjust the currently pointed at geo coordinates */
+* adjust the currently pointed at container coordinates */
 function currentCursorPos(e) {
-    // console.log(e.containerPoint);
-    // console.log(e.layerPoint);
-    var z = leafly.getZoom(), p = e.containerPoint;
-    // p.x -= M_HOVER_OFFSET.l;
-    // p.y -= M_HOVER_OFFSET.t;
-    // var ll = leafly.containerPointToLatLng(p);
-    // return { 
-    // 	x: ll.lng,
-    // 	y: ll.lat
-    // };
+    var p = e.containerPoint;
     return {
         x: p.x - M_HOVER_OFFSET.l,
         y: p.y - M_HOVER_OFFSET.t
@@ -7576,20 +7333,11 @@ function currentCursorPos(e) {
 /**
 * map tooltip */
 function canvasMouseMove(e) {
-    // doesn't work, fix or ignore, not critical (console errors when map is not ready)
-    //if(drawdat === undefined) { return false; } // no drawing, no tooltip!
     if (mutexGenGrid !== 0) {
         return false;
     }
     // don't bother while working hard
-    /*var cc = cco();
-	var x = cc[0],
-		y = cc[1];
-	//console.log(d3.event);
-	//console.log('Position in canvas: ('+x+','+y+')');
-	var gc = canvasCoord2geoCoord(x,y);*/
     var cc = currentCursorPos(e);
-    //var i = coord2index(gc.x, gc.y, drawdat.reso);
     var i = canvasCoord2index(cc, drawdat.reso);
     var cell = cellmap[i];
     // hover highlight
@@ -7601,28 +7349,21 @@ function canvasMouseMove(e) {
         // display the info bubble
         clearTimeout(bubbleTimer);
         bubbleTimer = true;
-        $("div#bubble").css("opacity", "1").css("bottom", viewportH - e.originalEvent.pageY + drawdat.wy + M_BUBBLE_OFFSET + "px").css("right", viewportW - e.originalEvent.pageX + drawdat.wy + M_BUBBLE_OFFSET * resoFactor + "px").html(cell.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + x + ", " + y + "]</span>");
+        $bubble.css("opacity", "1").css("bottom", viewportH - e.originalEvent.pageY + M_BUBBLE_OFFSET + "px").css("right", viewportW - e.originalEvent.pageX + M_BUBBLE_OFFSET + "px").html(cell.length + " <em>" + current_setsel.strings.label + "</em><br>" + "<span>[" + x + ", " + y + "]</span>");
     } else if (bubbleTimer === true) {
         // hide the info bubble
         //highlightCell(false);
         bubbleTimer = setTimeout(function() {
-            $("div#bubble").css("opacity", "0");
+            $bubble.css("opacity", "0");
         }, 250);
     }
 }
 
 function canvasMouseClick(e) {
-    // doesn't work, fix or ignore, not critical (console errors when map is not ready)
-    //if(drawdat === undefined) { return false; } // no drawing, no info!
     if (mutexGenGrid !== 0) {
         return false;
     }
     // don't bother while working hard
-    /*var cc = cco();
-	var x = cc[0],
-		y = cc[1];
-
-	var gc = canvasCoord2geoCoord(x,y);*/
     var cc = currentCursorPos(e);
     var i = canvasCoord2index(cc, drawdat.reso);
     selectCell(i);
@@ -7637,43 +7378,41 @@ function selectCell(i) {
     if (i === undefined) {
         i = selectedCell;
     }
-    var tb = $("#infolist");
-    tb.html("");
+    var $tb = $("#infolist"), $info = $("#cellinfo-desc>div");
+    $tb.html("");
     // clear the list
     if (i === false) {
-        $("#cellinfo-desc>div").hide();
+        $info.hide();
         selectedCell = false;
         highlightCell(false);
         urlifyState();
         return true;
     }
     var cell = cellmap[i];
-    if (cell !== undefined) {
+    if (cell === undefined) {
+        selectCell(false);
+    } else {
         selectedCell = i;
-        $("#cellinfo-desc>div").show();
+        $info.show();
         var timeout = 0;
         if (cell.length > 100) {
-            $("#cellinfo-desc>div").html("<em>assembling list...</em>");
-            //tb.html("<em>assembling list...</em>");
+            $info.html("<em>assembling list...</em>");
             timeout = 5;
         }
         setTimeout(function() {
             var p = index2geoCoord(i);
             var x = (p[0] + drawdat.reso / 2).toFixed(2), y = (p[1] + drawdat.reso / 2).toFixed(2);
             highlightCell(i, true);
-            //console.log(cell);
-            tb.html("");
+            $tb.html("");
             // TODO recursive timeouts for large arrays (around >5000)
             $.each(cell, function() {
                 var q = current_datsel.props.members[this[0]];
-                tb.append("<tr>" + '<td><a class="q" href="https://www.wikidata.org/wiki/' + q + '" data-qid="' + q + '" target="wikidata">' + q + "</a></td>" + "<td>" + this[1] + "</td>" + "</tr>");
+                $tb.append("<tr>" + '<td><a class="q" href="https://www.wikidata.org/wiki/' + q + '" data-qid="' + q + '" target="wikidata">' + q + "</a></td>" + "<td>" + this[1] + "</td>" + "</tr>");
             });
-            $("#cellinfo-desc>div").html("the <em>selected cell</em> <span>around " + "(" + x + ", " + y + ")</span> " + "contains <em>" + cell.length + "</em> of them:");
-            tb.trigger("scroll");
+            $info.html("the <em>selected cell</em> <span>around " + "(" + x + ", " + y + ")</span> " + "contains <em>" + cell.length + "</em> of them:");
+            $tb.trigger("scroll");
         }, timeout);
         urlifyState();
-    } else {
-        selectCell(false);
     }
 }
 
@@ -7681,7 +7420,7 @@ function selectCell(i) {
 * infolistScroll Timeout Wrapper*/
 function infolistScroll() {
     clearTimeout(infolistTimer);
-    infolistTimer = setTimeout(infolistScrollFkt, 200);
+    infolistTimer = setTimeout(infolistScrollFkt, CALC_TIMEOUT);
 }
 
 /**
@@ -7699,11 +7438,9 @@ function infolistScrollFkt() {
             qarray.push(this);
         }
     });
-    //console.log(qarray);
     // process result of ajax request
     var processLabels = function(data) {
         //console.log(data);
-        // TODO error handling
         $.each(data.entities, function() {
             var text = this.id;
             // + ' (no label)';
@@ -7740,10 +7477,6 @@ function infolistScrollFkt() {
 }
 
 /**
-* zoom or move the map */
-function zoom() {}
-
-/**
 * determine proper color scale based on current reso*/
 function setColorScale(r) {
     if (r === undefined) {
@@ -7762,6 +7495,10 @@ function setColorScale(r) {
 ////////////////
 /// timeline ///
 ////////////////
+/**
+** actually rather "data line" or anything like that - or simply chart
+** for displaying the non geographical axis of the supplied data
+*/
 function genChart(data) {
     if (current_setsel.ready !== true) {
         return false;
@@ -7795,20 +7532,14 @@ function updateChartDataFkt(data) {
     }
     // TODO
     console.log("/~~ generating chart data ~~\\ ");
-    var benchmark_chart = new Date();
+    var benchmark_chart = Date.now();
     drawWhat();
     var mAE = drawdat.bounds, mmt = drawdat.mmt;
-    ////
-    /// tomporary hacky timeline fix for changed data structure
-    // TODO refurbish when upgrading timeline
-    // still TODO? check if it can improved
     chartdat = [];
-    var x;
-    // = [], y = [], ticks = [];
-    var dat_obj = {}, globob = {}, locob = {}, i, j, l, k, d, it, itl;
+    var globob = {}, locob = {}, i, j, l, k, d, it, itl;
     /// create envision data from the assembled object
     var nvision = function(o) {
-        // create a sorted index for all dat_obj props
+        // create a sorted index for all o props
         var x = [], y = [], kay = [];
         for (i in o) {
             kay.push(parseInt(i));
@@ -7822,50 +7553,38 @@ function updateChartDataFkt(data) {
             x.push(kay[i]);
             y.push(o[kay[i]]);
         }
-        //chartdat[cdi] = [x,y];
         chartdat.push([ x, y ]);
     };
     // the following is a bit redundant because it's rolled out for performance
     // to save a few milliseconds here and there
-    // (even though it turns out that it doesn't make that much of a difference)
+    // (even though it turns out that it doesn't make that much of a difference...)
     if (timelineIsGlobal) {
         // collect all
         var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
         for (i = 0; i < tilecount; i++) {
             itl = data.itarraytor[i].length;
             it = -1;
-            if (i >= mmt.min && i <= mmt.max) {
-                // in range, collect both
-                while (++it < itl) {
-                    j = data.itarraytor[i][it];
-                    d = data.data[i][j];
-                    l = d.length;
-                    // global part
-                    if (globob[j] === undefined) {
-                        globob[j] = d.length;
-                    } else {
-                        globob[j] += d.length;
-                    }
-                    // local part
-                    if (locob[j] === undefined) {
-                        locob[j] = 0;
-                    }
+            //if(i >= mmt.min && i <= mmt.max) { // in range, collect both
+            while (++it < itl) {
+                j = data.itarraytor[i][it];
+                d = data.data[i][j];
+                l = d.length;
+                // global part
+                if (globob[j] === undefined) {
+                    globob[j] = d.length;
+                } else {
+                    globob[j] += d.length;
+                }
+                // local part
+                if (locob[j] === undefined) {
+                    locob[j] = 0;
+                }
+                if (i >= mmt.min && i <= mmt.max) {
                     for (k = 0; k < l; k++) {
                         d = data.data[i][j][k];
                         if (section_filter(d, mAE)) {
                             locob[j]++;
                         }
-                    }
-                }
-            } else {
-                // out of range, just global
-                while (++it < itl) {
-                    j = data.itarraytor[i][it];
-                    d = data.data[i][j];
-                    if (globob[j] === undefined) {
-                        globob[j] = d.length;
-                    } else {
-                        globob[j] += d.length;
                     }
                 }
             }
@@ -7874,23 +7593,6 @@ function updateChartDataFkt(data) {
         nvision(locob);
     } else {
         // collect map area data only
-        /*// get global data
-	if(timelineIsGlobal) {
-		var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
-		for(i = 0; i < tilecount; i++) {
-			it = data.itarraytor[i].length;
-			while(it--) {
-				j = data.itarraytor[i][it];
-				d = data.data[i][j];
-				if(dat_obj[j] === undefined) {
-					dat_obj[j] = d.length;
-				} else {
-					dat_obj[j] += d.length;
-				}
-			}
-		}
-		nvision(dat_obj);
-	}*/
         for (i = mmt.min; i <= mmt.max; i++) {
             it = data.itarraytor[i].length;
             while (it--) {
@@ -7909,25 +7611,7 @@ function updateChartDataFkt(data) {
         }
         nvision(locob);
     }
-    // create a sorted index for all dat_obj props
-    // var kay = [];
-    // for(i in dat_obj) {	kay.push(parseInt(i));	}
-    // kay.sort(function(a,b) { return a-b; });
-    // // and iterate over it
-    // l = kay.length;
-    // for(i = 0; i < l; i++) {
-    // 	x.push(kay[i]);
-    // 	y.push(dat_obj[kay[i]]);
-    // }
-    // for(i=data.min; i<=data.max; i++) {
-    // 	if(dat_obj[i] !== undefined) {
-    // 		x.push(i);
-    // 		y.push(dat_obj[i]);
-    // 	}
-    // }
-    //chartdat.push([x,y]);
-    //chartdat[0] = [x,y];
-    console.log("  |BM| timeline data updated in " + (new Date() - benchmark_chart) + "ms");
+    console.log("  |BM| timeline data updated in " + (Date.now() - benchmark_chart) + "ms");
 }
 
 function initChart() {
@@ -7943,15 +7627,6 @@ function initChart() {
     var container = $("#chart");
     var containerW = container.width(), detailH = Math.floor(container.height() * (2 / 3)) - connectionH, summaryH = Math.floor(container.height() * (1 / 3));
     // - connectionH;
-    //var initSelection = {	// default initial selection
-    /*if(timeSel === undefined) { is set in statifyUrl()
-		timeSel = {
-	      	data : {		// TODO this could go into dataset config options
-	        	x : {
-	          		min : 1500,
-	          		max : 2014
-    	}  	}, fmin: 0, fmax: 0   };
-	}*/
     var selCallback = function() {
         // callback function for selection change
         var range = getTimeSelection();
@@ -7965,9 +7640,8 @@ function initChart() {
         $("#range-tt-min>div").text(range.min);
         $("#range-tt-max>div").text(range.max);
     };
-    var detail, detailOptions, summaryOptions, // summary, (global)
+    var detail, detailOptions, summaryOptions, // summary, (is global)
     connection, connectionOptions;
-    //var normalize = $("#tl-normalize").get(0).checked;
     // Configuration for detail (top view):
     detailOptions = {
         name: "detail",
@@ -8021,7 +7695,6 @@ function initChart() {
             },
             yaxis: {
                 autoscale: true,
-                //normalize,
                 autoscaleMargin: .05,
                 noTicks: 4,
                 showLabels: true,
@@ -8029,9 +7702,6 @@ function initChart() {
             }
         }
     };
-    //if(!normalize) { 
-    //	detailOptions.config.yaxis.max = current_setsel.maxEventCount*T_YAXIS_MAX_EXPAND; 
-    //}
     // Configuration for summary (bottom view):
     summaryOptions = {
         name: "summary",
@@ -8069,7 +7739,7 @@ function initChart() {
         height: connectionH,
         width: containerW
     };
-    // Building the vis:
+    // Building the viz:
     chart = new envision.Visualization();
     detail = new envision.Component(detailOptions);
     summary = new envision.Component(summaryOptions);
@@ -8138,7 +7808,6 @@ function getTimeSelection() {
             max: max
         };
     }
-    // TODO simplify
     return {
         min: cAE.min >= min ? cAE.min : min,
         max: cAE.max <= max ? cAE.max : max
@@ -8155,11 +7824,6 @@ function appendTimelineRangeTips() {
     var cont = $('<div id="range-tt-min" class="range-tt hover-tt">' + '<span class="arrow arrow-left"></span>' + "<div></div>" + '<span class="arrow arrow-right"></span>' + "</div>" + '<div id="range-tt-max" class="range-tt hover-tt">' + '<span class="arrow arrow-left"></span>' + "<div></div>" + '<span class="arrow arrow-right"></span>' + "</div>");
     //.hide();
     $("#chart").append(cont);
-    // $("#chart .detail").on("mouseenter", function() {
-    // 	$(".range-tt").addClass("hintin");
-    // }).on("mouseleave", function() {
-    // 	$(".range-tt").removeClass("hintin");
-    // });
     // change interval limits with arrows
     var repeatTimeout, repeatInterval;
     $(".range-tt .arrow").on("mousedown", function() {
@@ -8182,14 +7846,9 @@ function appendTimelineRangeTips() {
         changeTimeSel(-d3.event.dx * stepSize, -d3.event.dx * stepSize);
     }).on("dragstart", function() {
         stepSize = (timeSel.data.x.max - timeSel.data.x.min) / $("#chart").width();
-    }).on("dragend", function() {});
+    });
     d3.selectAll("#chart .detail").call(drag);
 }
-
-/**
-* updates/builds the chart
-* (addSeries is bugged so build the chart from the ground)*/
-function updateChart(seriez) {}
 
 //////////////////////
 /// user interface ///
@@ -8247,45 +7906,23 @@ function setupControlHandlers() {
         timelineIsGlobal = parseInt($(this).val());
         //updateChartData();
         genChart();
-        if (current_setsel.ready === true) {
-            urlifyState();
-        }
+        urlifyState();
     });
-    //.filter("[value="+timelineIsGlobal+"]").prop("checked", true);
-    // $("#tl-normalize").on("change", function() {
-    // 	if(chart === undefined) {
-    // 		return false;
-    // 	}
-    // 	var detail = chart.components[0],
-    // 		ac = detail.options.config.yaxis;
-    // 	if(this.checked) {
-    // 		ac.autoscale = true;
-    // 		delete(ac.max);
-    // 	} else {
-    // 		ac.autoscale = false;
-    // 		ac.max = current_setsel.maxEventCount * T_YAXIS_MAX_EXPAND;
-    // 	}
-    // 	updateChartData();
-    // 	urlifyState();
-    // });
     $("#sidebar>menu h2").on("click", function() {
         $(this).toggleClass("closed");
         $(this).siblings("fieldset").slideToggle();
     });
     $("#infolist").on("scroll", infolistScroll);
     $("#map").on("mouseleave", function() {
-        $("div#bubble").css("opacity", "0");
+        $bubble.css("opacity", "0");
     });
-    // $(window).resize(function() {
-    // 	viewportW = $(this).width();
-    // 	viewportH = $(this).height();
-    // });
-    // $("#export").click(function() {
-    // 	$(this).attr("disabled","disabled");
-    // 	exportSvg();
-    // });
+    // bind window resize handling
+    $(window).resize(function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(onResize, 400);
+    });
     // label language
-    // TODO get full list from..where?
+    // TODO get proper labels somehow
     var langs = langCodes;
     for (i = 0; i < langs.length; i++) {
         $("#langsel").append($('<option value="' + langs[i] + '">' + langs[i] + "</option>"));
@@ -8372,8 +8009,7 @@ function statifyUrl() {
     var hash = window.location.hash;
     //if (hash === "") { return false; }
     /// default values
-    var labellang = DEFAULT_LABELLANG, timesel, dg = DEFAULT_DATAGROUP, ds = DEFAULT_DATASET, tl_mode = 0, // == map area
-    tile_opacity = M_DEFAULT_TILE_OPACITY, tile_conf = M_DEFAULT_TILE_CONF, map_lng = 0, map_lat = 0, map_zoom = 2;
+    var labellang = DEFAULT_LABELLANG, timesel, dg = DEFAULT_DATAGROUP, ds = DEFAULT_DATASET, tl_mode = timelineIsGlobal, tile_opacity = M_DEFAULT_TILE_OPACITY, tile_conf = M_DEFAULT_TILE_CONF, map_lng = 0, map_lat = 0, map_zoom = 2;
     hash = hash.substring(1).split("&");
     for (var i = 0; i < hash.length; ++i) {
         var key = hash[i].substring(0, 1);
@@ -8452,11 +8088,17 @@ function statifyUrl() {
             console.warn("statifyUrl(): discarded unrecognized parameter '" + key + "' in url pattern");
         }
     }
+    // datagroup fallback
+    var dgi = gdata.length;
+    while (--dgi && gdata[dgi].id !== dg) {}
+    if (gdata[dgi].id !== dg) {
+        console.warn('cannot find datagroup "' + dg + '". ' + 'Falling back to "' + gdata[dgi].id + '"');
+        dg = gdata[dgi].id;
+    }
     if (timesel === undefined) {
-        // todo get from setsel
         timesel = {
-            min: 1500,
-            max: 2014
+            min: gdata[dgi].datasets[ds].options.initSelection.min,
+            max: gdata[dgi].datasets[ds].options.initSelection.max
         };
     }
     // label language
@@ -8485,11 +8127,7 @@ function statifyUrl() {
     leafly.setView([ map_lat, map_lng ], map_zoom, {
         reset: true
     });
-    // zoombh.scale(lastTransformState.scale);
-    // zoombh.translate(lastTransformState.translate);
-    // $("#ctrl-zoom>input").val((Math.log(lastTransformState.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
     // select dataset
-    //if($("#filter input").get(ds) === undefined) { return false; }
-    $("#filter fieldset[data-gid=" + dg + "] input")[ds].click();
+    $("#filter fieldset[data-gid=" + dg + "] input").get(ds).click();
     attachMapHandlers();
 }

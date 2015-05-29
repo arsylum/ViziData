@@ -6,27 +6,15 @@
 	<meta charset="utf-8">
 
 	<link href="./stylesheets/screen.css" media="screen, projection" rel="stylesheet" />
-
 	<!-- Leaflet -->
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
 
-
-	<!-- local scripts for offline working - ->
-	<script type="text/javascript" src="../libs/jquery-2.1.1.min.js"></script>
-	<script type="text/javascript" src="../libs/d3.v3.min.js"></script>
-	-->
 	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-	
-	<!--<script src="http://code.highcharts.com/stock/highstock.js"></script>-->
-	<!--<script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>-->
 	<script>//L_DISABLE_3D = true;</script>
 	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-
 	<script src="./js/main.js"></script>
 	
-	
-
 </head>
 <body>
 
@@ -47,6 +35,12 @@
 					Map area only
 				</label>
 			</fieldset>
+			<!--<fieldset> not implemented
+				<label>
+					<input id="tl-savesel" type="checkbox">
+					Retain selection
+				</label>
+			</fieldset>-->
 		</div>
 		<div id="controls-map" class="controls">
 			<h2>Map Settings</h2>
@@ -101,7 +95,6 @@
 	<div id="legend"></div>
 	<div id="cellinfo-desc"><div></div></div>
 	<div id="cellinfo">
-		<!--<div>click on a cell for more information...</div>-->
 		<div class="table-wrapper">
 			<table>
 				<thead>

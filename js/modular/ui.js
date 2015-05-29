@@ -14,12 +14,9 @@ function setupControlHandlers() {
 		var fs = $("<fieldset>").attr("data-gid", gdata[i].id).attr("data-gi", i);
 		fs.append('<legend>'+gdata[i].title+'</legend>');
 		for(var j=0; j<gdata[i].datasets.length; j++) {
-			
 			var b = $('<input type="radio" name="radio" value="'+j+'" />')
 				.on("change", fn);
-
 			//var tt = $('<span class="tooltip">'+gdata[i].datasets[j].strings.desc+'</span>');
-
 			fs.append($('<label class="tooltip" data-tt="'+gdata[i].datasets[j].strings.desc+
 				'">'+gdata[i].datasets[j].strings.label+'</label>').prepend(b));
 		}
@@ -62,25 +59,8 @@ function setupControlHandlers() {
 		timelineIsGlobal = parseInt($(this).val());
 		//updateChartData();
 		genChart();
-		if(current_setsel.ready === true) { urlifyState(); }
+		urlifyState();
 	});
-	//.filter("[value="+timelineIsGlobal+"]").prop("checked", true);
-	// $("#tl-normalize").on("change", function() {
-	// 	if(chart === undefined) {
-	// 		return false;
-	// 	}
-	// 	var detail = chart.components[0],
-	// 		ac = detail.options.config.yaxis;
-	// 	if(this.checked) {
-	// 		ac.autoscale = true;
-	// 		delete(ac.max);
-	// 	} else {
-	// 		ac.autoscale = false;
-	// 		ac.max = current_setsel.maxEventCount * T_YAXIS_MAX_EXPAND;
-	// 	}
-	// 	updateChartData();
-	// 	urlifyState();
-	// });
 
 	$("#sidebar>menu h2").on("click", function() {
 		$(this).toggleClass("closed");
@@ -91,22 +71,17 @@ function setupControlHandlers() {
 
 	
 	$("#map").on("mouseleave", function() {
-		$("div#bubble").css("opacity", "0");
+		$bubble.css("opacity", "0");
 	});
 
-	// $(window).resize(function() {
-	// 	viewportW = $(this).width();
-	// 	viewportH = $(this).height();
-	// });
-
-	// $("#export").click(function() {
-	// 	$(this).attr("disabled","disabled");
-	// 	exportSvg();
-	// });
-
+	// bind window resize handling
+	$(window).resize(function() {
+		clearTimeout(resizeTimer);
+		resizeTimer = setTimeout(onResize, 400);
+	});
 
 	// label language
-	// TODO get full list from..where?
+	// TODO get proper labels somehow
 	var langs = langCodes;
 	for(i = 0; i<langs.length; i++) {
 		$("#langsel").append($('<option value="'+langs[i]+'">' + 
@@ -200,12 +175,10 @@ function statifyUrl() {
 		timesel,
 		dg = DEFAULT_DATAGROUP,
 		ds = DEFAULT_DATASET,
-		tl_mode = 0, // == map area
+		tl_mode = timelineIsGlobal,
 		tile_opacity = M_DEFAULT_TILE_OPACITY,
 		tile_conf = M_DEFAULT_TILE_CONF,
 		map_lng = 0, map_lat = 0, map_zoom = 2;
-
-
 
 	hash = hash.substring(1).split("&");
 	for(var i= 0; i<hash.length; ++i) {
@@ -257,10 +230,19 @@ function statifyUrl() {
 		}
 	}
 
-	if(timesel === undefined) {
-		// todo get from setsel
-		timesel = { min: 1500, max: 2014 };
+	// datagroup fallback
+	var dgi = gdata.length;
+	while(--dgi && gdata[dgi].id !== dg) {}
+	if(gdata[dgi].id !== dg) {
+		console.warn('cannot find datagroup "'+dg+'". '+
+					 'Falling back to "'+gdata[dgi].id + '"');
+		dg = gdata[dgi].id;
 	}
+
+	if(timesel === undefined) { timesel = { 
+		min: gdata[dgi].datasets[ds].options.initSelection.min, 
+		max: gdata[dgi].datasets[ds].options.initSelection.max 
+	};	}
 
 	// label language
 	$("#langsel").val(labellang);
@@ -277,23 +259,17 @@ function statifyUrl() {
 	          		max : timesel.max
     	}  	}, fmin: 0, fmax: 0   };
 
-
 	// recreate tilemap config
     $("#map-opacity").val(parseFloat(tile_opacity)).trigger("input");
     $("#maplayer-shape").get(0).checked = tile_conf > 1;
     $("#maplayer-labels").get(0).checked = tile_conf % 2; 
     changeTileSrc();
-    
+
 	// recreate map state
 	leafly.setView([map_lat,map_lng],map_zoom, { reset: true });
-	// zoombh.scale(lastTransformState.scale);
-	// zoombh.translate(lastTransformState.translate);
-	// $("#ctrl-zoom>input").val((Math.log(lastTransformState.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
-
-
+	
 	// select dataset
-	//if($("#filter input").get(ds) === undefined) { return false; }
-	$("#filter fieldset[data-gid="+dg+"] input")[ds].click();
+	$("#filter fieldset[data-gid="+dg+"] input").get(ds).click();
 	attachMapHandlers();
 	//return true;
 }

@@ -10,7 +10,7 @@ function setSetSel(dsi, dgi) { //, callback){
 
 	// load properties if missing
 	if(current_datsel.props === undefined) {
-		// TODO ? more loading feedback
+		// TODO ? more loading feedback. maybe not as long as it's quick enough
 		$.getJSON(DATA_DIR+current_datsel.properties, function(data) {
 			current_datsel.props = data;
 			console.log('~~ Member properties of "'+current_datsel.id+'" have been loaded');
@@ -86,6 +86,5 @@ function preprocess(ds) {
 			}
 		}
 	}
-
 	ds.ready = true;
 }

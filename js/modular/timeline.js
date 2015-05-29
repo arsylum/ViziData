@@ -1,9 +1,12 @@
 ////////////////
 /// timeline ///
 ////////////////
+/**
+** actually rather "data line" or anything like that - or simply chart
+** for displaying the non geographical axis of the supplied data
+*/
 function genChart(data){
 	if(current_setsel.ready !== true) { return false; }
-
 	var benchmark_chart = new Date();
 
 	updateChartDataFkt(data);
@@ -35,28 +38,22 @@ function updateChartDataFkt(data) {
 	if(data === undefined) { data = current_setsel; } // TODO
 
 	console.log("/~~ generating chart data ~~\\ ");
-	var benchmark_chart = new Date();
+	var benchmark_chart = Date.now();
 
 	drawWhat();
 	var mAE = drawdat.bounds,
 	    mmt = drawdat.mmt;
 
-	////
-	/// tomporary hacky timeline fix for changed data structure
-	// TODO refurbish when upgrading timeline
-	// still TODO? check if it can improved
-
 	chartdat = [];
 
-	var x; // = [], y = [], ticks = [];
-	var dat_obj = {}, globob = {}, locob = {},
+	var globob = {}, locob = {},
 		i,j,l,k,d,it, itl;
 	
 	
 
 	/// create envision data from the assembled object
 	var nvision = function(o) {
-		// create a sorted index for all dat_obj props
+		// create a sorted index for all o props
 		var x = [], y = [], kay = [];
 		for(i in o) {	kay.push(parseInt(i));	}
 		kay.sort(function(a,b) { return a-b; });
@@ -66,67 +63,46 @@ function updateChartDataFkt(data) {
 			x.push(kay[i]);
 			y.push(o[kay[i]]);
 		}
-		//chartdat[cdi] = [x,y];
 		chartdat.push([x,y]);
 	};
 
 	// the following is a bit redundant because it's rolled out for performance
 	// to save a few milliseconds here and there
-	// (even though it turns out that it doesn't make that much of a difference)
+	// (even though it turns out that it doesn't make that much of a difference...)
 	if(timelineIsGlobal) { // collect all
 		var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
 		for(i = 0; i < tilecount; i++) {
 			itl = data.itarraytor[i].length;
 			it = -1;
-			if(i >= mmt.min && i <= mmt.max) { // in range, collect both
-				while(++it < itl) {
-					j = data.itarraytor[i][it];
-					d = data.data[i][j];
-					l = d.length;
-					// global part
-					if(globob[j] === undefined) { globob[j] = d.length; }
-					else { globob[j] += d.length; }
-					// local part
-					if(locob[j] === undefined) { locob[j] = 0; }
+			//if(i >= mmt.min && i <= mmt.max) { // in range, collect both
+
+			while(++it < itl) {
+				j = data.itarraytor[i][it];
+				d = data.data[i][j];
+				l = d.length;
+				// global part
+				if(globob[j] === undefined) { globob[j] = d.length; }
+				else { globob[j] += d.length; }
+				// local part
+				if(locob[j] === undefined) { locob[j] = 0; }
+				if(i >= mmt.min && i <= mmt.max) {
 					for(k = 0; k < l; k++) {
 						d = data.data[i][j][k];
 						if(section_filter(d,mAE)) {
 							locob[j]++;
-						}
-					}
-				}
-			} else { // out of range, just global
-				while(++it < itl) {
-					j = data.itarraytor[i][it];
-					d = data.data[i][j];
-					if(globob[j] === undefined) { globob[j] = d.length; }
-					else { globob[j] += d.length; }
-				}
-			}
+			}	}	}	}
+			// } else { // out of range, just global
+			// 	while(++it < itl) {
+			// 		j = data.itarraytor[i][it];
+			// 		d = data.data[i][j];
+			// 		if(globob[j] === undefined) { globob[j] = d.length; }
+			// 		else { globob[j] += d.length; }
+			// 	}
+			// }
 		}
 		nvision(globob);
 		nvision(locob);
 	} else { // collect map area data only
-
-	/*// get global data
-	if(timelineIsGlobal) {
-		var tilecount = (C_WMAX - C_WMIN) / data.parent.tile_width;
-		for(i = 0; i < tilecount; i++) {
-			it = data.itarraytor[i].length;
-			while(it--) {
-				j = data.itarraytor[i][it];
-				d = data.data[i][j];
-				if(dat_obj[j] === undefined) {
-					dat_obj[j] = d.length;
-				} else {
-					dat_obj[j] += d.length;
-				}
-			}
-		}
-		nvision(dat_obj);
-	}*/
-
-
 		for(i = mmt.min; i<= mmt.max; i++) {
 			it = data.itarraytor[i].length;
 			while(it--) {
@@ -137,37 +113,10 @@ function updateChartDataFkt(data) {
 					d = data.data[i][j][k];
 					if(section_filter(d,mAE)) {
 						locob[j]++;
-					}
-				}
-			}
-		}
+		}	}	}	}
 		nvision(locob);
 	}
-
-	// create a sorted index for all dat_obj props
-	// var kay = [];
-	// for(i in dat_obj) {	kay.push(parseInt(i));	}
-	// kay.sort(function(a,b) { return a-b; });
-	// // and iterate over it
-	// l = kay.length;
-	// for(i = 0; i < l; i++) {
-	// 	x.push(kay[i]);
-	// 	y.push(dat_obj[kay[i]]);
-	// }
-
-	// for(i=data.min; i<=data.max; i++) {
-	// 	if(dat_obj[i] !== undefined) {
-	// 		x.push(i);
-	// 		y.push(dat_obj[i]);
-	// 	}
-	// }
-	
-	//chartdat.push([x,y]);
-	//chartdat[0] = [x,y];
-
-	console.log("  |BM| timeline data updated in "+(new Date()-benchmark_chart)+"ms");
-
-
+	console.log("  |BM| timeline data updated in "+(Date.now()-benchmark_chart)+"ms");
 }
 
 
@@ -187,21 +136,10 @@ function initChart() {
 		detailH = Math.floor(container.height() * (2/3)) - connectionH,
 		summaryH = Math.floor(container.height() * (1/3)); // - connectionH;
 
-	//var initSelection = {	// default initial selection
-	/*if(timeSel === undefined) { is set in statifyUrl()
-		timeSel = {
-	      	data : {		// TODO this could go into dataset config options
-	        	x : {
-	          		min : 1500,
-	          		max : 2014
-    	}  	}, fmin: 0, fmax: 0   };
-	}*/
-
     var selCallback = function() { // callback function for selection change
     	var range = getTimeSelection();
     	if(timeSel.data.x.min !== range.min || timeSel.data.x.max !== range.max) {
-    		timeSel.data.x = { 	min: range.min,
-	    						max: range.max };
+    		timeSel.data.x = { 	min: range.min,	max: range.max };
     		genGrid();
     	}
     	$("#range-tt-min>div").text(range.min);
@@ -209,10 +147,8 @@ function initChart() {
 	};
 
     var detail, detailOptions,
-        summaryOptions, // summary, (global)
+        summaryOptions, // summary, (is global)
         connection, connectionOptions;
-
-    //var normalize = $("#tl-normalize").get(0).checked;
 
     // Configuration for detail (top view):
     detailOptions = {
@@ -267,28 +203,17 @@ function initChart() {
 					}
 					fkt += 'in map area)</span>";';
 					return Function('o', fkt);
-
-					/*return function (o) {
-						var k = parseInt(o.x);
-						//console.log("na sieh an!");
-						highlightCellsFor(k); // hooking here for our highlight function
-				    	return "<em>" + current_setsel.strings.label + "</em> in " + k + ": <em>"+ parseInt(o.y) + "</em>";
-			    	};*/
 				})()
 	        },
 	        yaxis : { 
-	          	autoscale : true, //normalize,
+	          	autoscale : true,
 	          	autoscaleMargin : 0.05,
 	          	noTicks : 4,
 	          	showLabels : true,
 	          	min : 0,
-	          	//max: arrayMax(chartdat[0][1])
 	        }
 		}
     };
-    //if(!normalize) { 
-    //	detailOptions.config.yaxis.max = current_setsel.maxEventCount*T_YAXIS_MAX_EXPAND; 
-    //}
 
     // Configuration for summary (bottom view):
     summaryOptions = {
@@ -320,15 +245,7 @@ function initChart() {
 	        },
 	        selection : {
 	          	mode : 'x'
-	        },/*
-	        grid : {
-	          	verticalLines : false
-	        },
-	        mouse: {
-	        	margin: 100
-	        }*/
-
-
+	        }
       	}
     };
 
@@ -339,7 +256,7 @@ function initChart() {
 	    width: containerW
     };
 
-    // Building the vis:
+    // Building the viz:
     chart = new envision.Visualization();
     detail = new envision.Component(detailOptions);
     summary = new envision.Component(summaryOptions);
@@ -365,7 +282,6 @@ function initChart() {
 
     // set to initial selection state
   	summary.trigger('select', timeSel);
-
 }
 
 /**
@@ -375,7 +291,6 @@ function changeTimeSel(min,max,relative) {
 
 	var sel = chart.components[2].api.flotr.selection;
 	if(relative) {
-
 		timeSel.fmin += min - Math.floor(min);
 		timeSel.fmax += max - Math.floor(max);
 
@@ -390,18 +305,13 @@ function changeTimeSel(min,max,relative) {
 	if(max > current_setsel.max) { return false; }
 	if(min < current_setsel.min) { return false; }
 
-	timeSel.data.x = {
-		min: min,
-		max: max
-	};
+	timeSel.data.x = { min: min, max: max };
 
 	if(min !== current_setsel.min || max !== current_setsel.max) {
 		sel.selecting = true;
 	}
 	sel.setSelection({x1: min, x2: max});
-
 }
-
 
 /**
 * returns sanitized selection of the timeline */
@@ -413,14 +323,8 @@ function getTimeSelection() {
 		cAE = sel.getArea();
 		cAE.min = Math.round(cAE.x1);
 		cAE.max = Math.round(cAE.x2);
-	} else {
-		cAE = {
-			min: min,
-			max: max
-		};
-	}
+	} else { cAE = { min: min, max: max	}; }
 
-	// TODO simplify
 	return {
 		min: (cAE.min >= min ? cAE.min : min),
 		max: (cAE.max <= max ? cAE.max : max)
@@ -447,13 +351,6 @@ function appendTimelineRangeTips() {
 		'</div>'); //.hide();
 	$("#chart").append(cont);
 
-	// $("#chart .detail").on("mouseenter", function() {
-	// 	$(".range-tt").addClass("hintin");
-	// }).on("mouseleave", function() {
-	// 	$(".range-tt").removeClass("hintin");
-	// });
-
-
 	// change interval limits with arrows
 	var repeatTimeout, repeatInterval;
 	$(".range-tt .arrow").on("mousedown", function() {
@@ -475,9 +372,7 @@ function appendTimelineRangeTips() {
 	}).on("mouseup", function() {
 		clearTimeout(repeatTimeout);
 		clearInterval(repeatInterval);
-		//$("#freezer>input").trigger("change");
 	});
-
 
 	// drag behavior on detail view
 	var stepSize;
@@ -486,99 +381,6 @@ function appendTimelineRangeTips() {
             changeTimeSel(-d3.event.dx*stepSize, -d3.event.dx*stepSize);
         }).on("dragstart", function() {
         	stepSize = (timeSel.data.x.max - timeSel.data.x.min) / $("#chart").width();
-        }).on("dragend", function() {
-        	//$("#freezer>input").trigger("change");
         });
     d3.selectAll("#chart .detail").call(drag);
 }
-
-
-/**
-* updates/builds the chart
-* (addSeries is bugged so build the chart from the ground)*/
-function updateChart(seriez) {
-	
-
-	/*if(chart !== undefined) { chart.destroy(); }
-
-	chart = new Highcharts.StockChart({
-		chart: {
-			type: 'spline',
-			renderTo: 'chart'
-		},
-		title: {
-			text: null
-		},
-		credits: {
-			enabled: false
-		},
-		rangeSelector: {
-			enabled: true,
-			buttons: [{
-				type: "year",
-				count: 10,
-				text: "10y"
-			},{
-				type: "year",
-				count: 100,
-				text: "100y"
-			},{
-				type: "year",
-				count: 1000,
-				text: "1000y"
-			},{
-				type: "all",
-				text: "all"
-			}],
-			buttonTheme: {
-				width: 80
-			}
-		},
-		legend: {
-			enabled: false
-		},
-		yAxis: {
-			floor: 0,
-			type: "logarithmic"
-		},
-		xAxis: {
-			type: "linear",
-			events: {
-				setExtremes: function() {
-					clearTimeout(redrawTimer);
-					redrawTimer = setTimeout(genGrid, 200); // (!)genGrid adds another timeout
-				}
-			}
-		},
-		navigator: {
-			margin: 5,
-			enabled: true,
-			xAxis: {
-				type: "linear"
-			}
-		},
-		plotOptions: {
-			series: {
-				dataGrouping: {
-					enabled: true
-				}
-			}
-		},//*//*
-		tooltip: {
-			xDateFormat: "%Y"
-		},
-		series: seriez
-	});*/
-
-}
-
-/////////////////////////////
-/// Highcharts Extensions ///
-/////////////////////////////
-/*
-Highcharts.wrap(Highcharts.Chart.prototype, 'pan', function (proceed) {
-
-  proceed.apply(this, Array.prototype.slice.call(arguments, 1));
-  genGrid();
-
-});*/

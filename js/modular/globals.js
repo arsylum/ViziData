@@ -5,7 +5,7 @@
 ////////////////////
 /// pseudo constants
 //^^^^^^^^^^^^^^^^^^
-// coord parameters
+/// coord parameters
 var C_WMIN = -180,
 	C_WMAX = 180,
 	C_HMIN = -90,
@@ -14,48 +14,40 @@ var C_WMIN = -180,
 	C_W = C_WMAX-C_WMIN,
 	C_H = C_HMAX-C_HMIN;
 
-// map parameters
-var M_BOUNDING_THRESHOLD = 0,	// grid clipping tolerance
-	//M_ZOOM_RANGE = [1,8],		// zoom range (results in svg scale 2^(v-1))
+/// map parameters
+var //M_BOUNDING_THRESHOLD = 0,	// grid clipping tolerance
+	M_ZOOM_RANGE = [1,12],		// zoom range (results in svg scale 2^(v-1))
 	M_BASE_GRIDROWS = 300,		// number of horizontal grid cells
-	M_BUBBLE_OFFSET = 10,		// distance of map tooltip from pointer
-	M_HOVER_OFFSET = {			// pointer selection offset
-		l: 5, 
-		t: 5
-	};
-// color scale
-var M_COLOR_SCALE = [	// provided by colorbrewer2.org
-	/*'rgb(248,251,207)', // http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
-	'rgb(237,248,177)',
-	'rgb(199,233,180)',
-	'rgb(127,205,187)',
-	'rgb(65,182,196)',
-	'rgb(29,145,192)',
-	'rgb(34,94,168)',
-	'rgb(37,52,148)',
-	'rgb(8,29,88)'];*/
-	'#ccddff', '#aacc66', '#aa6611', '#800', '#300'],
+	M_BUBBLE_OFFSET = 20,		// distance of map tooltip from pointer
+	M_HOVER_OFFSET = { l: 8, t: 8 }, // pointer focus offset
+
 	M_DEFAULT_TILE_OPACITY = 1, // default visibility of tile layer
 	M_DEFAULT_TILE_CONF = 3; // default config tile layer ([2]shape [1]labels)
-
-// "Timeline" (can be almost anything)
-var T_YAXIS_MAX_EXPAND = 1.21; // faktor for top margin
+		
+	M_COLOR_SCALE = 	// color scale for grid
+	['#ccddff', '#aacc66', '#aa6611', '#800', '#300']; // self made / experimental
+ /*['rgb(248,251,207)',
+	'rgb(237,248,177)',
+	'rgb(199,233,180)',
+	'rgb(127,205,187)',	//
+	'rgb(65,182,196)',	// provided by colorbrewer2.org
+	'rgb(29,145,192)',	// http://colorbrewer2.org/?type=sequential&scheme=YlGnBu&n=9
+	'rgb(34,94,168)',	//
+	'rgb(37,52,148)',
+	'rgb(8,29,88)'];*/
 	
-
-// timing, responsiveness
+/// timing, responsiveness
 var CALC_TIMEOUT = 200; // default timeout before large operations are run
 
-// UI labels
+/// UI labels
 var T_DEFAULT_TOOLTIP = '%l in %x: %v', // default timeline hover tooltip
-	T_DEFAULT_ZPROP = '#', // default label for the chart data axis
+	T_DEFAULT_ZPROP = '#', 				// default label for the chart data axis
 	L_DEFAULT_TERM = 'between %l and %h'; // default legend suffix
 
-// DATA
+/// DATA
 var DATA_DIR = "./data/",
-	META_FILES = [
-		"humans.json",
-		"items.json"
-	];
+	META_FILES = ["humans.json", "items.json"]; // available datagroups
+
 var DEFAULT_DATAGROUP = 'humans', // default datagroup 
 	DEFAULT_DATASET = 0,	// dataset to load up initially
 	DEFAULT_LABELLANG = 'en';// default language for item labels
@@ -65,7 +57,7 @@ var	//ARR_UNDEFINED = null,	// undefined value
 	ARR_M_LAT = 1,			// latitude
 	ARR_M_I = 2;			// ref to prop
 
-var TPI = Math.PI * 2;
+var TPI = Math.PI * 2;		// for those saved nanoseconds
 ///_________________
 /// pseudo constants
 ////////////////////
@@ -75,35 +67,30 @@ var TPI = Math.PI * 2;
 //^^^^^^^^^^^^^
 var chart,		// Timeline / dataLine
 	summary, 	// summary component of timeline (interaction leader)
-	//plotlayer,  // plot drawing layer (<g>)
 	leafly,		//leaflet map
-	bubble,		// popup bubble on map
-	zoombh;		// zoomBehavior
+	$bubble;	// popup bubble on map
 
-var allow_redraw = true, // global genGrid prevention switch
-	timelineIsGlobal = 0,
-	colorScale, // color scaling function
-	mutexGenGrid = 0, // genGrid mutex (0: free, 1: looping, -1: kill loop)
+var allow_redraw = true,  // global genGrid prevention switch
+	timelineIsGlobal = 1,// switch controlled by Timeline Data settings
+	colorScale, 	    // d3 color scaling function
+	mutexGenGrid = 0,  // genGrid mutex (0: free, 1: looping, -1: kill loop)
 	initComplete = false, // true after initial initialization
-	redrawTimer, // genGrid
-	chartdatTimer, // updateChartData
-	bubbleTimer, // hide map tooltip bubble
-	//boundsTimer, // forceBounds
-	resizeTimer, // window resize handling
-	infolistTimer; // item table scroll handler
+	redrawTimer, 	 // for genGrid
+	chartdatTimer, 	// for updateChartData
+	bubbleTimer,   // for hiding map tooltip bubble
+	resizeTimer,  // for window resize handling
+	infolistTimer; // for item table scroll handler
 
-var gdata = [],		// global rawdata
+var gdata = [],		// global rawdata (array of datagroups)
 	current_datsel,	// slected data group
 	current_setsel = {}, // selected dataset
 	chartdat = [], // timeline rendering data
 	timeSel, // current timeline selection
-	cellmap, // latest generated tilemap
+	cellmap, // latest generated grid map
 	drawdat = {}, // latest generated drawing data
-	//filledTiles = [9999], // don't need to draw whats already there [min,max]
 	selectedCell = false, // currently selected cell
 	renderRTL = false, // flag for progressive tile iteration direction
 	resoFactor; // current value of the reso slider
-
 
 /// positions and dimensions
 var viewportH,
@@ -112,22 +99,21 @@ var viewportH,
 /// leaflet layers
 var leafloor,		// tilemap layer
 	leaflaggrid,	// grid layer
-	//leavlover;		// overlay layer
-	overcan, overctx;
-// map canvas
-var //mapcan,	mapctx,
-	//overcan, overctx,
-	canvasW,
-	canvasH,
-	canvasT,
-	canvasL;
+	//leavlover;	
+	overcan, overctx; // overlay layer (not hooked to leaflet actually)
 
-var //lastTransformState; // remember map scaling (only redraw on changes)
-	lastMapCenter, // to determine direction of panning
+var canvasW,
+	canvasH;
+	//canvasT,
+	//canvasL;
+
+var lastMapCenter, // to determine direction of panning
 	lastMapZoom, // keep track if zoom changes
 	lastAgPos = [0,0]; // css positioning of aggrid layer
 
 
+// TODO probably don't need all of them. 
+// also, proper labels would be nice
 var langCodes = [
 'aa',
 'ab',
