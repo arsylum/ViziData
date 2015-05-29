@@ -6565,6 +6565,7 @@ function setSetSel(dsi, dgi) {
             clearInterval(lAnim);
             updateUI();
             genChart();
+            initComplete = true;
             genGrid();
         });
     }
@@ -6620,8 +6621,10 @@ var M_COLOR_SCALE = [ // provided by colorbrewer2.org
 	'rgb(34,94,168)',
 	'rgb(37,52,148)',
 	'rgb(8,29,88)'];*/
-"#ccddff", "#aacc66", "#aa6611", "#800", "#300" ];
+"#ccddff", "#aacc66", "#aa6611", "#800", "#300" ], M_DEFAULT_TILE_OPACITY = 1, // default visibility of tile layer
+M_DEFAULT_TILE_CONF = 3;
 
+// default config tile layer ([2]shape [1]labels)
 // "Timeline" (can be almost anything)
 var T_YAXIS_MAX_EXPAND = 1.21;
 
@@ -6639,7 +6642,8 @@ L_DEFAULT_TERM = "between %l and %h";
 // DATA
 var DATA_DIR = "./data/", META_FILES = [ "humans.json", "items.json" ];
 
-var DEFAULT_DATASET = 0, // dataset to load up initially
+var DEFAULT_DATAGROUP = "humans", // default datagroup 
+DEFAULT_DATASET = 0, // dataset to load up initially
 DEFAULT_LABELLANG = "en";
 
 // default language for item labels
@@ -6665,8 +6669,10 @@ bubble, // popup bubble on map
 zoombh;
 
 // zoomBehavior
-var allow_redraw = true, timelineIsGlobal = 0, colorScale, // color scaling function
+var allow_redraw = true, // global genGrid prevention switch
+timelineIsGlobal = 0, colorScale, // color scaling function
 mutexGenGrid = 0, // genGrid mutex (0: free, 1: looping, -1: kill loop)
+initComplete = false, // true after initial initialization
 redrawTimer, // genGrid
 chartdatTimer, // updateChartData
 bubbleTimer, // hide map tooltip bubble
@@ -6751,16 +6757,16 @@ $(function() {
     var bmMETA = new Date();
     console.log("~~ started loading the meta files (total of " + META_FILES.length + ") ~~ ");
     var callback = function(data) {
-        gdata[mfc] = data;
-        // TODO
-        for (var j = 0; j < gdata[mfc].datasets.length; j++) {
-            gdata[mfc].datasets[j].parent = gdata[mfc];
+        for (var j = 0; j < data.datasets.length; j++) {
+            data.datasets[j].parent = data;
         }
-        mfc++;
+        gdata[mfc++] = data;
         if (mfc === META_FILES.length) {
             console.log(" |BM| got all the meta files (took " + (new Date() - bmMETA) + "ms)");
             setupControlHandlers();
-            $(document).trigger("meta_files_ready");
+            //$(document).trigger("meta_files_ready");
+            onResize();
+            statifyUrl();
         }
     };
     var mfc = 0;
@@ -7296,11 +7302,21 @@ function initLeaflet() {
         minZoom: 1,
         maxZoom: 12
     });
-    changeTileSrc();
+    //changeTileSrc();
     leafloor.addTo(leafly);
     L.control.attribution({
         prefix: false
     }).addAttribution('<a id="home-link" target="_top" href="http://maps.stamen.com/">Map tiles</a> by ' + '<a target="_top" href="http://stamen.com">Stamen Design</a>, ' + 'under <a target="_top" href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ' + 'Data by <a target="_top" href="http://openstreetmap.org">OpenStreetMap</a>, ' + 'under <a target="_top" href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.').addTo(leafly);
+    leaflaggrid = L.canvasOverlay();
+    leaflaggrid.drawing(drawPlot).addTo(leafly);
+    leafly.___eventHandlersAtached = false;
+}
+
+function attachMapHandlers() {
+    if (leafly.___eventHandlersAtached === true) {
+        console.warn("attachMapHandlers() has been called again.");
+        return false;
+    }
     leafly.on("movestart", function() {
         selectCell(false);
     }).on("moveend", function() {
@@ -7316,8 +7332,7 @@ function initLeaflet() {
     }).on("click", function(e) {
         canvasMouseClick(e);
     });
-    leaflaggrid = L.canvasOverlay();
-    leaflaggrid.drawing(drawPlot).addTo(leafly);
+    leafly.___eventHandlersAtached = true;
 }
 
 function changeTileSrc() {
@@ -7616,6 +7631,9 @@ function canvasMouseClick(e) {
 /**
 * select cell i and fill the infolist table */
 function selectCell(i) {
+    if (drawdat.draw === undefined) {
+        return false;
+    }
     if (i === undefined) {
         i = selectedCell;
     }
@@ -7627,7 +7645,7 @@ function selectCell(i) {
         selectedCell = false;
         highlightCell(false);
         urlifyState();
-        return false;
+        return true;
     }
     var cell = cellmap[i];
     if (cell !== undefined) {
@@ -8206,20 +8224,25 @@ function setupControlHandlers() {
     });
     $("#bleed-slider").on("change", function() {
         leaflaggrid._redraw();
+        urlifyState();
     });
-    $("#freezer>input").on("change", function() {
-        allow_redraw = !this.checked;
-        if (this.checked) {
-            $("#legend").css("opacity", ".5");
-        } else {
-            $("#legend").css("opacity", "1");
-            genGrid();
-        }
-    });
+    /*$("#freezer>input").on("change", function() {
+		allow_redraw = !this.checked;
+		if(this.checked) { 
+			$("#legend").css("opacity",".5"); 
+		} else { 
+			$("#legend").css("opacity","1"); 
+			genGrid();
+		}
+	});*/
     $("#map-opacity").on("input", function() {
         $(leafloor._container).css("opacity", $(this).val());
+        urlifyState();
     });
-    $("#ctrl-maplayer input[type=checkbox]").on("change", changeTileSrc);
+    $("#ctrl-maplayer input[type=checkbox]").on("change", function() {
+        changeTileSrc();
+        urlifyState();
+    });
     $("#ctrl-tlmode input").on("change", function() {
         timelineIsGlobal = parseInt($(this).val());
         //updateChartData();
@@ -8282,55 +8305,75 @@ function updateUI() {
     $("#cellinfo th:last-child").text(zprop);
 }
 
+// TODO:  mapop sl
 ////////////////////////////////
 /// url parameters key overview:
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-// c: selected Cell
-// d: selected Dataset
-// e: timeline Selection Interval
-// f: timeline Data Source Mode
-// g: grid Resolution Slider
+// c: selected cell
+// d: selected dataset
+// e: timeline selection interval
+// f: timeline data source mode
+// g: grid resolution slider
+// h: grid drawing overlap slider 
 // l: label language
-// n: timeline normalization
-// s: map scale
-// t: map translation
+// m: selected datagroup
+// o: tile map opacity ###
+// p: tile map parameters ###
+// x: map center longitude
+// y: map center latitude
+// z: map zoom
 ////////////////////////////////
 /**
 * encodes current state of viz into url to make it shareable*/
 function urlifyState() {
-    // TODO selected cells are note encoded yet
-    // TODO properly encode selcted dataset (depends on data management module)
-    var setsel = $("#filter input[type='radio']:checked").val();
+    if (!initComplete) {
+        return false;
+    }
     // selected dataset
+    var setsel = $("#filter input[type='radio']:checked").val();
     var hash = "d=" + setsel;
+    // selected datagroup
+    hash += "&m=" + current_datsel.id;
     // item label language
     hash += "&l=" + $("#langsel").val();
     // timeline settings
     hash += "&f=" + timelineIsGlobal;
-    //hash += "&n=" + $("#tl-normalize").get(0).checked;
     // timeline selection
     var time = getTimeSelection();
     hash += "&e=" + time.min + "_" + time.max;
-    // grid resolution
-    hash += "&g=" + resoFactor;
-    // TODO map transformation
-    //hash += "&t=" + lastTransformState.translate[0] + "_" + lastTransformState.translate[1] + "&s=" + lastTransformState.scale;
     // selected cell
     hash += "&c=" + selectedCell;
+    // grid resolution
+    hash += "&g=" + resoFactor;
+    // grid drawing overlap
+    hash += "&h=" + $("#bleed-slider").val();
+    // tilemap opacity
+    hash += "&o=" + $("#map-opacity").val();
+    // tilemap config (TODO universalify)
+    var tileconf = 0;
+    if ($("#maplayer-labels").get(0).checked) {
+        tileconf += 1;
+    }
+    if ($("#maplayer-shape").get(0).checked) {
+        tileconf += 2;
+    }
+    hash += "&p=" + tileconf;
+    // map transformation state
+    var mcenter = leafly.getCenter();
+    hash += "&x=" + mcenter.lng + "&y=" + mcenter.lat;
+    hash += "&z=" + leafly.getZoom();
     window.location.hash = hash;
 }
 
 /**
 * restore the url encoded viz state */
 function statifyUrl() {
+    mutexStatify = 1;
     var hash = window.location.hash;
     //if (hash === "") { return false; }
     /// default values
-    var labellang = DEFAULT_LABELLANG, timesel = {
-        min: 1500,
-        max: 2014
-    }, ds = DEFAULT_DATASET, tl_mode = 0, // == map area
-    tl_normalize = false;
+    var labellang = DEFAULT_LABELLANG, timesel, dg = DEFAULT_DATAGROUP, ds = DEFAULT_DATASET, tl_mode = 0, // == map area
+    tile_opacity = M_DEFAULT_TILE_OPACITY, tile_conf = M_DEFAULT_TILE_CONF, map_lng = 0, map_lat = 0, map_zoom = 2;
     hash = hash.substring(1).split("&");
     for (var i = 0; i < hash.length; ++i) {
         var key = hash[i].substring(0, 1);
@@ -8351,9 +8394,9 @@ function statifyUrl() {
             tl_mode = val;
             break;
 
-          case "n":
-            // timeline normalization
-            tl_normalize = val === "true";
+          case "m":
+            // datagroup selection
+            dg = val;
             break;
 
           case "e":
@@ -8370,15 +8413,34 @@ function statifyUrl() {
             $("#reso-slider").val(parseFloat(val)).trigger("input").trigger("change");
             break;
 
-          case "t":
-            // map translation TODO
-            var t = val.split("_");
-            //lastTransformState.translate = [parseFloat(t[0]),parseFloat(t[1])];
+          case "h":
+            // drawing overlap
+            $("#bleed-slider").val(parseFloat(val)).trigger("input");
             break;
 
-          case "s":
-            // map scale TODO
-            //lastTransformState.scale = parseFloat(val);
+          case "o":
+            // tilemap opacity
+            tile_opacity = parseFloat(val);
+            break;
+
+          case "p":
+            // tilemap parameters
+            tile_conf = parseInt(val);
+            break;
+
+          case "x":
+            // map longitude
+            map_lng = parseFloat(val);
+            break;
+
+          case "y":
+            // map latitude
+            map_lat = parseFloat(val);
+            break;
+
+          case "z":
+            // map zoom
+            map_zoom = parseInt(val);
             break;
 
           case "c":
@@ -8389,6 +8451,13 @@ function statifyUrl() {
           default:
             console.warn("statifyUrl(): discarded unrecognized parameter '" + key + "' in url pattern");
         }
+    }
+    if (timesel === undefined) {
+        // todo get from setsel
+        timesel = {
+            min: 1500,
+            max: 2014
+        };
     }
     // label language
     $("#langsel").val(labellang);
@@ -8407,14 +8476,20 @@ function statifyUrl() {
         fmin: 0,
         fmax: 0
     };
+    // recreate tilemap config
+    $("#map-opacity").val(parseFloat(tile_opacity)).trigger("input");
+    $("#maplayer-shape").get(0).checked = tile_conf > 1;
+    $("#maplayer-labels").get(0).checked = tile_conf % 2;
+    changeTileSrc();
     // recreate map state
+    leafly.setView([ map_lat, map_lng ], map_zoom, {
+        reset: true
+    });
     // zoombh.scale(lastTransformState.scale);
     // zoombh.translate(lastTransformState.translate);
     // $("#ctrl-zoom>input").val((Math.log(lastTransformState.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
     // select dataset
-    if ($("#filter input").get(ds) === undefined) {
-        return false;
-    }
-    $("#filter input")[ds].click();
-    return true;
+    //if($("#filter input").get(ds) === undefined) { return false; }
+    $("#filter fieldset[data-gid=" + dg + "] input")[ds].click();
+    attachMapHandlers();
 }

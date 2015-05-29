@@ -64,8 +64,8 @@ function setSetSel(dsi, dgi) { //, callback){
 
 			updateUI();
 			genChart();
+			initComplete = true;
 			genGrid();
-
 		});
 	}
 }

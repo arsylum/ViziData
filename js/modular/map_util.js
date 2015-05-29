@@ -268,6 +268,7 @@ function canvasMouseClick(e) {
 /**
 * select cell i and fill the infolist table */
 function selectCell(i) {
+	if(drawdat.draw === undefined) { return false; }
 	if(i === undefined) { i = selectedCell; }
 
 	var tb = $("#infolist");
@@ -278,7 +279,7 @@ function selectCell(i) {
 		selectedCell = false;
 		highlightCell(false);
 		urlifyState();
-		return false;
+		return true;
 	}
 
 	var cell = cellmap[i];

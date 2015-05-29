@@ -39,8 +39,9 @@ function setupControlHandlers() {
 	});
 	$("#bleed-slider").on("change", function() {
 		leaflaggrid._redraw();
+		urlifyState();
 	});
-	$("#freezer>input").on("change", function() {
+	/*$("#freezer>input").on("change", function() {
 		allow_redraw = !this.checked;
 		if(this.checked) { 
 			$("#legend").css("opacity",".5"); 
@@ -48,12 +49,15 @@ function setupControlHandlers() {
 			$("#legend").css("opacity","1"); 
 			genGrid();
 		}
-	});
+	});*/
 	$("#map-opacity").on("input", function() {
 		$(leafloor._container).css("opacity",$(this).val());
+		urlifyState();
 	});
-	$("#ctrl-maplayer input[type=checkbox]").on("change", changeTileSrc);
-
+	$("#ctrl-maplayer input[type=checkbox]").on("change", function() {
+		changeTileSrc();
+		urlifyState();
+	});
 	$("#ctrl-tlmode input").on("change", function() {
 		timelineIsGlobal = parseInt($(this).val());
 		//updateChartData();
@@ -123,41 +127,63 @@ function updateUI() {
 	$("#cellinfo th:last-child").text(zprop);
 }
 
+// TODO:  mapop sl
 ////////////////////////////////
 /// url parameters key overview:
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-// c: selected Cell
-// d: selected Dataset
-// e: timeline Selection Interval
-// f: timeline Data Source Mode
-// g: grid Resolution Slider
+// c: selected cell
+// d: selected dataset
+// e: timeline selection interval
+// f: timeline data source mode
+// g: grid resolution slider
+// h: grid drawing overlap slider 
 // l: label language
-// n: timeline normalization
-// s: map scale
-// t: map translation
+// m: selected datagroup
+// o: tile map opacity ###
+// p: tile map parameters ###
+// x: map center longitude
+// y: map center latitude
+// z: map zoom
 ////////////////////////////////
 /**
 * encodes current state of viz into url to make it shareable*/
 function urlifyState() {
-	// TODO selected cells are note encoded yet
-	// TODO properly encode selcted dataset (depends on data management module)
-	var setsel = $("#filter input[type='radio']:checked").val();
+	if(!initComplete) { return false; }
+
 	// selected dataset
+	var setsel = $("#filter input[type='radio']:checked").val();
 	var hash = "d="+setsel;
+	// selected datagroup
+	hash += "&m=" + current_datsel.id;
+
 	// item label language
 	hash += "&l=" + $("#langsel").val();
+
 	// timeline settings
 	hash += "&f=" + timelineIsGlobal;
-	//hash += "&n=" + $("#tl-normalize").get(0).checked;
 	// timeline selection
 	var time = getTimeSelection();
 	hash += "&e=" + time.min + "_" + time.max;
-	// grid resolution
-	hash += "&g=" + resoFactor;
-	// TODO map transformation
-	//hash += "&t=" + lastTransformState.translate[0] + "_" + lastTransformState.translate[1] + "&s=" + lastTransformState.scale;
+
 	// selected cell
 	hash += "&c=" + selectedCell;
+	// grid resolution
+	hash += "&g=" + resoFactor;
+	// grid drawing overlap
+	hash += "&h=" + $("#bleed-slider").val();
+
+	// tilemap opacity
+	hash += "&o=" + $("#map-opacity").val();
+	// tilemap config (TODO universalify)
+	var tileconf = 0;
+	if($("#maplayer-labels").get(0).checked) { tileconf += 1; }
+	if($("#maplayer-shape").get(0).checked) { tileconf += 2; }
+	hash += "&p=" + tileconf;
+
+	// map transformation state
+	var mcenter = leafly.getCenter();
+	hash += "&x=" + mcenter.lng + "&y=" + mcenter.lat;
+	hash += "&z=" + leafly.getZoom();
 
 	window.location.hash = hash;
 }
@@ -165,15 +191,20 @@ function urlifyState() {
 /**
 * restore the url encoded viz state */
 function statifyUrl() {
+	mutexStatify = 1;
 	var hash = window.location.hash;
 	//if (hash === "") { return false; }
 
 	/// default values
 	var	labellang = DEFAULT_LABELLANG,
-		timesel = { min: 1500, max: 2014 },
+		timesel,
+		dg = DEFAULT_DATAGROUP,
 		ds = DEFAULT_DATASET,
 		tl_mode = 0, // == map area
-		tl_normalize = false;
+		tile_opacity = M_DEFAULT_TILE_OPACITY,
+		tile_conf = M_DEFAULT_TILE_CONF,
+		map_lng = 0, map_lat = 0, map_zoom = 2;
+
 
 
 	hash = hash.substring(1).split("&");
@@ -190,8 +221,8 @@ function statifyUrl() {
 			case "f": // timeline data source (global or map area)
 				tl_mode = val;
 				break;
-			case "n": // timeline normalization
-				tl_normalize = (val === "true");
+			case "m": // datagroup selection
+				dg = val;
 				break;
 			case "e": // time selection (envision)
 				var e = val.split("_");
@@ -200,12 +231,23 @@ function statifyUrl() {
 			case "g": // grid resolution
 				$("#reso-slider").val(parseFloat(val)).trigger("input").trigger("change");
 				break;
-			case "t": // map translation TODO
-				var t = val.split("_");
-				//lastTransformState.translate = [parseFloat(t[0]),parseFloat(t[1])];
+			case "h": // drawing overlap
+				$("#bleed-slider").val(parseFloat(val)).trigger("input");
 				break;
-			case "s": // map scale TODO
-				//lastTransformState.scale = parseFloat(val);
+			case "o": // tilemap opacity
+				tile_opacity = parseFloat(val);
+				break;
+			case "p": // tilemap parameters
+				tile_conf = parseInt(val);
+				break;
+			case "x": // map longitude
+				map_lng = parseFloat(val);
+				break;
+			case "y": // map latitude
+				map_lat = parseFloat(val);
+				break;
+			case "z": // map zoom
+				map_zoom = parseInt(val);
 				break;
 			case "c": // selected cell
 				selectedCell = parseFloat(val);
@@ -213,6 +255,11 @@ function statifyUrl() {
 			default:
 				console.warn("statifyUrl(): discarded unrecognized parameter '"+ key + "' in url pattern");
 		}
+	}
+
+	if(timesel === undefined) {
+		// todo get from setsel
+		timesel = { min: 1500, max: 2014 };
 	}
 
 	// label language
@@ -230,13 +277,23 @@ function statifyUrl() {
 	          		max : timesel.max
     	}  	}, fmin: 0, fmax: 0   };
 
+
+	// recreate tilemap config
+    $("#map-opacity").val(parseFloat(tile_opacity)).trigger("input");
+    $("#maplayer-shape").get(0).checked = tile_conf > 1;
+    $("#maplayer-labels").get(0).checked = tile_conf % 2; 
+    changeTileSrc();
+    
 	// recreate map state
+	leafly.setView([map_lat,map_lng],map_zoom, { reset: true });
 	// zoombh.scale(lastTransformState.scale);
 	// zoombh.translate(lastTransformState.translate);
 	// $("#ctrl-zoom>input").val((Math.log(lastTransformState.scale)/Math.log(2)+1).toFixed(1)).trigger("input");
 
+
 	// select dataset
-	if($("#filter input").get(ds) === undefined) { return false; }
-	$("#filter input")[ds].click();
-	return true;
+	//if($("#filter input").get(ds) === undefined) { return false; }
+	$("#filter fieldset[data-gid="+dg+"] input")[ds].click();
+	attachMapHandlers();
+	//return true;
 }

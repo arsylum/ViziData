@@ -48,15 +48,16 @@ $(function(){
 	console.log("~~ started loading the meta files (total of "+META_FILES.length+") ~~ ");
 	
 	var callback = function(data) {
-		gdata[mfc] = data; // TODO
-		for(var j = 0; j<gdata[mfc].datasets.length; j++) {
-			gdata[mfc].datasets[j].parent = gdata[mfc];
+		for(var j = 0; j< data.datasets.length; j++) {
+			data.datasets[j].parent = data;
 		}
-		mfc++;
+		gdata[mfc++] = data;
 		if(mfc===META_FILES.length) {
 			console.log(" |BM| got all the meta files (took "+(new Date() -bmMETA)+"ms)");
 			setupControlHandlers();
-			$(document).trigger("meta_files_ready");
+			//$(document).trigger("meta_files_ready");
+			onResize();
+			statifyUrl(); // revert state from url parameters and get things going
 		}
 	};
 

@@ -34,7 +34,9 @@ var M_COLOR_SCALE = [	// provided by colorbrewer2.org
 	'rgb(34,94,168)',
 	'rgb(37,52,148)',
 	'rgb(8,29,88)'];*/
-	'#ccddff', '#aacc66', '#aa6611', '#800', '#300'];
+	'#ccddff', '#aacc66', '#aa6611', '#800', '#300'],
+	M_DEFAULT_TILE_OPACITY = 1, // default visibility of tile layer
+	M_DEFAULT_TILE_CONF = 3; // default config tile layer ([2]shape [1]labels)
 
 // "Timeline" (can be almost anything)
 var T_YAXIS_MAX_EXPAND = 1.21; // faktor for top margin
@@ -54,7 +56,8 @@ var DATA_DIR = "./data/",
 		"humans.json",
 		"items.json"
 	];
-var DEFAULT_DATASET = 0,	// dataset to load up initially
+var DEFAULT_DATAGROUP = 'humans', // default datagroup 
+	DEFAULT_DATASET = 0,	// dataset to load up initially
 	DEFAULT_LABELLANG = 'en';// default language for item labels
 
 var	//ARR_UNDEFINED = null,	// undefined value
@@ -77,10 +80,11 @@ var chart,		// Timeline / dataLine
 	bubble,		// popup bubble on map
 	zoombh;		// zoomBehavior
 
-var allow_redraw = true,
+var allow_redraw = true, // global genGrid prevention switch
 	timelineIsGlobal = 0,
 	colorScale, // color scaling function
 	mutexGenGrid = 0, // genGrid mutex (0: free, 1: looping, -1: kill loop)
+	initComplete = false, // true after initial initialization
 	redrawTimer, // genGrid
 	chartdatTimer, // updateChartData
 	bubbleTimer, // hide map tooltip bubble

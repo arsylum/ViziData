@@ -576,7 +576,7 @@ function initLeaflet() {
 		minZoom: 1,
 		maxZoom: 12
 	});
-	changeTileSrc();
+	//changeTileSrc();
 	leafloor.addTo(leafly);
 	
 	L.control.attribution({prefix: false}).addAttribution(
@@ -588,30 +588,12 @@ function initLeaflet() {
 		.addTo(leafly);
 	
 	
-	leafly.on("movestart", function() {
-		selectCell(false);
-	}).on("moveend", function() {
-		//clearGrid();
-		genGrid();
-		genChart(); // maybe there is a less destructive way?
-		//updateChartData();
-	})/*.on("dragend", function() {
-		clearGrid();
-	})*/.on("zoomend", function() {
-		drawdat.draw = undefined;
-		clearGrid();
-	}).on("mousemove", function(e) {
-		//console.log(e.latlng);
-		canvasMouseMove(e);
-	}).on("click", function(e) {
-		canvasMouseClick(e);
-	});
-
 	leaflaggrid = L.canvasOverlay();
 	leaflaggrid
 		.drawing(drawPlot)
 		.addTo(leafly);
 
+	leafly.___eventHandlersAtached = false;
 	/*leaflover = L.canvasOverlay();
 	leaflover
 		//.drawing(highlightCell)
@@ -636,6 +618,34 @@ function initLeaflet() {
 //         }
 
 
+}
+
+function attachMapHandlers() {
+	if(leafly.___eventHandlersAtached === true) {
+		console.warn("attachMapHandlers() has been called again.");
+		return false;
+	}
+
+	leafly.on("movestart", function() {
+		selectCell(false);
+	}).on("moveend", function() {
+		//clearGrid();
+		genGrid();
+		genChart(); // maybe there is a less destructive way?
+		//updateChartData();
+	})/*.on("dragend", function() {
+		clearGrid();
+	})*/.on("zoomend", function() {
+		drawdat.draw = undefined;
+		clearGrid();
+	}).on("mousemove", function(e) {
+		//console.log(e.latlng);
+		canvasMouseMove(e);
+	}).on("click", function(e) {
+		canvasMouseClick(e);
+	});
+	
+	leafly.___eventHandlersAtached = true;
 }
 
 function changeTileSrc() {
