@@ -6601,7 +6601,7 @@ var C_WMIN = -180, C_WMAX = 180, C_HMIN = -90, C_HMAX = 90, C_W = C_WMAX - C_WMI
 
 /// map parameters
 var //M_BOUNDING_THRESHOLD = 0,	// grid clipping tolerance
-M_ZOOM_RANGE = [ 1, 12 ], // zoom range (results in svg scale 2^(v-1))
+M_ZOOM_RANGE = [ 1, 12 ], // map zoom range
 M_BASE_GRIDROWS = 300, // number of horizontal grid cells
 M_BUBBLE_OFFSET = 20, // distance of map tooltip from pointer
 M_HOVER_OFFSET = {
