@@ -281,6 +281,10 @@ function initChart() {
    	appendListeners();
 
     // set to initial selection state
+    var iS = current_setsel.options.initSelection;
+    if(initComplete && iS !== undefined) { // set to datasets default selection
+    	timeSel.data.x = {min: iS.min, max: iS.max };
+    }
   	summary.trigger('select', timeSel);
 }
 
@@ -301,7 +305,7 @@ function changeTimeSel(min,max,relative) {
 		timeSel.fmax -= Math.floor(timeSel.fmax);
 	}
 
-	if(min >= max) { return false; }
+	if(min > max) { return false; }
 	if(max > current_setsel.max) { return false; }
 	if(min < current_setsel.min) { return false; }
 
@@ -311,6 +315,7 @@ function changeTimeSel(min,max,relative) {
 		sel.selecting = true;
 	}
 	sel.setSelection({x1: min, x2: max});
+	genGrid();
 }
 
 /**
