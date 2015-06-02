@@ -281,10 +281,6 @@ function initChart() {
    	appendListeners();
 
     // set to initial selection state
-    var iS = current_setsel.options.initSelection;
-    if(initComplete && iS !== undefined) { // set to datasets default selection
-    	timeSel.data.x = {min: iS.min, max: iS.max };
-    }
   	summary.trigger('select', timeSel);
 }
 
