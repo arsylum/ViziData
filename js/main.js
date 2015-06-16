@@ -6540,6 +6540,14 @@ function setSetSel(dsi, dgi) {
             console.log('~~ Member properties of "' + current_datsel.id + '" have been loaded');
         });
     }
+    var iS = current_datsel.datasets[dsi].options.initSelection;
+    if (initComplete && iS !== undefined) {
+        // set to datasets default selection
+        timeSel.data.x = {
+            min: iS.min,
+            max: iS.max
+        };
+    }
     if (current_datsel.datasets[dsi].data !== undefined) {
         current_setsel = current_datsel.datasets[dsi];
         updateUI();
@@ -6758,6 +6766,21 @@ function onResize() {
     // get new viewport size
     viewportW = $(window).width();
     viewportH = $(window).height();
+    var mapcbox = $("#controls-map"), tlcbox = $("#controls-timeline");
+    if (viewportH < 700) {
+        mapcbox.children("h2").addClass("closed");
+        mapcbox.children("fieldset").slideUp();
+    } else {
+        mapcbox.children("h2").removeClass("closed");
+        mapcbox.children("fieldset").slideDown();
+    }
+    if (viewportH < 777) {
+        tlcbox.children("h2").addClass("closed");
+        tlcbox.children("fieldset").slideUp();
+    } else {
+        tlcbox.children("h2").removeClass("closed");
+        tlcbox.children("fieldset").slideDown();
+    }
     // set canvas dimensions
     //canvasT = Math.floor($("#map").position().top); 
     //canvasL = Math.floor($("#sidebar").width()); //doesen't change but is set here for code maintainability
@@ -7400,7 +7423,7 @@ function selectCell(i) {
             timeout = 5;
         }
         setTimeout(function() {
-            var p = index2geoCoord(i);
+            var p = index2geoCoord(i, drawdat.reso);
             var x = (p[0] + drawdat.reso / 2).toFixed(2), y = (p[1] + drawdat.reso / 2).toFixed(2);
             highlightCell(i, true);
             $tb.html("");
@@ -7772,7 +7795,7 @@ function changeTimeSel(min, max, relative) {
         timeSel.fmin -= Math.floor(timeSel.fmin);
         timeSel.fmax -= Math.floor(timeSel.fmax);
     }
-    if (min >= max) {
+    if (min > max) {
         return false;
     }
     if (max > current_setsel.max) {
@@ -7792,6 +7815,7 @@ function changeTimeSel(min, max, relative) {
         x1: min,
         x2: max
     });
+    genGrid();
 }
 
 /**

@@ -193,7 +193,7 @@ function selectCell(i) {
 		}
 		setTimeout(function() {
 
-			var p = index2geoCoord(i);
+			var p = index2geoCoord(i, drawdat.reso);
 			var x = (p[0] + drawdat.reso/2).toFixed(2),
 				y = (p[1] + drawdat.reso/2).toFixed(2);
 

@@ -16,6 +16,12 @@ function setSetSel(dsi, dgi) { //, callback){
 			console.log('~~ Member properties of "'+current_datsel.id+'" have been loaded');
 		});
 	}
+
+	var iS = current_datsel.datasets[dsi].options.initSelection;
+    if(initComplete && iS !== undefined) { // set to datasets default selection
+    	timeSel.data.x = {min: iS.min, max: iS.max };
+    }
+
 	if(current_datsel.datasets[dsi].data !== undefined) {
 		current_setsel = current_datsel.datasets[dsi];
 		updateUI();
