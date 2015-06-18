@@ -7308,7 +7308,7 @@ function canvasCoord2index(p, reso) {
 
 /**
 * returns the geo coordinates for a given index
-* (for the bottom left corner of the gridcells rect)*/
+* (for the middle of the gridscells bounding box) */
 function index2geoCoord(i, reso) {
     var cc = index2canvasCoord(i, reso);
     var gc = leafly.containerPointToLatLng([ cc.x, cc.y ]);
@@ -7317,12 +7317,12 @@ function index2geoCoord(i, reso) {
 
 /**
 * returns the canvas rendering coordinates for a given index 
-* (for the top left corner of the gridscells rect) */
+* (for the middle of the gridscells bounding box) */
 function index2canvasCoord(i, reso) {
     var cpr = canvasW / reso;
     return {
-        x: i % cpr * reso,
-        y: Math.floor(i / cpr) * reso
+        x: i % cpr * reso + reso / 2,
+        y: Math.floor(i / cpr) * reso + reso / 2
     };
 }
 
@@ -7369,7 +7369,7 @@ function canvasMouseMove(e) {
     //$("#hud").text('(' + cc.x.toFixed(5) + ', ' + cc.y.toFixed(5) + ')');
     if (cell !== undefined) {
         var p = index2geoCoord(i, drawdat.reso);
-        var x = (p[0] + drawdat.reso / 2).toFixed(2), y = (p[1] + drawdat.reso / 2).toFixed(2);
+        var x = p[0].toFixed(2), y = p[1].toFixed(2);
         // display the info bubble
         clearTimeout(bubbleTimer);
         bubbleTimer = true;
@@ -7425,7 +7425,7 @@ function selectCell(i) {
         }
         setTimeout(function() {
             var p = index2geoCoord(i, drawdat.reso);
-            var x = (p[0] + drawdat.reso / 2).toFixed(2), y = (p[1] + drawdat.reso / 2).toFixed(2);
+            var x = p[0].toFixed(2), y = p[1].toFixed(2);
             highlightCell(i, true);
             $tb.html("");
             // TODO recursive timeouts for large arrays (around >5000)
