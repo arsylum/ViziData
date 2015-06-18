@@ -8002,9 +8002,9 @@ function urlifyState() {
     hash += "&f=" + timelineIsGlobal;
     // timeline selection
     var time = getTimeSelection();
-    hash += "&e=" + time.min + "_" + time.max;
+    hash += "&e=" + time.min + "," + time.max;
     // selected cell
-    hash += "&c=" + selectedCell;
+    //hash += "&c=" + index2geoCoord(selectedCell, calcReso()).toString(); //selectedCell;
     // grid resolution
     hash += "&g=" + resoFactor;
     // grid drawing overlap
@@ -8034,7 +8034,7 @@ function statifyUrl() {
     var hash = window.location.hash;
     //if (hash === "") { return false; }
     /// default values
-    var labellang = DEFAULT_LABELLANG, timesel, dg = DEFAULT_DATAGROUP, ds = DEFAULT_DATASET, tl_mode = timelineIsGlobal, tile_opacity = M_DEFAULT_TILE_OPACITY, tile_conf = M_DEFAULT_TILE_CONF, map_lng = 0, map_lat = 0, map_zoom = 2;
+    var labellang = DEFAULT_LABELLANG, timesel, cellsel = false, dg = DEFAULT_DATAGROUP, ds = DEFAULT_DATASET, tl_mode = timelineIsGlobal, tile_opacity = M_DEFAULT_TILE_OPACITY, tile_conf = M_DEFAULT_TILE_CONF, map_lng = 0, map_lat = 0, map_zoom = 2;
     hash = hash.substring(1).split("&");
     for (var i = 0; i < hash.length; ++i) {
         var key = hash[i].substring(0, 1);
@@ -8062,7 +8062,7 @@ function statifyUrl() {
 
           case "e":
             // time selection (envision)
-            var e = val.split("_");
+            var e = val.split(",");
             timesel = {
                 min: parseInt(e[0]),
                 max: parseInt(e[1])
@@ -8106,7 +8106,8 @@ function statifyUrl() {
 
           case "c":
             // selected cell
-            selectedCell = parseFloat(val);
+            //selectedCell = parseFloat(val);
+            //cellsel = val.split(",");
             break;
 
           default:
@@ -8152,6 +8153,7 @@ function statifyUrl() {
     leafly.setView([ map_lat, map_lng ], map_zoom, {
         reset: true
     });
+    //selectedCell = geoCoord2index(cellsel[0], cellsel[1], calcReso());
     // select dataset
     $("#filter fieldset[data-gid=" + dg + "] input").get(ds).click();
     attachMapHandlers();

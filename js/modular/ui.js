@@ -138,10 +138,10 @@ function urlifyState() {
 	hash += "&f=" + timelineIsGlobal;
 	// timeline selection
 	var time = getTimeSelection();
-	hash += "&e=" + time.min + "_" + time.max;
+	hash += "&e=" + time.min + "," + time.max;
 
 	// selected cell
-	hash += "&c=" + selectedCell;
+	//hash += "&c=" + index2geoCoord(selectedCell, calcReso()).toString(); //selectedCell;
 	// grid resolution
 	hash += "&g=" + resoFactor;
 	// grid drawing overlap
@@ -173,6 +173,7 @@ function statifyUrl() {
 	/// default values
 	var	labellang = DEFAULT_LABELLANG,
 		timesel,
+		cellsel = false,
 		dg = DEFAULT_DATAGROUP,
 		ds = DEFAULT_DATASET,
 		tl_mode = timelineIsGlobal,
@@ -198,7 +199,7 @@ function statifyUrl() {
 				dg = val;
 				break;
 			case "e": // time selection (envision)
-				var e = val.split("_");
+				var e = val.split(",");
 				timesel = { min: parseInt(e[0]), max: parseInt(e[1]) };
 				break;
 			case "g": // grid resolution
@@ -223,7 +224,8 @@ function statifyUrl() {
 				map_zoom = parseInt(val);
 				break;
 			case "c": // selected cell
-				selectedCell = parseFloat(val);
+				//selectedCell = parseFloat(val);
+				//cellsel = val.split(",");
 				break;
 			default:
 				console.warn("statifyUrl(): discarded unrecognized parameter '"+ key + "' in url pattern");
@@ -267,6 +269,7 @@ function statifyUrl() {
 
 	// recreate map state
 	leafly.setView([map_lat,map_lng],map_zoom, { reset: true });
+	//selectedCell = geoCoord2index(cellsel[0], cellsel[1], calcReso());
 	
 	// select dataset
 	$("#filter fieldset[data-gid="+dg+"] input").get(ds).click();
