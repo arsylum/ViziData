@@ -58,9 +58,10 @@ function getMinMaxTile(mAE) {
 /**
 * returns the index value for the cell of a grid with given resolution
 * where the given geocoordinate pair lies in*/
-function coord2index(longi, lati, reso) {
+function geoCoord2index(lati, longi, reso) {
 	var proj = leafly.latLngToContainerPoint(L.latLng(lati,longi));
-	return (Math.floor(proj.y/reso)*(canvasW/reso) + Math.floor(proj.x/reso));
+	//return (Math.floor(proj.y/reso)*(canvasW/reso) + Math.floor(proj.x/reso));
+	return canvasCoord2index(proj, reso);
 }
 
 /**

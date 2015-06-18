@@ -6855,8 +6855,8 @@ function generateGrid(reso, mAE, data) {
             calcPlotDat(cellmap, reso);
             console.log("  |BM| finished genGrid (total of " + (new Date() - bms) + "ms)");
             var term = data.strings.term || L_DEFAULT_TERM;
-            $("#legend").html("<em>inside the visible area</em><br>" + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
-            "we have registered a total of<br>" + "<em>" + count + " " + data.strings.label + "</em><br>" + term.replace("%l", "<em>" + cAE.min + "</em>").replace("%h", "<em>" + cAE.max + "</em>"));
+            $("#legend").html("<em>inside the visible area</em> " + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
+            "we have registered a total of " + "<em>" + count + " " + data.strings.label + "</em> " + term.replace("%l", "<em>" + cAE.min + "</em>").replace("%h", "<em>" + cAE.max + "</em>"));
             selectCell();
             // urlifyState(); // is always called in selectCell
             console.log("\\~~ grid generation complete~~/ ");
@@ -6892,7 +6892,7 @@ function generateGrid(reso, mAE, data) {
                             a = data.data[i][j][k];
                             if (section_filter(a, mAE)) {
                                 // if it actually lies within map bounds
-                                ti = coord2index(a[ARR_M_LON], a[ARR_M_LAT], reso);
+                                ti = geoCoord2index(a[ARR_M_LAT], a[ARR_M_LON], reso);
                                 if (cellmap[ti] === undefined) {
                                     cellmap[ti] = [];
                                 }
@@ -7108,7 +7108,7 @@ function highlightCellsFor(key) {
             j = t.length;
             while (j--) {
                 if (section_filter(t[j], mAE)) {
-                    ci = coord2index(t[j][ARR_M_LON], t[j][ARR_M_LAT], reso);
+                    ci = geoCoord2index(t[j][ARR_M_LAT], t[j][ARR_M_LON], reso);
                     cmap[ci] = true;
                 }
             }
@@ -7294,9 +7294,10 @@ function getMinMaxTile(mAE) {
 /**
 * returns the index value for the cell of a grid with given resolution
 * where the given geocoordinate pair lies in*/
-function coord2index(longi, lati, reso) {
+function geoCoord2index(lati, longi, reso) {
     var proj = leafly.latLngToContainerPoint(L.latLng(lati, longi));
-    return Math.floor(proj.y / reso) * (canvasW / reso) + Math.floor(proj.x / reso);
+    //return (Math.floor(proj.y/reso)*(canvasW/reso) + Math.floor(proj.x/reso));
+    return canvasCoord2index(proj, reso);
 }
 
 /**

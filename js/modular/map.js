@@ -60,10 +60,10 @@ function generateGrid(reso, mAE, data) {
 			console.log("  |BM| finished genGrid (total of "+(new Date()-bms)+"ms)");
 
 			var term = data.strings.term || L_DEFAULT_TERM;
-			$("#legend").html("<em>inside the visible area</em><br>"+
+			$("#legend").html("<em>inside the visible area</em> "+
 				//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
-				"we have registered a total of<br>"+
-				"<em>"+count+" "+data.strings.label+"</em><br>"+
+				"we have registered a total of "+
+				"<em>"+count+" "+data.strings.label+"</em> "+
 				term.replace("%l", "<em>"+cAE.min+"</em>")
 					.replace("%h", "<em>"+cAE.max+"</em>"));
 
@@ -92,7 +92,7 @@ function generateGrid(reso, mAE, data) {
 						while(k--) {										// go over each event in key and
 							a = data.data[i][j][k];
 							if(section_filter(a,mAE)) {							// if it actually lies within map bounds
-								ti = coord2index(a[ARR_M_LON],a[ARR_M_LAT],reso);
+								ti = geoCoord2index(a[ARR_M_LAT],a[ARR_M_LON],reso);
 								if(cellmap[ti] === undefined) {	cellmap[ti] = []; }	// aggregate it on the grid
 								cellmap[ti].push([a[ARR_M_I],j]);
 								cellmapprog[ti] = cellmap[ti];
@@ -337,7 +337,7 @@ function highlightCellsFor(key) {
 			j = t.length;
 			while(j--) {
 				if(section_filter(t[j],mAE)){
-					ci = coord2index(t[j][ARR_M_LON],t[j][ARR_M_LAT],reso);
+					ci = geoCoord2index(t[j][ARR_M_LAT],t[j][ARR_M_LON],reso);
 					cmap[ci] = true;
 	}	}	}	}
 	$.each(cmap, function(k) { ca.push(k); });
