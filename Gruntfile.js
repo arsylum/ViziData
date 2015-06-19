@@ -31,11 +31,29 @@ module.exports = function(grunt) {
       }
     },
     ///////////////
+    // STYLUS
+    stylus: {
+      compile: {
+        options: {
+          compress: false,
+          linenos: true,
+          //'include css': true
+        },
+        files: {
+          'stylesheets/style.css': 'stylus/main.styl'
+        }
+      }
+    },
+    ///////////////
     // AUTOPREFIX
     autoprefixer: {
       screen: {
         src: 'stylesheets/screen.css',
         dest: 'stylesheets/screen.css'
+      },
+      style: {
+        src: 'stylesheets/style.css',
+        dest: 'stylesheets/style.css'
       }
     },
     //////////
@@ -44,6 +62,10 @@ module.exports = function(grunt) {
       compass: {
         files: 'sass/*.scss',
         tasks: ['compass','autoprefixer:screen']
+      },
+      stylus: {
+        files: 'stylus/*.styl',
+        tasks: ['stylus', 'autoprefixer:style']
       },
       uglify: {
         files: 'js/modular/*.js',
@@ -55,6 +77,7 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-compass');
+  grunt.loadNpmTasks('grunt-contrib-stylus');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-autoprefixer');
 

@@ -1,0 +1,209 @@
+/////////////////////
+// main style src //
+///////////////////
+
+
+// including lib styles
+@import "envision.css"
+@import "leaflet.css"
+
+/// variables
+// chart (aka timeline)
+chart-height = 200px
+
+legend-width = 250px
+
+
+html, body
+	height 100%
+	min-height 570px
+
+html, body, menu, div
+	margin 0
+	padding 0
+
+body 
+	overflow hidden
+	position absolute
+	top 0
+	bottom 0
+	right 0
+	left 0
+
+
+menu#timefilter {
+	height: chart-height
+	position absolute
+	top 0
+	left 0 
+	right 0
+	//min-height: $timeline-min-height;
+	//max-height: $timelline-max-height;
+	/*margin-left: ($left-row-width)-($controls-padding);*/
+	
+	padding: 0;
+	background: transparent;
+	
+
+	#legend {
+		position absolute
+		top 0
+		bottom 0
+		left 0
+		width legend-width
+		height 100%
+	}
+
+	#chartwrapper {
+		position absolute
+		top 0
+		bottom 0
+		right 0
+		left legend-width
+		//padding: $controls-padding;
+		//margin-left: legend-width;
+		height: 100%;
+		//background: $control-bg-color;
+		box-shadow: none;
+	}
+
+	#chart {
+		background: white;
+		/*height: $timeline-height;*/
+		/*min-height: $timeline-min-height;*/
+		height: 100%;
+		//margin-left: ($left-row-width)-($controls-padding);
+		//box-shadow: $menu-box-shadow;
+
+		* {
+			// prevent flickering highlights on interaction
+			user-select: none;
+		}
+
+		.summary .flotr-labels {
+			.flotr-grid-label {
+				margin-top: -1.1em;
+			}
+			.last {
+				right: 0;
+				left: initial !important;
+				text-align: right !important;
+				margin-right: 4px;
+			}
+		}
+
+		.detail {
+			.flotr-labels {
+				div {
+					margin-left: 4px;
+				}
+				.last {
+					display: none;
+				}
+			}
+			.flotr-mouse-value {
+				background: $widget-tt-bg !important;
+				opacity: 1 !important;
+				//right: $widget-tt-margin !important;
+				//top: $widget-tt-margin !important;
+				top: 103% !important;
+				z-index: 9;
+				//left: initial !important;
+				left: $widget-tt-margin !important;
+				padding: $widget-tt-padding !important;
+				//border-radius: ($outer-border-radius/4) !important;
+				em {
+					color: rgb(255, 219, 153);
+					margin-right: .2em;
+				}
+
+				span {
+					font-size: .8em;
+					color: #ddd;
+				}
+			}
+			&:active {
+				cursor: ew-resize;
+			}
+		}
+
+		.range-tt {
+			position: absolute;
+			z-index: 9;
+			top: ($controls-padding + $widget-tt-margin);
+			color: rgb(255, 219, 153);
+
+			//&:before, &:after {
+			.arrow {
+				//content: "";
+				border-color: rgba(0,0,0,0) $widget-tt-bg;
+				border-style: solid;
+				border-width: 0.5em 0 0.5em 0;
+				display: block;
+				height: 0;
+				width: 0;
+				top: 0.1em;
+				position: absolute;
+				z-index: 8;
+				transition: all 0.3s;
+			}
+			.arrow-left {
+				//border-width: 0.5em 0.75em 0.5em 0;
+				border-right-width: $range-tt-arrow-length/2;
+				left: -$range-tt-arrow-length/2;
+				cursor: w-resize;
+			}
+			.arrow-right {
+				//border-width: 0.5em 0 0.5em 0.75em;
+				border-left-width: $range-tt-arrow-length/2;
+				right: -$range-tt-arrow-length/2;
+				cursor: e-resize;
+			}
+			//&:hover:before, &.draggin:before {
+			// &.hintin .arrow-left, &:hover .arrow-left {
+			// 	border-right-width: $range-tt-arrow-length;
+			// 	left: -$range-tt-arrow-length - $range-tt-arrow-distance;
+			// }
+			// //&:hover:after, &.draggin:after {
+			// &.hintin .arrow-right, &:hover .arrow-right {
+			// 	border-left-width: $range-tt-arrow-length;
+			// 	right: -$range-tt-arrow-length - $range-tt-arrow-distance;
+			// }
+			//&.draggin:before, &.draggin:after {
+			.arrow:hover {
+				border-color: rgba(0,0,0,0) rgb(248, 213, 150);
+			}
+
+			&#range-tt-min {
+				left: $left-row-width + $widget-tt-margin + $range-tt-arrow-length + $range-tt-arrow-distance;
+			}
+			&#range-tt-max {
+				right: $controls-padding + $widget-tt-margin + $range-tt-arrow-length + $range-tt-arrow-distance;
+			}
+
+			//opacity: 0.1;
+			//transition: opacity 0.3s;
+		}
+		&:hover .range-tt {
+			.arrow-left {
+				border-right-width: $range-tt-arrow-length;
+				left: -$range-tt-arrow-length - $range-tt-arrow-distance;
+			}
+			.arrow-right {
+				border-left-width: $range-tt-arrow-length;
+				right: -$range-tt-arrow-length - $range-tt-arrow-distance;
+			}
+		}
+	}
+}
+
+#map
+	position absolute
+	top chart-height
+	bottom 0
+	left 0
+	right 0
+	
+
+#sidebar 
+	display none

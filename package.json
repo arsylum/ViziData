@@ -6,6 +6,7 @@
     "grunt-autoprefixer": "^3.0.0",
     "grunt-contrib-compass": "^1.0.1",
     "grunt-contrib-uglify": "^0.8.0",
-    "grunt-contrib-watch": "^0.6.1"
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-contrib-stylus": "~0.21.0"
   }
 }

@@ -1,0 +1,221 @@
+
+/* line 209 : /var/www/html/dev/ViziData/stylus/main.styl */
+
+/* line 1 : /var/www/html/dev/ViziData/node_modules/grunt-contrib-stylus/node_modules/stylus/lib/functions/index.styl */
+
+/* line 7 : /var/www/html/dev/ViziData/stylus/main.styl */
+@import "envision.css";
+
+/* line 8 : /var/www/html/dev/ViziData/stylus/main.styl */
+@import "leaflet.css";
+
+/* line 17 : /var/www/html/dev/ViziData/stylus/main.styl */
+html,
+body {
+  height: 100%;
+  min-height: 570px;
+}
+
+/* line 21 : /var/www/html/dev/ViziData/stylus/main.styl */
+html,
+body,
+menu,
+div {
+  margin: 0;
+  padding: 0;
+}
+
+/* line 25 : /var/www/html/dev/ViziData/stylus/main.styl */
+body {
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
+/* line 34 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter {
+  height: 200px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+/*margin-left: ($left-row-width)-($controls-padding);*/
+  padding: 0;
+  background: transparent;
+}
+
+/* line 48 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #legend {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+}
+
+/* line 57 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chartwrapper {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 250px;
+  height: 100%;
+  box-shadow: none;
+}
+
+/* line 70 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart {
+  background: #fff;
+/*height: $timeline-height;*/
+/*min-height: $timeline-min-height;*/
+  height: 100%;
+}
+
+/* line 78 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart * {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+/* line 83 : /var/www/html/dev/ViziData/stylus/main.styl */
+
+/* line 84 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .summary .flotr-labels .flotr-grid-label {
+  margin-top: -1.1em;
+}
+
+/* line 87 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .summary .flotr-labels .last {
+  right: 0;
+  left: initial !important;
+  text-align: right !important;
+  margin-right: 4px;
+}
+
+/* line 95 : /var/www/html/dev/ViziData/stylus/main.styl */
+
+/* line 96 : /var/www/html/dev/ViziData/stylus/main.styl */
+
+/* line 97 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .detail .flotr-labels div {
+  margin-left: 4px;
+}
+
+/* line 100 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .detail .flotr-labels .last {
+  display: none;
+}
+
+/* line 104 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .detail .flotr-mouse-value {
+  background: $widget-tt-bg !important;
+  opacity: 1 !important;
+  top: 103% !important;
+  z-index: 9;
+  left: $widget-tt-margin !important;
+  padding: $widget-tt-padding !important;
+}
+
+/* line 115 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .detail .flotr-mouse-value em {
+  color: #ffdb99;
+  margin-right: 0.2em;
+}
+
+/* line 120 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .detail .flotr-mouse-value span {
+  font-size: 0.8em;
+  color: #ddd;
+}
+
+/* line 125 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .detail:active {
+  cursor: ew-resize;
+}
+
+/* line 130 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .range-tt {
+  position: absolute;
+  z-index: 9;
+  top: $controls-padding$widget-tt-margin;
+  color: #ffdb99;
+}
+
+/* line 137 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .range-tt .arrow {
+  border-color: rgba(0,0,0,0) $widget-tt-bg;
+  border-style: solid;
+  border-width: 0.5em 0 0.5em 0;
+  display: block;
+  height: 0;
+  width: 0;
+  top: 0.1em;
+  position: absolute;
+  z-index: 8;
+  -webkit-transition: all 0.3s;
+          transition: all 0.3s;
+}
+
+/* line 150 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .range-tt .arrow-left {
+  border-right-width: $range-tt-arrow-length/2;
+  left: -$range-tt-arrow-length/2;
+  cursor: w-resize;
+}
+
+/* line 156 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .range-tt .arrow-right {
+  border-left-width: $range-tt-arrow-length/2;
+  right: -$range-tt-arrow-length/2;
+  cursor: e-resize;
+}
+
+/* line 173 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .range-tt .arrow:hover {
+  border-color: rgba(0,0,0,0) #f8d596;
+}
+
+/* line 177 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .range-tt#range-tt-min {
+  left: $left-row-width$widget-tt-margin$range-tt-arrow-length$range-tt-arrow-distance;
+}
+
+/* line 180 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart .range-tt#range-tt-max {
+  right: $controls-padding$widget-tt-margin$range-tt-arrow-length$range-tt-arrow-distance;
+}
+
+/* line 187 : /var/www/html/dev/ViziData/stylus/main.styl */
+
+/* line 188 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart:hover .range-tt .arrow-left {
+  border-right-width: $range-tt-arrow-length;
+  left: -$range-tt-arrow-length$range-tt-arrow-distance;
+}
+
+/* line 192 : /var/www/html/dev/ViziData/stylus/main.styl */
+menu#timefilter #chart:hover .range-tt .arrow-right {
+  border-left-width: $range-tt-arrow-length;
+  right: -$range-tt-arrow-length$range-tt-arrow-distance;
+}
+
+/* line 200 : /var/www/html/dev/ViziData/stylus/main.styl */
+#map {
+  position: absolute;
+  top: 200px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+/* line 208 : /var/www/html/dev/ViziData/stylus/main.styl */
+#sidebar {
+  display: none;
+}
