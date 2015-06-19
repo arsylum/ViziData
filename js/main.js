@@ -6558,7 +6558,7 @@ function setSetSel(dsi, dgi) {
         var l = 0;
         var lAnim = setInterval(function() {
             var txt = [ "loading... &nbsp; &nbsp; ┬──┬", "loading... &nbsp; &nbsp; ┬──┬", "loading... (°o°） ┬──┬", "loading... &nbsp;(°o°）┬──┬", "loading... (╯°□°）╯ ┻━┻", "loading... (╯°□°）╯︵ ┻━┻", "loading... (╯°□°）╯︵ ︵ ┻━┻", "loading... (╯°□°）╯︵ ︵ ︵ ┻━┻", "loading... ︵ ︵ ︵ ┻━┻", "loading... ︵ ︵ ┻━┻", "loading... ︵ ┻━┻", "loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp; (ツ)", "loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp;(ツ)", "loading... &nbsp; &nbsp; ┻━┻ &nbsp; (ツ)", "loading... &nbsp; &nbsp; ┻━┻ &nbsp;(ツ)", "loading... &nbsp; &nbsp; ┬──┬ ¯\\_(ツ)", "loading... &nbsp; &nbsp; ┬──┬ (ツ)" ];
-            $("#legend").html(txt[l]);
+            $("#dsdesc").html(txt[l]);
             l = (l + 1) % 17;
         }, 180);
         var lBM = new Date();
@@ -7119,9 +7119,9 @@ function highlightCellsFor(key) {
     });
     overctx.save();
     overctx.clearRect(0, 0, canvasW, canvasH);
-    overctx.fillStyle = "rgba(255,255,255,0.7)";
+    overctx.fillStyle = "rgba(255,255,255,0.5)";
     overctx.strokeStyle = "rgba(0,0,0,1)";
-    overctx.lineWidth = rx / 2;
+    overctx.lineWidth = rx / 4;
     var x, y, p;
     i = ca.length;
     while (i--) {
@@ -7933,10 +7933,15 @@ function setupControlHandlers() {
         genChart();
         urlifyState();
     });
-    $("#sidebar>menu h2").on("click", function() {
+    $("#main-menu h2").on("click", function() {
         $(this).toggleClass("closed");
         $(this).siblings("fieldset").slideToggle();
     });
+    /// setup menu
+    $("#menu-launcher").on("click", function() {
+        $("#widget-area").toggleClass("open");
+    });
+    /// item table
     $("#infolist").on("scroll", infolistScroll);
     $("#map").on("mouseleave", function() {
         $bubble.css("opacity", "0");
@@ -7960,11 +7965,13 @@ function setupControlHandlers() {
 }
 
 /**
-* update UI labels etc
-* (so far only right column of item table) */
+* update UI labels etc on dataset change */
 function updateUI() {
     var zprop = current_setsel.strings.zprop || T_DEFAULT_ZPROP;
     $("#cellinfo th:last-child").text(zprop);
+    $("#dsdesc").html("<h4>Dataset</h4><h3><em>" + //current_setsel.parent.label + '</em> &gt; <em>' + 
+    current_setsel.strings.label + "</em></h3>");
+    var showDsDesc = function() {};
 }
 
 // TODO:  mapop sl

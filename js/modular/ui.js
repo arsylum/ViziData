@@ -62,11 +62,18 @@ function setupControlHandlers() {
 		urlifyState();
 	});
 
-	$("#sidebar>menu h2").on("click", function() {
+	$("#main-menu h2").on("click", function() {
 		$(this).toggleClass("closed");
 		$(this).siblings("fieldset").slideToggle();
 	});
 
+	/// setup menu
+	$("#menu-launcher").on("click", function() {
+		$("#widget-area").toggleClass("open");
+	});
+
+
+	/// item table
 	$("#infolist").on("scroll", infolistScroll);
 
 	
@@ -95,11 +102,21 @@ function setupControlHandlers() {
 }
 
 /**
-* update UI labels etc
-* (so far only right column of item table) */
+* update UI labels etc on dataset change */
 function updateUI() {
 	var zprop = current_setsel.strings.zprop || T_DEFAULT_ZPROP;
 	$("#cellinfo th:last-child").text(zprop);
+
+	$("#dsdesc").html(
+		'<h4>Dataset</h4><h3><em>' + 
+		//current_setsel.parent.label + '</em> &gt; <em>' + 
+		current_setsel.strings.label + '</em></h3>'
+		//+ '<p>' + current_setsel.strings.desc + '</p>'
+		);
+
+	var showDsDesc = function() {
+
+	}
 }
 
 // TODO:  mapop sl

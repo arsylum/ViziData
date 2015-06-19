@@ -18,8 +18,46 @@
 </head>
 <body>
 
-<div id="sidebar">
-	<menu>
+<header>
+	<a id="github_link" href="https://github.com/gordelwig/ViziData" title="View on GitHub" target="github">
+		<img src="./github_logo.png" alt="GitHub">
+		<img src="./octocat.png" alt="GitHub">
+	</a>
+	<h1>ViziData <span>1.0</span></h1>
+</header>
+
+<!-- chart aka timeline -->
+<menu id="timefilter">
+		<div id="chartwrapper">
+		<div id="chart"></div>
+	</div>
+</menu>
+<!-- map container -->
+<div id="map">
+	<div id ="leaflet"></div>
+	<!--<div id="hud" class="hover-tt"></div>-->
+</div>
+<div id="bubble"></div>
+
+
+<!-- ui widgets -->
+<div id="widget-area">
+	<!-- legend -->
+	<div id="legend"></div>
+
+
+	<menu id="main-menu">
+		<div id="menu-launcher">
+
+			<svg  id="menu-icon" viewBox="0 0 7 7" role="img" title="Menu">
+				<use xlink:href="./icons.svg#menu"></use>
+			</svg>
+			<div id="dsdesc"></div>
+		</div>
+<!--<div id="sidebar">
+	<menu>-->
+	<!-- main menu -->
+	
 		<div id="filter"><h2>Data Selection</h2></div>
 		<div id="controls-timeline" class="controls">
 			<h2>Timeline Settings</h2>
@@ -90,10 +128,12 @@
 			</fieldset>
 		</div>
 	</menu>
+</div>
+	<!--</menu>-->
 	<!--<div id="stuff">
 	</div>-->
 	
-	<div id="cellinfo-desc"><div></div></div>
+	<!--<div id="cellinfo-desc"><div></div></div>
 	<div id="cellinfo">
 		<div class="table-wrapper">
 			<table>
@@ -110,26 +150,8 @@
 			</table>
 		</div>
 	</div>
-	<header>
-		<a id="github_link" href="https://github.com/gordelwig/ViziData" title="View on GitHub" target="github">
-			<img src="./github_logo.png" alt="GitHub">
-			<img src="./octocat.png" alt="GitHub">
-		</a>
-		<h1>ViziData <span>1.0</span></h1>
-	</header>
-</div>
+<!-- </div> -->
 
-<menu id="timefilter">
-	<div id="legend">I AM LEGEND</div>
-	<div id="chartwrapper">
-		<div id="chart"></div>
-	</div>
-</menu>
-<div id="map">
-	<div id ="leaflet"></div>
-	<!--<div id="hud" class="hover-tt"></div>-->
-</div>
-<div id="bubble"></div>
 
 </body>
 </html>

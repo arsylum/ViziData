@@ -50,7 +50,7 @@ function setSetSel(dsi, dgi) { //, callback){
 			"loading... &nbsp; &nbsp; ┬──┬﻿ ¯\\_(ツ)",
 			"loading... &nbsp; &nbsp; ┬──┬﻿ (ツ)",
 			];
-		$("#legend").html(txt[l]);
+		$("#dsdesc").html(txt[l]);
 		l = (l+1)%17;
 		},180);
 

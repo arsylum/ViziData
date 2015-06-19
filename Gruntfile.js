@@ -38,6 +38,7 @@ module.exports = function(grunt) {
           compress: false,
           linenos: true,
           //'include css': true
+          'resolve url': true
         },
         files: {
           'stylesheets/style.css': 'stylus/main.styl'

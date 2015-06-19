@@ -2,69 +2,139 @@
 // main style src //
 ///////////////////
 
-
 // including lib styles
-@import "envision.css"
-@import "leaflet.css"
+@import "../stylesheets/envision.css"
+@import "../stylesheets/leaflet.css"
 
-/// variables
+/////////////////////////////
+/// variable declarations //
+///////////////////////////
+
 // chart (aka timeline)
 chart-height = 200px
+chart-mbottom = 5px
 
 legend-width = 250px
 
+chart-range-arrow-length = 16px
+chart-range-arrow-distance = 5px
 
+controls-padding = 5px
+box-padding = 10px
+
+// colors
+tt-bg = rgba(0,0,0,.5)
+tt-margin = 3px
+tt-padding = 0 .3em
+
+//menu-bg = #F9FAFF
+legend-bg = rgba(249, 250, 255, 0.75)
+highlight-color = #aa5500
+
+boxshadow = 0px 1px 2px rgba(0, 0, 0, 0.5)
+
+
+@import ui_widgets
+
+//////////////////////////////////////
+/// general - elements and classes //
+////////////////////////////////////
 html, body
 	height 100%
 	min-height 570px
+	font-size 14px
 
-html, body, menu, div
+html, body, menu, div, p
 	margin 0
 	padding 0
 
+body, body>*
+	position absolute
+
 body 
 	overflow hidden
-	position absolute
 	top 0
 	bottom 0
 	right 0
 	left 0
 
 
+h2,h3,h4
+	margin 0
+	
+h3
+	font-size: 1.2rem
+	
+h4
+	font-size: 0.9rem
+	
+
+
+em 
+	font-style: italic;
+	color: highlight-color;
+
+
+.hover-tt 
+	display: inline-block;
+	padding: tt-padding
+	//border-radius: ($outer-border-radius/4);
+	background: tt-bg;
+	color: white;
+
+/////////////////////////////
+/// map hover info bubble //
+///////////////////////////
+#bubble 
+	position: absolute;
+	z-index: 999;
+	bottom: 1337px;
+	display: inline-block;
+	text-align: right;
+	min-width: 80px;
+	background: rgba(225,245,255,.9);
+	border: 2px solid rgba(170 ,85,0,.1);
+	//border-radius 3px
+	box-shadow boxshadow
+	transition all 0.6s
+	padding: .3em;
+	pointer-events: none;
+
+
+#bubble>span,
+#legend span 
+	font-size: .7em;
+	color: rgba(0,0,0,.5);
+	font-family: sans-serif;
+
+///////////////////////////////////////
+/// upper part - chart aka timeline //
+/////////////////////////////////////
 menu#timefilter {
 	height: chart-height
-	position absolute
 	top 0
-	left 0 
-	right 0
+	left controls-padding 
+	right controls-padding
 	//min-height: $timeline-min-height;
 	//max-height: $timelline-max-height;
 	/*margin-left: ($left-row-width)-($controls-padding);*/
 	
-	padding: 0;
-	background: transparent;
+	//background: transparent;
 	
-
-	#legend {
+	&>div {
 		position absolute
 		top 0
 		bottom 0
-		left 0
-		width legend-width
-		height 100%
 	}
 
 	#chartwrapper {
-		position absolute
-		top 0
-		bottom 0
 		right 0
-		left legend-width
+		left 0 //legend-width
 		//padding: $controls-padding;
 		//margin-left: legend-width;
 		height: 100%;
 		//background: $control-bg-color;
-		box-shadow: none;
+		//box-shadow: none;
 	}
 
 	#chart {
@@ -102,16 +172,16 @@ menu#timefilter {
 				}
 			}
 			.flotr-mouse-value {
-				background: $widget-tt-bg !important;
+				background: tt-bg !important;
 				opacity: 1 !important;
 				//right: $widget-tt-margin !important;
 				//top: $widget-tt-margin !important;
 				top: 103% !important;
 				z-index: 9;
+				//border-radius  0 !important
 				//left: initial !important;
-				left: $widget-tt-margin !important;
-				padding: $widget-tt-padding !important;
-				//border-radius: ($outer-border-radius/4) !important;
+				//left: $widget-tt-margin !important;
+				//padding: $widget-tt-padding !important;
 				em {
 					color: rgb(255, 219, 153);
 					margin-right: .2em;
@@ -123,40 +193,45 @@ menu#timefilter {
 				}
 			}
 			&:active {
+				// indicate dragging behaviour
 				cursor: ew-resize;
 			}
 		}
 
+		range-tt-height = 20px
 		.range-tt {
 			position: absolute;
 			z-index: 9;
-			top: ($controls-padding + $widget-tt-margin);
+			top: (controls-padding);
 			color: rgb(255, 219, 153);
+			height range-tt-height
+			font-size (range-tt-height - 4)
+			line-height range-tt-height
 
 			//&:before, &:after {
 			.arrow {
 				//content: "";
-				border-color: rgba(0,0,0,0) $widget-tt-bg;
+				border-color: rgba(0,0,0,0) tt-bg;
 				border-style: solid;
-				border-width: 0.5em 0 0.5em 0;
+				border-width: (range-tt-height/2) 0 (range-tt-height/2) 0;
 				display: block;
 				height: 0;
 				width: 0;
-				top: 0.1em;
+				top: 0;
 				position: absolute;
 				z-index: 8;
 				transition: all 0.3s;
 			}
 			.arrow-left {
 				//border-width: 0.5em 0.75em 0.5em 0;
-				border-right-width: $range-tt-arrow-length/2;
-				left: -$range-tt-arrow-length/2;
+				border-right-width: (chart-range-arrow-length/2);
+				left: -(chart-range-arrow-length/2);
 				cursor: w-resize;
 			}
 			.arrow-right {
 				//border-width: 0.5em 0 0.5em 0.75em;
-				border-left-width: $range-tt-arrow-length/2;
-				right: -$range-tt-arrow-length/2;
+				border-left-width: (chart-range-arrow-length/2);
+				right: -(chart-range-arrow-length/2);
 				cursor: e-resize;
 			}
 			//&:hover:before, &.draggin:before {
@@ -175,10 +250,12 @@ menu#timefilter {
 			}
 
 			&#range-tt-min {
-				left: $left-row-width + $widget-tt-margin + $range-tt-arrow-length + $range-tt-arrow-distance;
+				left controls-padding + chart-range-arrow-length + chart-range-arrow-distance
+				//left: legend-width + tt-margin + chart-range-arrow-length + chart-range-arrow-distance;
 			}
 			&#range-tt-max {
-				right: $controls-padding + $widget-tt-margin + $range-tt-arrow-length + $range-tt-arrow-distance;
+				right controls-padding + chart-range-arrow-length + chart-range-arrow-distance
+				//right: controls-padding + tt-margin + chart-range-arrow-length + chart-range-arrow-distance;
 			}
 
 			//opacity: 0.1;
@@ -186,24 +263,53 @@ menu#timefilter {
 		}
 		&:hover .range-tt {
 			.arrow-left {
-				border-right-width: $range-tt-arrow-length;
-				left: -$range-tt-arrow-length - $range-tt-arrow-distance;
+				border-right-width: chart-range-arrow-length;
+				left: -(chart-range-arrow-length) - chart-range-arrow-distance;
 			}
 			.arrow-right {
-				border-left-width: $range-tt-arrow-length;
-				right: -$range-tt-arrow-length - $range-tt-arrow-distance;
+				border-left-width: chart-range-arrow-length;
+				right: -(chart-range-arrow-length) - chart-range-arrow-distance;
 			}
 		}
 	}
 }
 
+
+
+	
+
+
 #map
 	position absolute
-	top chart-height
+	top chart-height + chart-mbottom
 	bottom 0
 	left 0
 	right 0
 	
+	#leaflet 
+		position: absolute;
+		z-index: 2;
+		background: transparent;
 
-#sidebar 
+		* 
+			user-select: none;
+		
+	.leaflet-container 
+		cursor: default;
+		
+	canvas 
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 3;
+		pointer-events: none;
+	
+	.overlay 
+		z-index: 4;
+	
+
+#config
+	display none
+	
+header
 	display none

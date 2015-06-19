@@ -1,0 +1,148 @@
+/// Vars
+menu-bg = rgba(0,0,0,.8)
+menu-vmargin = 5px
+
+////////////////////////////////////////////
+/// widget area - main control interface //
+//////////////////////////////////////////
+#widget-area
+	position absolute
+	z-index 11
+	left controls-padding
+	bottom 0
+	
+	&>div
+		width legend-width
+		padding box-padding
+		background legend-bg
+		box-shadow boxshadow
+		margin-top box-padding
+
+////////////////////////////////////
+/// legend - informative display //
+//////////////////////////////////
+	#legend 
+		
+		//position absolute
+		//bottom -(chart-mbottom)
+		//left 0
+			
+	
+////////////////////////////////////////
+/// main menu (child of widget area) //
+//////////////////////////////////////
+#main-menu 
+		
+	line-height: 1.2em;
+
+	&>div
+		padding box-padding
+		margin-bottom menu-vmargin
+		&:last-child
+			margin-bottom 0
+
+	.advanced 
+		display none
+		
+	div>fieldset
+		padding 0 box-padding	
+		margin-top: .5em;
+		&:last-child 
+			padding-bottom: box-padding;
+			
+	.fieldgroup
+		border: 2px rgb(208, 208, 208) solid;
+		//border-radius: 0 0 $outer-border-radius/2 $outer-border-radius/2;
+		&>legend 
+			font-family: sans-serif;
+		input[type=checkbox] 
+			margin-bottom box-padding
+	
+	h2+.fieldgroup 
+		margin-top: 0;
+		
+	h2 
+		//border: 1px orange solid;
+		//border-radius: ($outer-border-radius/2) ($outer-border-radius/2) 0 0;
+		background: #777;
+		font-family: sans-serif;
+		font-size: 14px;
+		line-height: 20px;
+		padding: 0px box-padding;
+		color: white;
+		cursor: pointer;
+		height: 20px;
+		&:hover 
+			/* text-shadow: 1px 0px 0px orange, -1px 0px 0 orange, 0 1px 0 orange, 0 -1px 0 orange; */
+			/* padding-left: 20px; */
+			//color: rgb(255, 234, 197);
+			//font-weight: bold;
+			background: #666;
+			//$tsc: rgba(255,255,255,0.6);
+			//text-shadow: 1px 0 0 $tsc, -1px 0 0 $tsc, 0 1px 0 $tsc, 0 -1px 0 $tsc;
+
+		&:after 
+			content: '';
+			height: 8px;
+			width: 8px;
+			border: 2px white solid;
+			float: right;
+			transform: rotate(135deg);
+			border-style: solid solid none none;
+			transition: transform 0.4s, top 0.4s, border-width 0s;
+			position: relative;
+			top: 3px;
+			
+		&.closed:after 
+			transform: rotate(45deg);
+			top: 5px;
+		
+		&:hover:after 
+			border-width: 3px;
+		
+	
+	
+	/// LAUNCHER ///
+	#menu-launcher
+		position relative
+		cursor pointer
+		top 5px
+		transition all 0.4s
+		
+		#menu-icon
+			position absolute
+			right 1rem
+			top 50%
+			margin-top -1rem
+			height 2rem
+			width 2rem
+			
+			use
+				stroke-width 1
+				stroke rgba(0,0,0,0.5)
+				
+		&:hover
+			top 0
+			background rgba(0,0,0,.8)
+			color white
+			
+			#menu-icon use
+				stroke white
+	//|\ LAUNCHER ///
+		
+
+
+
+#widget-area.open
+	#legend
+		display none
+		
+	#main-menu
+		background menu-bg
+		color white
+		#menu-launcher
+			background transparent
+
+
+#widget-area.init 
+	opacity 0

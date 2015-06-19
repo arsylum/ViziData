@@ -345,9 +345,9 @@ function highlightCellsFor(key) {
 	overctx.save();
 	overctx.clearRect(0,0,canvasW,canvasH);
 
-	overctx.fillStyle = "rgba(255,255,255,0.7)";
+	overctx.fillStyle = "rgba(255,255,255,0.5)";
 	overctx.strokeStyle = "rgba(0,0,0,1)";
-	overctx.lineWidth = rx/2;
+	overctx.lineWidth = rx/4;
 
   	var x, y, p;
 	i = ca.length;
