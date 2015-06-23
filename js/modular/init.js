@@ -51,22 +51,22 @@ function onResize() {
 	viewportW = $(window).width();
 	viewportH = $(window).height();
 
-	var mapcbox = $("#controls-map"),
-		tlcbox = $("#controls-timeline");
-	if(viewportH < 700) {
-		mapcbox.children("h2").addClass("closed");
-		mapcbox.children("fieldset").slideUp();
-	} else {
-		mapcbox.children("h2").removeClass("closed");
-		mapcbox.children("fieldset").slideDown();
-	}
-	if(viewportH < 777) {
-		tlcbox.children("h2").addClass("closed");
-		tlcbox.children("fieldset").slideUp();
-	} else {
-		tlcbox.children("h2").removeClass("closed");
-		tlcbox.children("fieldset").slideDown();
-	}
+	// var mapcbox = $("#controls-map"),
+	// 	tlcbox = $("#controls-timeline");
+	// if(viewportH < 700) {
+	// 	mapcbox.children("h2").addClass("closed");
+	// 	mapcbox.children("fieldset").slideUp();
+	// } else {
+	// 	mapcbox.children("h2").removeClass("closed");
+	// 	mapcbox.children("fieldset").slideDown();
+	// }
+	// if(viewportH < 777) {
+	// 	tlcbox.children("h2").addClass("closed");
+	// 	tlcbox.children("fieldset").slideUp();
+	// } else {
+	// 	tlcbox.children("h2").removeClass("closed");
+	// 	tlcbox.children("fieldset").slideDown();
+	// }
 
 	// set canvas dimensions
 	//canvasT = Math.floor($("#map").position().top); 

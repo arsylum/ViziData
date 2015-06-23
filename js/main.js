@@ -6766,21 +6766,22 @@ function onResize() {
     // get new viewport size
     viewportW = $(window).width();
     viewportH = $(window).height();
-    var mapcbox = $("#controls-map"), tlcbox = $("#controls-timeline");
-    if (viewportH < 700) {
-        mapcbox.children("h2").addClass("closed");
-        mapcbox.children("fieldset").slideUp();
-    } else {
-        mapcbox.children("h2").removeClass("closed");
-        mapcbox.children("fieldset").slideDown();
-    }
-    if (viewportH < 777) {
-        tlcbox.children("h2").addClass("closed");
-        tlcbox.children("fieldset").slideUp();
-    } else {
-        tlcbox.children("h2").removeClass("closed");
-        tlcbox.children("fieldset").slideDown();
-    }
+    // var mapcbox = $("#controls-map"),
+    // 	tlcbox = $("#controls-timeline");
+    // if(viewportH < 700) {
+    // 	mapcbox.children("h2").addClass("closed");
+    // 	mapcbox.children("fieldset").slideUp();
+    // } else {
+    // 	mapcbox.children("h2").removeClass("closed");
+    // 	mapcbox.children("fieldset").slideDown();
+    // }
+    // if(viewportH < 777) {
+    // 	tlcbox.children("h2").addClass("closed");
+    // 	tlcbox.children("fieldset").slideUp();
+    // } else {
+    // 	tlcbox.children("h2").removeClass("closed");
+    // 	tlcbox.children("fieldset").slideDown();
+    // }
     // set canvas dimensions
     //canvasT = Math.floor($("#map").position().top); 
     //canvasL = Math.floor($("#sidebar").width()); //doesen't change but is set here for code maintainability
@@ -7896,9 +7897,24 @@ function setupControlHandlers() {
         }
         filter.append(fs);
     }
-    $(".controls input[type='range']").on("input", function() {
-        $(this).siblings("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
-    });
+    /*$(".controls input[type='range']")
+		.on("input", (function() {
+			//$(this).siblings("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
+
+			var $t = $(this),
+				min = parseFloat($t.attr("min")),
+				max = parseFloat($t.attr("max"))-min;
+				//val = parseFloat($t.val())-min;
+
+			//var pc = parseFloat((val/max).toFixed(1)) * 10;
+
+			return function() {
+				var pc = parseInt((($t.val()-min)/max)*10);
+				console.log(pc);
+				$(this).attr("class", "valuepc-"+pc);
+
+			}
+		})());*/
     /*$("#zoom-slider").on("change", function() {
 		transitTo(getZoomTransform($(this).val()));
 	});*/
@@ -7938,9 +7954,34 @@ function setupControlHandlers() {
         $(this).siblings("fieldset").slideToggle();
     });
     /// setup menu
-    $("#menu-launcher").on("click", function() {
-        $("#widget-area").toggleClass("open");
-    });
+    var toggleMenu = function() {
+        var $wa = $("#widget-area");
+        if ($wa.hasClass("open")) {
+            $(window).off("click.menufocus");
+            var mabo = -($("#main-menu").outerHeight() - $("#menu-launcher").outerHeight());
+            $wa.css("margin-bottom", mabo);
+        } else {
+            $(window).on("click.menufocus", function(e) {
+                if ($(e.target).parents("#main-menu").length === 0) {
+                    toggleMenu();
+                }
+            });
+        }
+        $wa.toggleClass("open");
+    };
+    $("#menu-launcher").on("click", toggleMenu);
+    //function() {
+    //$("#widget-area").toggleClass("open");
+    //});
+    // quick and dirty menu init
+    toggleMenu();
+    setTimeout(function() {
+        toggleMenu();
+        $("#widget-area").removeClass("init");
+    }, 1e3);
+    // $("#widget-area").css("margin-bottom",
+    // 	-($("#main-menu").outerHeight() - $("#menu-launcher").outerHeight()))
+    // 	.removeClass("init");
     /// item table
     $("#infolist").on("scroll", infolistScroll);
     $("#map").on("mouseleave", function() {

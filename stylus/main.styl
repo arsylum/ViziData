@@ -16,9 +16,6 @@ chart-mbottom = 5px
 
 legend-width = 250px
 
-chart-range-arrow-length = 16px
-chart-range-arrow-distance = 5px
-
 controls-padding = 5px
 box-padding = 10px
 
@@ -39,10 +36,14 @@ boxshadow = 0px 1px 2px rgba(0, 0, 0, 0.5)
 //////////////////////////////////////
 /// general - elements and classes //
 ////////////////////////////////////
+*
+	box-sizing border-box
+
 html, body
 	height 100%
 	min-height 570px
 	font-size 14px
+	font-family 'Oxygen', sans-serif
 
 html, body, menu, div, p
 	margin 0
@@ -81,6 +82,49 @@ em
 	//border-radius: ($outer-border-radius/4);
 	background: tt-bg;
 	color: white;
+
+
+//////////////
+/// header //
+////////////
+header
+	position fixed
+	z-index 10
+	right -20px
+	bottom 15px
+
+	h1 
+		clear: both;
+		font-family: sans-serif;
+		font-size: 1.6em;
+		margin: 15px 15px 5px;
+		font-weight: bold;
+
+		span 
+			font-size: .5em;
+		
+
+	#github_link 
+		position: relative;
+		float: left;
+		width: 120px;
+		margin: 0 15px;
+
+		img[src*=octocat]
+			float right
+			margin-right 10px
+			
+		img[src*=logo] 
+			float: left;
+			transition: .5s;
+			position: absolute;
+			left: 100px;
+			top: 0
+			opacity: 0;
+
+	&:hover #github_link img[src*=logo] 
+		left: 0px;
+		opacity: 1;
 
 /////////////////////////////
 /// map hover info bubble //
@@ -199,6 +243,9 @@ menu#timefilter {
 		}
 
 		range-tt-height = 20px
+		range-tt-margin = 39px
+		range-arrow-length = 16px
+		range-arrow-distance = 5px
 		.range-tt {
 			position: absolute;
 			z-index: 9;
@@ -224,14 +271,14 @@ menu#timefilter {
 			}
 			.arrow-left {
 				//border-width: 0.5em 0.75em 0.5em 0;
-				border-right-width: (chart-range-arrow-length/2);
-				left: -(chart-range-arrow-length/2);
+				border-right-width: (range-arrow-length/2);
+				left: -(range-arrow-length/2);
 				cursor: w-resize;
 			}
 			.arrow-right {
 				//border-width: 0.5em 0 0.5em 0.75em;
-				border-left-width: (chart-range-arrow-length/2);
-				right: -(chart-range-arrow-length/2);
+				border-left-width: (range-arrow-length/2);
+				right: -(range-arrow-length/2);
 				cursor: e-resize;
 			}
 			//&:hover:before, &.draggin:before {
@@ -250,12 +297,12 @@ menu#timefilter {
 			}
 
 			&#range-tt-min {
-				left controls-padding + chart-range-arrow-length + chart-range-arrow-distance
-				//left: legend-width + tt-margin + chart-range-arrow-length + chart-range-arrow-distance;
+				left range-tt-margin + range-arrow-length + range-arrow-distance
+				//left: legend-width + tt-margin + range-arrow-length + range-arrow-distance;
 			}
 			&#range-tt-max {
-				right controls-padding + chart-range-arrow-length + chart-range-arrow-distance
-				//right: controls-padding + tt-margin + chart-range-arrow-length + chart-range-arrow-distance;
+				right range-tt-margin + range-arrow-length + range-arrow-distance
+				//right: controls-padding + tt-margin + range-arrow-length + range-arrow-distance;
 			}
 
 			//opacity: 0.1;
@@ -263,12 +310,12 @@ menu#timefilter {
 		}
 		&:hover .range-tt {
 			.arrow-left {
-				border-right-width: chart-range-arrow-length;
-				left: -(chart-range-arrow-length) - chart-range-arrow-distance;
+				border-right-width: range-arrow-length;
+				left: -(range-arrow-length) - range-arrow-distance;
 			}
 			.arrow-right {
-				border-left-width: chart-range-arrow-length;
-				right: -(chart-range-arrow-length) - chart-range-arrow-distance;
+				border-left-width: range-arrow-length;
+				right: -(range-arrow-length) - range-arrow-distance;
 			}
 		}
 	}
@@ -309,7 +356,4 @@ menu#timefilter {
 	
 
 #config
-	display none
-	
-header
 	display none

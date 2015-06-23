@@ -6,13 +6,22 @@
 	<meta charset="utf-8">
 
 	<link href="./stylesheets/style.css" media="screen, projection" rel="stylesheet" />
-	<!-- Leaflet -->
-	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
 
+	<link href='http://fonts.googleapis.com/css?family=Oxygen:400,700' rel='stylesheet' type='text/css'>
+
+	<!-- external scripts - ->
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
 	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-	<script>//L_DISABLE_3D = true;</script>
-	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script> 
+
+	<!-- include them locally for offline development (temporary hack) -->
+	<link rel="stylesheet" href="../assets/leaflet.css" />
+	<script src="../assets/jquery-2.1.1.min.js"></script>
+	<script src="../assets/d3.v3.min.js" charset="utf-8"></script>
+	<script src="../assets/leaflet.js"></script> 
+	<!-- /external scripts -->
+
 	<script src="./js/main.js"></script>
 	
 </head>
@@ -23,7 +32,7 @@
 		<img src="./github_logo.png" alt="GitHub">
 		<img src="./octocat.png" alt="GitHub">
 	</a>
-	<h1>ViziData <span>1.0</span></h1>
+	<h1>ViziData<!--<span>1.0</span>--></h1>
 </header>
 
 <!-- chart aka timeline -->
@@ -41,7 +50,7 @@
 
 
 <!-- ui widgets -->
-<div id="widget-area">
+<div id="widget-area" class="init">
 	<!-- legend -->
 	<div id="legend"></div>
 
@@ -58,8 +67,10 @@
 	<menu>-->
 	<!-- main menu -->
 	
-		<div id="filter"><h2>Data Selection</h2></div>
-		<div id="controls-timeline" class="controls">
+		<div id="filter"><h2>Data Selection</h2>
+		<fieldset><select><option>humans</option><option>things</option><option>aliens</option><option>cats</option></select></fieldset>
+		</fieldset></div>
+		<div id="controls-timeline" class="controls advanced">
 			<h2>Timeline Settings</h2>
 			<!-- switch timeline mode -->
 			<fieldset id="ctrl-tlmode">
@@ -82,12 +93,12 @@
 		</div>
 		<div id="controls-map" class="controls">
 			<h2>Map Settings</h2>
-			<fieldset id="ctrl-maplayer" class="fieldgroup">
+			<fieldset id="ctrl-maplayer" class="fieldgroup advanced">
 				<legend>Map</legend>
 				<fieldset class="slider">
 					<legend>Opacity</legend>
 					<input type="range" id="map-opacity" min="0" max="1" step="0.1" value="1" />
-					<input type="text" id="map-opacity-display" readonly size="2" value="1" />
+<!-- 					<input type="text" id="map-opacity-display" readonly size="2" value="1" /> -->
 				</fieldset>
 				<label>
 					<input id="maplayer-shape" type="checkbox" checked 
@@ -107,12 +118,12 @@
 					<legend>Size</legend>
 					<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1" />
 					<!--</label>-->
-					<input id="reso-display" type="text" readonly size="2" value="1" />
+					<!--<input id="reso-display" type="text" readonly size="2" value="1" />-->
 				</fieldset>
-				<fieldset class="slider">
+				<fieldset class="slider advanced">
 					<legend>Drawing Overlap</legend>
 					<input id="bleed-slider" type="range" min="0.5" max="3" step="0.1" value="1.2" />
-					<input id="bleed-display" type="text" readonly size="2" value="1.2" />
+<!-- 					<input id="bleed-display" type="text" readonly size="2" value="1.2" /> -->
 				</fieldset>
 				<!--<fieldset class="slider">
 					<legend>Zoom</legend>
@@ -130,10 +141,10 @@
 	</menu>
 </div>
 	<!--</menu>-->
-	<!--<div id="stuff">
-	</div>-->
+<div id="stuff">
+	<!--</div>-->
 	
-	<!--<div id="cellinfo-desc"><div></div></div>
+	<div id="cellinfo-desc"><div></div></div>
 	<div id="cellinfo">
 		<div class="table-wrapper">
 			<table>
@@ -150,7 +161,7 @@
 			</table>
 		</div>
 	</div>
-<!-- </div> -->
+</div>
 
 
 </body>

@@ -1,6 +1,7 @@
 /// Vars
 menu-bg = rgba(0,0,0,.8)
 menu-vmargin = 5px
+menu-icon-margin-right = 1rem
 
 ////////////////////////////////////////////
 /// widget area - main control interface //
@@ -10,19 +11,27 @@ menu-vmargin = 5px
 	z-index 11
 	left controls-padding
 	bottom 0
+	transition all 0.4s
 	
-	&>div
-		width legend-width
+	/*&>div, #menu-launcher
 		padding box-padding
 		background legend-bg
+		margin box-padding 0*/
+		
+		
+	#legend, #main-menu
+		width legend-width
 		box-shadow boxshadow
-		margin-top box-padding
+		//margin box-padding 0
+		border 1px rgba(0,0,0,0.5) solid
 
 ////////////////////////////////////
 /// legend - informative display //
 //////////////////////////////////
 	#legend 
-		
+		background legend-bg
+		margin menu-vmargin 0
+		padding box-padding
 		//position absolute
 		//bottom -(chart-mbottom)
 		//left 0
@@ -32,17 +41,53 @@ menu-vmargin = 5px
 /// main menu (child of widget area) //
 //////////////////////////////////////
 #main-menu 
-		
+	position relative
+	top 5px	
 	line-height: 1.2em;
+	background rgba(200, 200, 200, 0.8)
+	transition all 0.4s
+
+	&:hover 
+		top 0
+		background rgba(0,0,0,.8)
+		color white
+
+	/// LAUNCHER ///
+	#menu-launcher
+		position relative
+		cursor pointer
+		padding box-padding
+		
+		#menu-icon
+			position absolute
+			right menu-icon-margin-right
+			top 50%
+			margin-top -1rem
+			height 2rem
+			width 2rem
+			
+			use
+				stroke-width 1
+				stroke rgba(0,0,0,0.5)
+				
+		&:hover	#menu-icon use
+			stroke white
+	//|\ LAUNCHER ///
+
 
 	&>div
-		padding box-padding
 		margin-bottom menu-vmargin
 		&:last-child
 			margin-bottom 0
+			
+		&>fieldset
+			padding box-padding
 
 	.advanced 
 		display none
+		
+	fieldset
+		border none
 		
 	div>fieldset
 		padding 0 box-padding	
@@ -51,7 +96,7 @@ menu-vmargin = 5px
 			padding-bottom: box-padding;
 			
 	.fieldgroup
-		border: 2px rgb(208, 208, 208) solid;
+		border: 2px rgba(208, 208, 208, 0.1) solid
 		//border-radius: 0 0 $outer-border-radius/2 $outer-border-radius/2;
 		&>legend 
 			font-family: sans-serif;
@@ -92,6 +137,7 @@ menu-vmargin = 5px
 			transition: transform 0.4s, top 0.4s, border-width 0s;
 			position: relative;
 			top: 3px;
+			right: menu-icon-margin-right
 			
 		&.closed:after 
 			transform: rotate(45deg);
@@ -100,49 +146,140 @@ menu-vmargin = 5px
 		&:hover:after 
 			border-width: 3px;
 		
-	
-	
-	/// LAUNCHER ///
-	#menu-launcher
-		position relative
-		cursor pointer
-		top 5px
-		transition all 0.4s
-		
-		#menu-icon
-			position absolute
-			right 1rem
-			top 50%
-			margin-top -1rem
-			height 2rem
-			width 2rem
-			
-			use
-				stroke-width 1
-				stroke rgba(0,0,0,0.5)
-				
-		&:hover
-			top 0
-			background rgba(0,0,0,.8)
-			color white
-			
-			#menu-icon use
-				stroke white
-	//|\ LAUNCHER ///
-		
 
 
 
 #widget-area.open
+	margin-bottom 0 !important
 	#legend
 		display none
 		
 	#main-menu
 		background menu-bg
 		color white
+		top 0px
 		#menu-launcher
-			background transparent
+			//background transparent
+			//top 0
+			#menu-icon use
+				stroke white
+			&:hover #menu-icon use
+				stroke gray
 
 
 #widget-area.init 
 	opacity 0
+	
+
+
+///////////////////////
+/// form appearance //
+/////////////////////
+
+select, label
+	display: inline;
+	
+menu select
+	background transparent
+	border none
+	color white
+	
+	option
+		background green
+		
+		&:hover
+			background red
+			color yelllow
+			font-weight bold	
+
+menu .controls 
+	.slider 
+		line-height: 1.5em;
+		//margin: .5em 0;
+		//display: inline-block;
+		width: 100%;
+		// input {
+		// 	display: inline-block;
+		// 	width: 80%;
+		// 	&:last-child {
+		// 		width: 20%;
+		// 	}
+		// }
+		legend 
+			margin-bottom: -.5em;
+
+
+	
+
+	input[type=range]//, input[type=text] 
+		display: inline-block;
+		//padding: 2%;
+		margin: 0;
+		border: none;
+		vertical-align: middle;
+		width: 100%;
+
+	/*input[type=text][readonly] 
+		width: 14%;
+		margin-left: 2%;
+		text-align: center;*/
+	
+
+	input[type=range] 
+		-webkit-appearance: none;
+	
+
+	input[type=range]::-webkit-slider-runnable-track {
+	    height: 3px
+	    //background: yelllow //rgba(255,255,255,0.1)
+	    background rgb(144, 144, 144)
+	    border: none;
+	    border-radius: 1px;
+	}
+
+	input[type=range]::-webkit-slider-thumb  {
+	    -webkit-appearance: none;
+	    border: none;
+	    height: 16px;
+	    width: 16px;
+	    border-radius: 8px;
+	    background: #a9a9a9;
+	    margin-top: -7px;
+	    transition: background 0.4s;
+	}
+
+	input[type=range]:active::-webkit-slider-thumb,
+	input[type=range]:hover::-webkit-slider-thumb {
+		background: #aa5500;
+		cursor: pointer;
+	}
+
+	input[type=range]:disabled::-webkit-slider-thumb {
+		background: #d8d8d8;
+		cursor: default;
+	}
+
+	input[type=range]:focus {
+	    outline: none;
+	}
+	
+
+	input[type=range]:active::-webkit-slider-runnable-track {
+	    background: #ccc;	
+	}
+	
+	input[value=1]::-webkit-slider-thumb {
+		background red !important
+	}
+	input[value=1.0]::-webkit-slider-thumb {
+		background red !important
+	}
+
+
+	for num in (1..10)
+		input[type=range].valuepc-{num}::-webkit-slider-thumb {
+			height (6+num*2)px
+			width (6+num*2)px
+			border-radius (3+num)px
+			margin-top -(2+num)px
+		}
