@@ -1,10 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
 
 <symbol id="menu" viewBox="0 0 7 7" title="Open Menu">
-	<g style="fill: #000">
+	<g>
 		<path d="M 1,1.5 L 6,1.5" />
 		<path d="M 1,3.5 L 6,3.5" />
 		<path d="M 1,5.5 L 6,5.5" />
+	</g>
+</symbol>
+<symbol id="checkbox-empty" viewBox="0 0 7 7" title="not set">
+	<g style="fill: #000">
+		<rect x="1" y="1" width="5" height="5" />
+	</g>
+</symbol>
+
+<symbol id="checkbox-empty" viewBox="0 0 7 7" title="not set">
+	<g style="fill: #000">
+		<rect x="1" y="1" width="5" height="5" />
+		<rect x="2" y="2" width="3" height="5" />
 	</g>
 </symbol>
 </svg>

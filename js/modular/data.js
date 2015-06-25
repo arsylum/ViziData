@@ -29,49 +29,65 @@ function setSetSel(dsi, dgi) { //, callback){
 		genGrid();
 	} else {
 		// loading feedback
-		var l = 0;
-		var lAnim = setInterval(function(){
-		var txt = [
-			"loading... &nbsp; &nbsp; ┬──┬﻿",
-			"loading... &nbsp; &nbsp; ┬──┬﻿",
-			"loading... (°o°） ┬──┬﻿",
-			"loading... &nbsp;(°o°）┬──┬﻿",
-			"loading... (╯°□°）╯ ┻━┻",
-			"loading... (╯°□°）╯︵ ┻━┻",
-			"loading... (╯°□°）╯︵ ︵ ┻━┻",
-			"loading... (╯°□°）╯︵ ︵ ︵ ┻━┻",
-			"loading... ︵ ︵ ︵ ┻━┻",
-			"loading... ︵ ︵ ┻━┻",
-			"loading... ︵ ┻━┻",
-			"loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp; (ツ)",
-			"loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp;(ツ)",
-			"loading... &nbsp; &nbsp; ┻━┻ &nbsp; (ツ)",
-			"loading... &nbsp; &nbsp; ┻━┻ &nbsp;(ツ)",
-			"loading... &nbsp; &nbsp; ┬──┬﻿ ¯\\_(ツ)",
-			"loading... &nbsp; &nbsp; ┬──┬﻿ (ツ)",
-			];
-		$("#dsdesc").html(txt[l]);
-		l = (l+1)%17;
-		},180);
+		// var l = 0;
+		// var lAnim = setInterval(function(){
+		// var txt = [
+		// 	"loading... &nbsp; &nbsp; ┬──┬﻿",
+		// 	"loading... &nbsp; &nbsp; ┬──┬﻿",
+		// 	"loading... (°o°） ┬──┬﻿",
+		// 	"loading... &nbsp;(°o°）┬──┬﻿",
+		// 	"loading... (╯°□°）╯ ┻━┻",
+		// 	"loading... (╯°□°）╯︵ ┻━┻",
+		// 	"loading... (╯°□°）╯︵ ︵ ┻━┻",
+		// 	"loading... (╯°□°）╯︵ ︵ ︵ ┻━┻",
+		// 	"loading... ︵ ︵ ︵ ┻━┻",
+		// 	"loading... ︵ ︵ ┻━┻",
+		// 	"loading... ︵ ┻━┻",
+		// 	"loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp; (ツ)",
+		// 	"loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp;(ツ)",
+		// 	"loading... &nbsp; &nbsp; ┻━┻ &nbsp; (ツ)",
+		// 	"loading... &nbsp; &nbsp; ┻━┻ &nbsp;(ツ)",
+		// 	"loading... &nbsp; &nbsp; ┬──┬﻿ ¯\\_(ツ)",
+		// 	"loading... &nbsp; &nbsp; ┬──┬﻿ (ツ)",
+		// 	];
+		// $("#dsdesc").html(txt[l]);
+		// l = (l+1)%17;
+		// },180);
+
+		$("#dsdesc").html(
+			'<h4>Dataset <em>' + current_datsel.datasets[dsi].strings.label + '</em></h4>' +
+			'<div class="loading-box"><div class="loading-bar"></div></div>');
 
 		var lBM = new Date();
 		console.log("~~ starting to load dataset "+current_datsel.datasets[dsi].strings.label+" ~~ ");
-		$.getJSON(DATA_DIR+current_datsel.datasets[dsi].file, function(data){
-			console.log(" |BM| finished loading "+current_datsel.datasets[dsi].strings.label+" data (took "+(new Date()-lBM)+"ms)");
-						
-			current_datsel.datasets[dsi].data = data;
-			current_setsel = current_datsel.datasets[dsi];
-			lBM = Date.now();
-			preprocess(current_setsel);
+		$.ajax({
+			dataType: "json",
+			url: DATA_DIR+current_datsel.datasets[dsi].file,
+			//data: data,
+			progress: function(e) {
+				if (e.lengthComputable) {
+					var pct = Math.floor((e.loaded / e.total)*100);
+					$("#dsdesc .loading-bar").css("width", pct+"%");
+				}
+			},
+			success: function(data) {
+		//$.getJSON(DATA_DIR+current_datsel.datasets[dsi].file, function(data){
+				console.log(" |BM| finished loading "+current_datsel.datasets[dsi].strings.label+" data (took "+(new Date()-lBM)+"ms)");
+							
+				current_datsel.datasets[dsi].data = data;
+				current_setsel = current_datsel.datasets[dsi];
+				lBM = Date.now();
+				preprocess(current_setsel);
 
-			console.log(" |BM| finished preprocessing object iterators ("+(Date.now()-lBM)+"ms)");
+				console.log(" |BM| finished preprocessing object iterators ("+(Date.now()-lBM)+"ms)");
 
-			clearInterval(lAnim);
+				//clearInterval(lAnim);
 
-			updateUI();
-			genChart();
-			initComplete = true;
-			genGrid();
+				updateUI();
+				genChart();
+				initComplete = true;
+				genGrid();
+			}
 		});
 	}
 }

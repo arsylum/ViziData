@@ -374,7 +374,8 @@ function initLeaflet() {
 	leafly = L.map('leaflet', {
 		//maxBounds: [[-90,-180],[90,180]],
 		attributionControl: false,
-		worldCopyJump: true
+		worldCopyJump: true,
+		zoomControl: false
 	}).setView([0,0], 2);
 	leafly.___eventHandlersAtached = false;
 
@@ -385,7 +386,8 @@ function initLeaflet() {
 		maxZoom: M_ZOOM_RANGE[1]
 	});
 	leafloor.addTo(leafly);
-	
+
+	L.control.zoom({ 'position': 'topright' }).addTo(leafly);
 	L.control.attribution({prefix: false}).addAttribution(
 		'<a id="home-link" target="_top" href="http://maps.stamen.com/">Map tiles</a> by '+
 		'<a target="_top" href="http://stamen.com">Stamen Design</a>, '+

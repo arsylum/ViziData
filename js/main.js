@@ -6423,6 +6423,30 @@ envision.templates = envision.templates || {};
 })();
 
 /*
+ * simple ajax progress Event jQuery Plugin by Chad Engler
+ * https://github.com/englercj/jquery-ajax-progress */
+(function($, window, undefined) {
+    //is onprogress supported by browser?
+    var hasOnProgress = "onprogress" in $.ajaxSettings.xhr();
+    //If not supported, do nothing
+    if (!hasOnProgress) {
+        return;
+    }
+    //patch ajax settings to call a progress callback
+    var oldXHR = $.ajaxSettings.xhr;
+    $.ajaxSettings.xhr = function() {
+        var xhr = oldXHR();
+        if (xhr instanceof window.XMLHttpRequest) {
+            xhr.addEventListener("progress", this.progress, false);
+        }
+        if (xhr.upload) {
+            xhr.upload.addEventListener("progress", this.progress, false);
+        }
+        return xhr;
+    };
+})(jQuery, window);
+
+/*
  Generic  Canvas Overlay for leaflet, 
  Stanislav Sumbera, April , 2014
 
@@ -6523,6 +6547,71 @@ L.canvasOverlay = function(userDrawFunc, options) {
     return new L.CanvasOverlay(userDrawFunc, options);
 };
 
+/*
+
+sizeof.js
+
+A function to calculate the approximate memory usage of objects
+
+Created by Stephen Morley - http://code.stephenmorley.org/ - and released under
+the terms of the CC0 1.0 Universal legal code:
+
+http://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+*/
+/* Returns the approximate memory usage, in bytes, of the specified object. The
+ * parameter is:
+ *
+ * object - the object whose size should be determined
+ */
+function sizeof(object) {
+    // initialise the list of objects and size
+    var objects = [ object ];
+    var size = 0;
+    // loop over the objects
+    for (var index = 0; index < objects.length; index++) {
+        // determine the type of the object
+        switch (typeof objects[index]) {
+          // the object is a boolean
+            case "boolean":
+            size += 4;
+            break;
+
+          // the object is a number
+            case "number":
+            size += 8;
+            break;
+
+          // the object is a string
+            case "string":
+            size += 2 * objects[index].length;
+            break;
+
+          // the object is a generic object
+            case "object":
+            // if the object is not an array, add the sizes of the keys
+            if (Object.prototype.toString.call(objects[index]) != "[object Array]") {
+                for (var key in objects[index]) size += 2 * key.length;
+            }
+            // loop over the keys
+            for (var key in objects[index]) {
+                // determine whether the value has already been processed
+                var processed = false;
+                for (var search = 0; search < objects.length; search++) {
+                    if (objects[search] === objects[index][key]) {
+                        processed = true;
+                        break;
+                    }
+                }
+                // queue the value to be processed if appropriate
+                if (!processed) objects.push(objects[index][key]);
+            }
+        }
+    }
+    // return the calculated size
+    return size;
+}
+
 ////////////////////////
 /// data management ///
 //////////////////////
@@ -6555,26 +6644,57 @@ function setSetSel(dsi, dgi) {
         genGrid();
     } else {
         // loading feedback
-        var l = 0;
-        var lAnim = setInterval(function() {
-            var txt = [ "loading... &nbsp; &nbsp; ┬──┬", "loading... &nbsp; &nbsp; ┬──┬", "loading... (°o°） ┬──┬", "loading... &nbsp;(°o°）┬──┬", "loading... (╯°□°）╯ ┻━┻", "loading... (╯°□°）╯︵ ┻━┻", "loading... (╯°□°）╯︵ ︵ ┻━┻", "loading... (╯°□°）╯︵ ︵ ︵ ┻━┻", "loading... ︵ ︵ ︵ ┻━┻", "loading... ︵ ︵ ┻━┻", "loading... ︵ ┻━┻", "loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp; (ツ)", "loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp;(ツ)", "loading... &nbsp; &nbsp; ┻━┻ &nbsp; (ツ)", "loading... &nbsp; &nbsp; ┻━┻ &nbsp;(ツ)", "loading... &nbsp; &nbsp; ┬──┬ ¯\\_(ツ)", "loading... &nbsp; &nbsp; ┬──┬ (ツ)" ];
-            $("#dsdesc").html(txt[l]);
-            l = (l + 1) % 17;
-        }, 180);
+        // var l = 0;
+        // var lAnim = setInterval(function(){
+        // var txt = [
+        // 	"loading... &nbsp; &nbsp; ┬──┬",
+        // 	"loading... &nbsp; &nbsp; ┬──┬",
+        // 	"loading... (°o°） ┬──┬",
+        // 	"loading... &nbsp;(°o°）┬──┬",
+        // 	"loading... (╯°□°）╯ ┻━┻",
+        // 	"loading... (╯°□°）╯︵ ┻━┻",
+        // 	"loading... (╯°□°）╯︵ ︵ ┻━┻",
+        // 	"loading... (╯°□°）╯︵ ︵ ︵ ┻━┻",
+        // 	"loading... ︵ ︵ ︵ ┻━┻",
+        // 	"loading... ︵ ︵ ┻━┻",
+        // 	"loading... ︵ ┻━┻",
+        // 	"loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp; (ツ)",
+        // 	"loading... &nbsp; &nbsp; ┻━┻ &nbsp; &nbsp;(ツ)",
+        // 	"loading... &nbsp; &nbsp; ┻━┻ &nbsp; (ツ)",
+        // 	"loading... &nbsp; &nbsp; ┻━┻ &nbsp;(ツ)",
+        // 	"loading... &nbsp; &nbsp; ┬──┬ ¯\\_(ツ)",
+        // 	"loading... &nbsp; &nbsp; ┬──┬ (ツ)",
+        // 	];
+        // $("#dsdesc").html(txt[l]);
+        // l = (l+1)%17;
+        // },180);
+        $("#dsdesc").html("<h4>Dataset <em>" + current_datsel.datasets[dsi].strings.label + "</em></h4>" + '<div class="loading-box"><div class="loading-bar"></div></div>');
         var lBM = new Date();
         console.log("~~ starting to load dataset " + current_datsel.datasets[dsi].strings.label + " ~~ ");
-        $.getJSON(DATA_DIR + current_datsel.datasets[dsi].file, function(data) {
-            console.log(" |BM| finished loading " + current_datsel.datasets[dsi].strings.label + " data (took " + (new Date() - lBM) + "ms)");
-            current_datsel.datasets[dsi].data = data;
-            current_setsel = current_datsel.datasets[dsi];
-            lBM = Date.now();
-            preprocess(current_setsel);
-            console.log(" |BM| finished preprocessing object iterators (" + (Date.now() - lBM) + "ms)");
-            clearInterval(lAnim);
-            updateUI();
-            genChart();
-            initComplete = true;
-            genGrid();
+        $.ajax({
+            dataType: "json",
+            url: DATA_DIR + current_datsel.datasets[dsi].file,
+            //data: data,
+            progress: function(e) {
+                if (e.lengthComputable) {
+                    var pct = Math.floor(e.loaded / e.total * 100);
+                    $("#dsdesc .loading-bar").css("width", pct + "%");
+                }
+            },
+            success: function(data) {
+                //$.getJSON(DATA_DIR+current_datsel.datasets[dsi].file, function(data){
+                console.log(" |BM| finished loading " + current_datsel.datasets[dsi].strings.label + " data (took " + (new Date() - lBM) + "ms)");
+                current_datsel.datasets[dsi].data = data;
+                current_setsel = current_datsel.datasets[dsi];
+                lBM = Date.now();
+                preprocess(current_setsel);
+                console.log(" |BM| finished preprocessing object iterators (" + (Date.now() - lBM) + "ms)");
+                //clearInterval(lAnim);
+                updateUI();
+                genChart();
+                initComplete = true;
+                genGrid();
+            }
         });
     }
 }
@@ -7145,7 +7265,8 @@ function initLeaflet() {
     leafly = L.map("leaflet", {
         //maxBounds: [[-90,-180],[90,180]],
         attributionControl: false,
-        worldCopyJump: true
+        worldCopyJump: true,
+        zoomControl: false
     }).setView([ 0, 0 ], 2);
     leafly.___eventHandlersAtached = false;
     leafloor = L.tileLayer("", {
@@ -7155,6 +7276,9 @@ function initLeaflet() {
         maxZoom: M_ZOOM_RANGE[1]
     });
     leafloor.addTo(leafly);
+    L.control.zoom({
+        position: "topright"
+    }).addTo(leafly);
     L.control.attribution({
         prefix: false
     }).addAttribution('<a id="home-link" target="_top" href="http://maps.stamen.com/">Map tiles</a> by ' + '<a target="_top" href="http://stamen.com">Stamen Design</a>, ' + 'under <a target="_top" href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ' + 'Data by <a target="_top" href="http://openstreetmap.org">OpenStreetMap</a>, ' + 'under <a target="_top" href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.').addTo(leafly);
@@ -7883,19 +8007,24 @@ function appendTimelineRangeTips() {
 * bind control handlers */
 function setupControlHandlers() {
     // build filter menu
-    var fn = function() {
-        setSetSel(this.value, $(this).parent().parent().attr("data-gi"));
+    var fn = function(e) {
+        $t = $(this);
+        $("#filter fieldset div").removeClass("selected");
+        $t.addClass("selected");
+        setSetSel($t.attr("data-ds"), $t.parent().attr("data-gi"));
     };
-    var filter = $("#filter");
+    var grouptoggle = function() {
+        var $t = $(this);
+        $t.filter(":not(.open)").addClass("open").children("div").slideDown("fast");
+        $('#filter .group-container:not([id="' + $t.attr("id") + '"]).open').removeClass("open").children("div").slideUp("fast");
+    };
+    var filter = $("#filter fieldset"), div;
     for (var i = 0; i < gdata.length; i++) {
-        var fs = $("<fieldset>").attr("data-gid", gdata[i].id).attr("data-gi", i);
-        fs.append("<legend>" + gdata[i].title + "</legend>");
+        div = $('<div id="dg-' + gdata[i].id + '" class="group-container" data-gi="' + i + '">' + "<h4>" + gdata[i].id + "</h4></div>").on("click mouseenter", grouptoggle);
         for (var j = 0; j < gdata[i].datasets.length; j++) {
-            var b = $('<input type="radio" name="radio" value="' + j + '" />').on("change", fn);
-            //var tt = $('<span class="tooltip">'+gdata[i].datasets[j].strings.desc+'</span>');
-            fs.append($('<label class="tooltip" data-tt="' + gdata[i].datasets[j].strings.desc + '">' + gdata[i].datasets[j].strings.label + "</label>").prepend(b));
+            div.append($('<div data-ds="' + j + '" data-tt="' + gdata[i].datasets[j].strings.desc + '" class="tooltip">' + gdata[i].datasets[j].strings.label + "</div>").on("click", fn));
         }
-        filter.append(fs);
+        filter.append(div);
     }
     /*$(".controls input[type='range']")
 		.on("input", (function() {
@@ -7954,6 +8083,15 @@ function setupControlHandlers() {
         $(this).siblings("fieldset").slideToggle();
     });
     /// setup menu
+    // toggle extended version
+    $("#show-advanced input").on("change", function() {
+        if (this.checked) {
+            $("#main-menu").removeClass("hide-advanced");
+        } else {
+            $("#main-menu").addClass("hide-advanced");
+        }
+    });
+    // setup menu jumper
     var toggleMenu = function() {
         var $wa = $("#widget-area");
         if ($wa.hasClass("open")) {
@@ -7978,6 +8116,7 @@ function setupControlHandlers() {
     setTimeout(function() {
         toggleMenu();
         $("#widget-area").removeClass("init");
+        setTimeout(toggleMenu, 500);
     }, 1e3);
     // $("#widget-area").css("margin-bottom",
     // 	-($("#main-menu").outerHeight() - $("#menu-launcher").outerHeight()))
@@ -8010,8 +8149,8 @@ function setupControlHandlers() {
 function updateUI() {
     var zprop = current_setsel.strings.zprop || T_DEFAULT_ZPROP;
     $("#cellinfo th:last-child").text(zprop);
-    $("#dsdesc").html("<h4>Dataset</h4><h3><em>" + //current_setsel.parent.label + '</em> &gt; <em>' + 
-    current_setsel.strings.label + "</em></h3>");
+    $("#dsdesc").html("<h4>Dataset <em>" + //current_setsel.parent.label + '</em> &gt; <em>' + 
+    current_setsel.strings.label + "</em></h4>" + "<p>" + current_setsel.strings.desc + "</p>");
     var showDsDesc = function() {};
 }
 
@@ -8040,7 +8179,8 @@ function urlifyState() {
         return false;
     }
     // selected dataset
-    var setsel = $("#filter input[type='radio']:checked").val();
+    //var setsel = $("#filter input[type='radio']:checked").val();
+    var setsel = $("#filter div.selected").attr("data-ds");
     var hash = "d=" + setsel;
     // selected datagroup
     hash += "&m=" + current_datsel.id;
@@ -8203,6 +8343,7 @@ function statifyUrl() {
     });
     //selectedCell = geoCoord2index(cellsel[0], cellsel[1], calcReso());
     // select dataset
-    $("#filter fieldset[data-gid=" + dg + "] input").get(ds).click();
+    //$("#filter fieldset[data-gid="+dg+"] input").get(ds).click();
+    $("#dg-" + dg + ">div").get(ds).click();
     attachMapHandlers();
 }

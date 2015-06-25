@@ -1,33 +1,32 @@
 /// Vars
 menu-bg = rgba(0,0,0,.8)
+menu-col = white
+menu-highlight = #E09100
 menu-vmargin = 5px
 menu-icon-margin-right = 1rem
+menu-icon-size = 2rem
 
-////////////////////////////////////////////
-/// widget area - main control interface //
-//////////////////////////////////////////
-#widget-area
+
+
+#info-area, #widget-area
 	position absolute
-	z-index 11
 	left controls-padding
-	bottom 0
+	z-index 11
 	transition all 0.4s
 	
-	/*&>div, #menu-launcher
-		padding box-padding
-		background legend-bg
-		margin box-padding 0*/
-		
-		
 	#legend, #main-menu
 		width legend-width
 		box-shadow boxshadow
 		//margin box-padding 0
-		border 1px rgba(0,0,0,0.5) solid
+		//border 1px rgba(0,0,0,0.5) solid
 
-////////////////////////////////////
-/// legend - informative display //
-//////////////////////////////////
+
+/////////////////////////////////////////
+/// info area - item table and legend //
+///////////////////////////////////////
+#info-area
+	top 0
+
 	#legend 
 		background legend-bg
 		margin menu-vmargin 0
@@ -35,6 +34,23 @@ menu-icon-margin-right = 1rem
 		//position absolute
 		//bottom -(chart-mbottom)
 		//left 0
+
+////////////////////////////////////////////
+/// widget area - main control interface //
+//////////////////////////////////////////
+#widget-area
+	bottom 0
+
+	
+	/*&>div, #menu-launcher
+		padding box-padding
+		background legend-bg
+		margin box-padding 0*/
+		
+		
+	
+
+
 			
 	
 ////////////////////////////////////////
@@ -44,7 +60,8 @@ menu-icon-margin-right = 1rem
 	position relative
 	top 5px	
 	line-height: 1.2em;
-	background rgba(200, 200, 200, 0.8)
+	background menu-bg
+	color menu-col
 	transition all 0.4s
 
 	&:hover 
@@ -52,28 +69,56 @@ menu-icon-margin-right = 1rem
 		background rgba(0,0,0,.8)
 		color white
 
-	/// LAUNCHER ///
+	em {
+		color menu-highlight
+	}
+
+	/// LAUNCHER / description ///
 	#menu-launcher
 		position relative
 		cursor pointer
 		padding box-padding
+		padding-right 0
 		
 		#menu-icon
 			position absolute
 			right menu-icon-margin-right
 			top 50%
 			margin-top -1rem
-			height 2rem
-			width 2rem
+			height menu-icon-size
+			width menu-icon-size
 			
 			use
 				stroke-width 1
-				stroke rgba(0,0,0,0.5)
+				stroke rgb(200,200,200)
 				
 		&:hover	#menu-icon use
 			stroke white
-	//|\ LAUNCHER ///
+		
+		#dsdesc
+			margin-right (menu-icon-margin-right + menu-icon-size)
+			
+			h4
+				margin-bottom .2rem
+			p 
+				font-size 0.85rem
 
+
+		.loading-box
+			margin-right menu-icon-margin-right
+			height 1rem
+			border 1px rgba(255, 255, 255, 0.4) solid
+			
+			.loading-bar
+				height 100%
+				width 0
+				background #2189B3
+				font-size 0.8rem
+				line-height 1rem
+				text-align center
+
+
+	//|\ LAUNCHER ///
 
 	&>div
 		margin-bottom menu-vmargin
@@ -83,15 +128,16 @@ menu-icon-margin-right = 1rem
 		&>fieldset
 			padding box-padding
 
-	.advanced 
-		display none
+	&.hide-advanced .advanced 
+		display none !important
 		
 	fieldset
 		border none
 		
 	div>fieldset
 		padding 0 box-padding	
-		margin-top: .5em;
+		//margin-top: .5em;
+		margin .5em 0 0
 		&:last-child 
 			padding-bottom: box-padding;
 			
@@ -155,8 +201,7 @@ menu-icon-margin-right = 1rem
 		display none
 		
 	#main-menu
-		background menu-bg
-		color white
+
 		top 0px
 		#menu-launcher
 			//background transparent
@@ -164,12 +209,97 @@ menu-icon-margin-right = 1rem
 			#menu-icon use
 				stroke white
 			&:hover #menu-icon use
-				stroke gray
+				stroke rgb(200,200,200)
 
 
 #widget-area.init 
 	opacity 0
 	
+
+////////////////////////
+/// dataset selector //
+//////////////////////
+
+#filter fieldset
+	
+
+	.group-container
+		//background transparent
+		
+		&.open
+			background rgba(4, 20, 71, 0.4)
+			border-radius: 0 0 4px 4px;
+			h4
+				border 1px rgba(27, 36, 60, 1) solid
+		h4
+			background rgba(119, 119, 119, 0.3)
+			padding .4em .5em
+			box-shadow boxshadow
+
+		&>div
+			cursor pointer
+			display none
+			padding 0 1em
+			height 20px
+			font-size 14px
+			line-height 20px
+			
+			
+			&:hover
+				background rgba(menu-highlight, 0.2)
+			&.selected
+				//background rgba(menu-highlight, 0.8)
+				font-weight bold
+
+/// dataset tooltips
+.tooltip 
+	display: inline;
+	position: relative;
+
+	&:before, &:after 
+		transition: all  .2s;
+		opacity: 0;
+		pointer-events: none;
+
+
+	&:hover:before, &:hover:after
+		opacity: 1;
+		//pointer-events: auto;
+
+	&:after 
+		content: attr(data-tt);
+		display: block;
+		position: absolute;
+		background: menu-bg
+		color: menu-col
+		font-size: 1.1em;
+		line-height: 1.1em;
+		width: 10rem
+		top: -100%;
+		left: 100%;
+		margin-top: 17px // matches baseline of dataset label text
+		margin-left: box-padding
+		padding: .4em .8em;
+		text-align: left;
+
+		box-shadow: boxshadow // 0px 1px 2px rgba(0, 0, 0, 0.25);
+		z-index: 9998;
+
+
+	&:before 
+		border: solid;
+		border-color: transparent transparent transparent rgba(menu-highlight, 0.2);
+		border-width: 10px 0 10px 10px;
+		content: "";
+		display: block;
+		width: 0;
+		left: 100%;
+		top: 50%;
+		margin-top: -10px;
+		position: absolute;
+		z-index: 9999;
+
+
 
 
 ///////////////////////
@@ -179,19 +309,65 @@ menu-icon-margin-right = 1rem
 select, label
 	display: inline;
 	
-menu select
+// todo
+input[type="checkbox"]:checked + label {
+ 	background black
+}
+/*menu select
 	background transparent
 	border none
 	color white
+	width 100%
 	
+
+	&::-webkit-scrollbar {
+	    height: 12px;
+	    width: 12px;
+	    background: #000;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: #393812;
+	    border-radius: 1ex;
+	    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+	}
+
+	&::-webkit-scrollbar-corner {
+	    background: #000;
+	}
+	
+	
+	&:active, &:focus
+		//border none
+		outline none
 	option
-		background green
+		//padding .4em
+		position relative
+		cursor pointer
+		
+		&.selected:before
+			content 'bla'
+			position absolute
+			top 0
+			left 0
+			width 100%
+			height 100%
+			background green			
+		
+		&:after
+			content 'bla'
+			float right
+			
 		
 		&:hover
-			background red
-			color yelllow
-			font-weight bold	
-
+			background rgba(170, 85, 0, 0.25)
+			//color yelllow
+			//font-weight bold	
+		&:focus
+			background rgba(170, 85, 0, 0.75)
+		&.selected
+			background rgba(170, 85, 0, 0.75)
+*/
 menu .controls 
 	.slider 
 		line-height: 1.5em;
@@ -276,10 +452,10 @@ menu .controls
 	}
 
 
-	for num in (1..10)
-		input[type=range].valuepc-{num}::-webkit-slider-thumb {
-			height (6+num*2)px
-			width (6+num*2)px
-			border-radius (3+num)px
-			margin-top -(2+num)px
-		}
+	// for num in (1..10)
+	// 	input[type=range].valuepc-{num}::-webkit-slider-thumb {
+	// 		height (6+num*2)px
+	// 		width (6+num*2)px
+	// 		border-radius (3+num)px
+	// 		margin-top -(2+num)px
+	// 	}

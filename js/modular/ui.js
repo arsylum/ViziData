@@ -6,21 +6,33 @@
 function setupControlHandlers() {
 
 	// build filter menu
-	var fn = function() { 
-		setSetSel(this.value, $(this).parent().parent().attr("data-gi")); 
-	};
-	var filter = $("#filter");
+	var fn = function(e) {
+		$t = $(this);
+		$("#filter fieldset div").removeClass("selected");
+		$t.addClass("selected");
+		setSetSel($t.attr("data-ds"), $t.parent().attr("data-gi"));
+	}
+	var grouptoggle = function() {
+		var $t = $(this);
+		$t.filter(":not(.open)").addClass("open").children("div").slideDown("fast");
+		$('#filter .group-container:not([id="' + $t.attr("id") + '"]).open')
+			.removeClass("open").children("div").slideUp("fast");
+	}
+
+	var filter = $("#filter fieldset"),
+		div;
 	for(var i = 0; i<gdata.length; i++) {
-		var fs = $("<fieldset>").attr("data-gid", gdata[i].id).attr("data-gi", i);
-		fs.append('<legend>'+gdata[i].title+'</legend>');
+
+		div = $('<div id="dg-'+gdata[i].id+'" class="group-container" data-gi="'+i+'">' + 
+				'<h4>'+gdata[i].id+'</h4></div>').on("click mouseenter", grouptoggle);
+				
 		for(var j=0; j<gdata[i].datasets.length; j++) {
-			var b = $('<input type="radio" name="radio" value="'+j+'" />')
-				.on("change", fn);
-			//var tt = $('<span class="tooltip">'+gdata[i].datasets[j].strings.desc+'</span>');
-			fs.append($('<label class="tooltip" data-tt="'+gdata[i].datasets[j].strings.desc+
-				'">'+gdata[i].datasets[j].strings.label+'</label>').prepend(b));
+			div.append(
+				$('<div data-ds="'+j+'" data-tt="'+gdata[i].datasets[j].strings.desc+'" class="tooltip">' +
+					gdata[i].datasets[j].strings.label+'</div>').on("click", fn)
+			);
 		}
-		filter.append(fs);
+		filter.append(div);
 	}
 
 	/*$(".controls input[type='range']")
@@ -81,8 +93,18 @@ function setupControlHandlers() {
 		$(this).siblings("fieldset").slideToggle();
 	});
 
-
+	
 	/// setup menu
+	// toggle extended version
+	$("#show-advanced input").on("change", function() {
+		if(this.checked) {
+			$("#main-menu").removeClass("hide-advanced");
+		} else {
+			$("#main-menu").addClass("hide-advanced");
+		}
+	});
+
+	// setup menu jumper
 	var toggleMenu = function() {
 		var $wa = $("#widget-area");
 		if($wa.hasClass("open")) {
@@ -107,7 +129,7 @@ function setupControlHandlers() {
 	setTimeout(function() {
 		toggleMenu();
 		$("#widget-area").removeClass("init");
-		//setTimeout(toggleMenu, 500);
+		setTimeout(toggleMenu, 500);
 	}, 1000)
 
 	// $("#widget-area").css("margin-bottom",
@@ -150,10 +172,10 @@ function updateUI() {
 	$("#cellinfo th:last-child").text(zprop);
 
 	$("#dsdesc").html(
-		'<h4>Dataset</h4><h3><em>' + 
+		'<h4>Dataset <em>' + 
 		//current_setsel.parent.label + '</em> &gt; <em>' + 
-		current_setsel.strings.label + '</em></h3>'
-		//+ '<p>' + current_setsel.strings.desc + '</p>'
+		current_setsel.strings.label + '</em></h4>'
+		+ '<p>' + current_setsel.strings.desc + '</p>'
 		);
 
 	var showDsDesc = function() {
@@ -185,7 +207,8 @@ function urlifyState() {
 	if(!initComplete) { return false; }
 
 	// selected dataset
-	var setsel = $("#filter input[type='radio']:checked").val();
+	//var setsel = $("#filter input[type='radio']:checked").val();
+	var setsel = $("#filter div.selected").attr("data-ds");
 	var hash = "d="+setsel;
 	// selected datagroup
 	hash += "&m=" + current_datsel.id;
@@ -331,7 +354,8 @@ function statifyUrl() {
 	//selectedCell = geoCoord2index(cellsel[0], cellsel[1], calcReso());
 	
 	// select dataset
-	$("#filter fieldset[data-gid="+dg+"] input").get(ds).click();
+	//$("#filter fieldset[data-gid="+dg+"] input").get(ds).click();
+	$("#dg-"+dg+">div").get(ds).click();
 	attachMapHandlers();
 	//return true;
 }
