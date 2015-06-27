@@ -9,13 +9,13 @@
 
 	<link href='http://fonts.googleapis.com/css?family=Oxygen:400,700' rel='stylesheet' type='text/css'>
 
-	<!-- external scripts -->
+	<!-- external scripts - ->
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
 	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script> 
 
-	<!-- include them locally for offline development (temporary hack) - ->
+	<!-- include them locally for offline development (temporary hack) -->
 	<link rel="stylesheet" href="../assets/leaflet.css" />
 	<script src="../assets/jquery-2.1.1.min.js"></script>
 	<script src="../assets/d3.v3.min.js" charset="utf-8"></script>
@@ -47,10 +47,14 @@
 	<!--<div id="hud" class="hover-tt"></div>-->
 
 	<!-- information / legend -->
-	<div id="info-area">
+	<div id="info-area" class="init">
 		
+		<!-- legend -->
+		<div id="legend"></div>
 
-		<!-- <div id="cellinfo-desc"><div></div></div>
+		<div id="cellinfo-desc"><div class="inactive">
+			(click on a point to see it's contents)
+		</div></div>
 		<div id="cellinfo">
 			<div class="table-wrapper">
 				<table>
@@ -66,10 +70,7 @@
 					<tbody id="infolist"></tbody>
 				</table>
 			</div>
-		</div> -->
-
-		<!-- legend -->
-		<div id="legend"></div>
+		</div> <!-- -->
 
 	</div>
 </div>
@@ -78,7 +79,7 @@
 
 
 <!-- ui widgets -->
-<div id="widget-area" class="init">
+<div id="widget-area" class="init open">
 	<menu id="main-menu" class="hide-advanced">
 		<div id="menu-launcher">
 

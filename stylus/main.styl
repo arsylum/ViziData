@@ -14,18 +14,22 @@
 chart-height = 200px
 chart-mbottom = 5px
 
-legend-width = 250px
+legend-width = 320px
 
 controls-padding = 5px
 box-padding = 10px
 
 // colors
-tt-bg = rgba(0,0,0,.5)
+//tt-bg = rgba(0,0,0,.5)
 tt-margin = 3px
 tt-padding = 0 .3em
 
+menu-bg = rgba(0,0,0,.75)
+menu-col = white
+menu-highlight = #E09100
+
 //menu-bg = #F9FAFF
-legend-bg = rgba(249, 250, 255, 0.75)
+//legend-bg = rgba(249, 250, 255, 0.75)
 highlight-color = #aa5500
 
 boxshadow = 0px 1px 2px rgba(0, 0, 0, 0.5)
@@ -78,8 +82,8 @@ em
 	display: inline-block;
 	padding: tt-padding
 	//border-radius: ($outer-border-radius/4);
-	background: tt-bg;
-	color: white;
+	background: menu-bg;
+	color: menu-col;
 
 
 
@@ -145,8 +149,8 @@ header
 
 
 #bubble>span,
-#legend span 
-	font-size: .7em;
+#info-area span 
+	font-size: .8em;
 	color: rgba(0,0,0,.5);
 	font-family: sans-serif;
 
@@ -215,7 +219,7 @@ menu#timefilter {
 				}
 			}
 			.flotr-mouse-value {
-				background: tt-bg !important;
+				background: menu-bg !important;
 				opacity: 1 !important;
 				//right: $widget-tt-margin !important;
 				//top: $widget-tt-margin !important;
@@ -226,7 +230,7 @@ menu#timefilter {
 				//left: $widget-tt-margin !important;
 				//padding: $widget-tt-padding !important;
 				em {
-					color: rgb(255, 219, 153);
+					color: menu-highlight //rgb(255, 219, 153);
 					margin-right: .2em;
 				}
 
@@ -257,7 +261,7 @@ menu#timefilter {
 			//&:before, &:after {
 			.arrow {
 				//content: "";
-				border-color: rgba(0,0,0,0) tt-bg;
+				border-color: rgba(0,0,0,0) menu-bg;
 				border-style: solid;
 				border-width: (range-tt-height/2) 0 (range-tt-height/2) 0;
 				display: block;

@@ -7527,22 +7527,32 @@ function selectCell(i) {
     if (i === undefined) {
         i = selectedCell;
     }
-    var $tb = $("#infolist"), $info = $("#cellinfo-desc>div");
+    var $cinf = $("#cellinfo"), $tb = $("#infolist"), $info = $("#cellinfo-desc>div");
     $tb.html("");
     // clear the list
     if (i === false) {
-        $info.hide();
+        //$info.hide();
+        $cinf.slideUp("fast");
+        $info.addClass("inactive").html("(click on a point to see it's contents)");
         selectedCell = false;
         highlightCell(false);
         urlifyState();
         return true;
     }
     var cell = cellmap[i];
+    var calcTHeight = function() {
+        // only estimate height of menu launcher and cellinfo-desc
+        var h = $("#map").height() - $("#legend").height() - 150;
+        $("#cellinfo .table-wrapper").css("max-height", h + "px");
+    };
     if (cell === undefined) {
         selectCell(false);
     } else {
         selectedCell = i;
-        $info.show();
+        $info.removeClass("inactive");
+        calcTHeight();
+        $cinf.slideDown("fast");
+        //$info.show();
         var timeout = 0;
         if (cell.length > 100) {
             $info.html("<em>assembling list...</em>");
@@ -7558,7 +7568,7 @@ function selectCell(i) {
                 var q = current_datsel.props.members[this[0]];
                 $tb.append("<tr>" + '<td><a class="q" href="https://www.wikidata.org/wiki/' + q + '" data-qid="' + q + '" target="wikidata">' + q + "</a></td>" + "<td>" + this[1] + "</td>" + "</tr>");
             });
-            $info.html("the <em>selected cell</em> <span>around " + "(" + x + ", " + y + ")</span> " + "contains <em>" + cell.length + "</em> of them:");
+            $info.html("the <em>selected cell</em> <span>around " + "(" + x + ", " + y + ")</span><br>" + "contains <em>" + cell.length + "</em> of them:");
             $tb.trigger("scroll");
         }, timeout);
         urlifyState();
@@ -7577,7 +7587,7 @@ function infolistScroll() {
 function infolistScrollFkt() {
     var cellinfo = $("#cellinfo");
     var infolist = $("#infolist");
-    var infolistT = cellinfo.position().top + infolist.position().top;
+    var infolistT = $("#map").position().top + cellinfo.position().top + infolist.position().top;
     var infolistB = infolistT + infolist.height();
     var qarray = [];
     var lang = $("#langsel").val();
@@ -8111,13 +8121,13 @@ function setupControlHandlers() {
     //function() {
     //$("#widget-area").toggleClass("open");
     //});
-    // quick and dirty menu init
-    toggleMenu();
+    // show ui, qick and dirty
     setTimeout(function() {
         toggleMenu();
-        $("#widget-area").removeClass("init");
-        setTimeout(toggleMenu, 500);
-    }, 1e3);
+        setTimeout(function() {
+            $(".init").removeClass("init");
+        }, 100);
+    }, 500);
     // $("#widget-area").css("margin-bottom",
     // 	-($("#main-menu").outerHeight() - $("#menu-launcher").outerHeight()))
     // 	.removeClass("init");
@@ -8154,7 +8164,7 @@ function updateUI() {
     var showDsDesc = function() {};
 }
 
-// TODO:  mapop sl
+// TODO selected cell solution
 ////////////////////////////////
 /// url parameters key overview:
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°

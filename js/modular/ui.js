@@ -124,13 +124,15 @@ function setupControlHandlers() {
 		//$("#widget-area").toggleClass("open");
 	//});
 
-	// quick and dirty menu init
-	toggleMenu();
+	// show ui, qick and dirty
 	setTimeout(function() {
 		toggleMenu();
-		$("#widget-area").removeClass("init");
-		setTimeout(toggleMenu, 500);
-	}, 1000)
+		setTimeout(function() {
+			$(".init").removeClass("init");
+
+		}, 100);
+	}, 500);
+
 
 	// $("#widget-area").css("margin-bottom",
 	// 	-($("#main-menu").outerHeight() - $("#menu-launcher").outerHeight()))
@@ -183,7 +185,7 @@ function updateUI() {
 	}
 }
 
-// TODO:  mapop sl
+// TODO selected cell solution
 ////////////////////////////////
 /// url parameters key overview:
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -355,6 +357,7 @@ function statifyUrl() {
 	
 	// select dataset
 	//$("#filter fieldset[data-gid="+dg+"] input").get(ds).click();
+
 	$("#dg-"+dg+">div").get(ds).click();
 	attachMapHandlers();
 	//return true;

@@ -170,12 +170,15 @@ function selectCell(i) {
 	if(drawdat.draw === undefined) { return false; }
 	if(i === undefined) { i = selectedCell; }
 
-	var $tb = $("#infolist"),
+	var $cinf = $("#cellinfo"),
+		$tb = $("#infolist"),
 		$info = $("#cellinfo-desc>div");
 	$tb.html(""); // clear the list
 
 	if(i === false) {
-		$info.hide();
+		//$info.hide();
+		$cinf.slideUp("fast");
+		$info.addClass("inactive").html("(click on a point to see it's contents)");
 		selectedCell = false;
 		highlightCell(false);
 		urlifyState();
@@ -184,9 +187,18 @@ function selectCell(i) {
 
 	var cell = cellmap[i];
 
+	var calcTHeight = function() {
+		// only estimate height of menu launcher and cellinfo-desc
+		var h = $("#map").height() - $("#legend").height() - 150;
+		$("#cellinfo .table-wrapper").css("max-height", h+"px");
+	};
+
 	if(cell === undefined) { selectCell(false);	} else {
 		selectedCell = i;
-		$info.show();
+		$info.removeClass("inactive");
+		calcTHeight();
+		$cinf.slideDown("fast");
+		//$info.show();
 		var timeout = 0;
 		if(cell.length > 100) {
 			$info.html("<em>assembling list...</em>");
@@ -210,7 +222,7 @@ function selectCell(i) {
 			});
 			$info.html(
 				"the <em>selected cell</em> <span>around "+
-				"("+ x +", "+ y +")</span> "+
+				"("+ x +", "+ y +")</span><br>"+
 				"contains <em>"+cell.length+"</em> of them:");
 			$tb.trigger("scroll");
 		}, timeout);
@@ -230,7 +242,7 @@ function infolistScroll() {
 function infolistScrollFkt() {
 	var cellinfo = $("#cellinfo");
 	var infolist = $("#infolist");
-	var infolistT = cellinfo.position().top + infolist.position().top;
+	var infolistT = $("#map").position().top + cellinfo.position().top + infolist.position().top;
 	var infolistB = infolistT + infolist.height();
 	var qarray = [];
 	var lang = $("#langsel").val();
