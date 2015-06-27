@@ -20,172 +20,108 @@ menu-icon-size = 2rem
 		color rgba(255,255,255,.7)
 
 
-	#legend, #cellinfo-desc, #cellinfo table, #main-menu
+	#legend, #cellinfo-desc, #cellinfo, #main-menu
 		background menu-bg
 		color menu-col
 
 	#legend, #main-menu
-		
 		box-shadow boxshadow
-		//margin box-padding 0
-		//border 1px rgba(0,0,0,0.5) solid
 
 /////////////////////////////////////////
 /// info area - item table and legend //
 ///////////////////////////////////////
 #info-area
 	top 0
+	box-shadow boxshadow
 	
 	
-	#legend, #cellinfo-desc //, #cellinfo table
+	#legend, #cellinfo-desc
 		padding box-padding
-
-	#legend
-		//background legend-bg
-		margin 0// menu-vmargin 0 0
-		//padding box-padding
-		//position absolute
-		//bottom -(chart-mbottom)
-		//left 0
 
 	#cellinfo-desc div.inactive
 		color rgba(255,255,255,.5)
-		//color black
 		
 	#cellinfo
-		display none
-		//height 70%
-		
-		//@extend #legend;
-		//flex: 1 1 auto !important;
+		display none // gets expanded in selectCell()
 		padding: 0;
-		//display: flex;
-		//flex-flow: column;
-
 		border-top: none;
-		//border-radius: 0 0 ($outer-border-radius/2) ($outer-border-radius/2);
-
 		position: relative;
 
-		//div, table {
-			//border: 1px black solid;
-		//}
-		//div {
-			//flex: 0 1 auto;
-		//}
-		.table-wrapper 
-			display: block;
-			position: absolute;
-			//height: 450px
+		table 
+			//height 100%
 			width: 100%;
-			overflow: hidden;
-			
 
-			table 
-				//flex: 1 1 auto;
-				//position: absolute;
-				//display: block;
-				//display: table;
-				//padding box-padding
-				height 100%
+			//thead, tbody 
+				//width: 100%;
+			tr 
 				width: 100%;
+				display: flex;
+				text-align: left;
+				//font-family: sans-serif;
 
-				thead, tbody 
-					width: 100%;
-				
+				td,th 
+					margin: 0 box-padding
+					font-size: 0.8em;
 
-				tr 
-					width: 100%;
-					display: flex;
-					text-align: left;
-					font-family: sans-serif;
+					&:first-child 
+						float: left;
+						width: 70%;
 
-					td,th 
-						margin: 0 box-padding
-						font-size: 0.8em;
-
-						&:first-child 
-							float: left;
-							width: 70%;
-
-						&:last-child 
-							//float: right;
-							text-align: right;
-							width: 30%;
-
-
-					a 
-						color: #73B5CF
-
-
-					th 
-						font-size: 1em;
-						margin-top: 0.1em;
-						white-space: nowrap;
-
-
-				
-				//height: 100%;
-				//display: flex;
-				//flex-flow: column;
-				thead 
-					//flex: 0 1 auto;
-					font-size: 1.1em;
+					&:last-child 
+						//float: right;
+						text-align: right;
+						width: 30%;
+						
+				a 
+					color: #73B5CF
+					text-decoration: none;
+					&:hover 
+						text-decoration: underline;
+			
+			thead 
+				//flex: 0 1 auto;
+				//font-size: 1.1em;	
+				th 
+					font-size: 1em;
 					font-weight: bold;
-					th:last-child 
-						margin-right: 26px;
+					white-space: nowrap;
+				th:last-child 
+					margin-right: 26px;
+				tr
+					margin-top -0.3em
+				select 
+					display: inline;
+					vertical-align: middle;
+					font-size: 0.8em;
+			tbody 
+				display block
+				top: 1.4em;
+				bottom: 0;
+				overflow-y: scroll;
+				tr 
+					border-bottom: 1px solid rgba(255,255,255,0.15);
+					//padding: 0.02em 0;
+					&:last-child
+						border none
 					
-					tr
-						margin-top -0.4em
-
-					select 
-						display: inline;
-						vertical-align: middle;
-						font-size: 0.6em;
-					
-				
-				tbody 
-					//position: absolute;
-					display block
-					max-height 300px
-					top: 1.4em;
-					bottom: 0;
-					overflow-y: scroll;
-					//float: left;
-					tr 
-						border-bottom: 1px solid rgba(255,255,255,0.15);
-						//padding: 0.02em 0;
-					
-					a 
-						text-decoration: none;
-						&:hover 
-							text-decoration: underline;
-						
-					
-					em  // loading text
-						display: block;
-						margin: .5em 10px;
-						
-					&::-webkit-scrollbar {
-						width 16px
-					}
-					&::-webkit-scrollbar-track {
-						box-shadow: inset 0 0 6px rgba(255,255,255,0.6); 
-					}
-					&::-webkit-scrollbar-thumb {
-						margin 0 auto
-						width 10px
-						background rgba(4, 20, 71, 0.6)
-						box-shadow: inset 0 0 6px rgba(10,20,140,0.5);
-					}
+				&::-webkit-scrollbar {
+					width 16px
+				}
+				&::-webkit-scrollbar-track {
+					box-shadow: inset 0 0 6px rgba(255,255,255,0.6); 
+				}
+				&::-webkit-scrollbar-thumb {
+					margin 0 auto
+					width 10px
+					background rgba(4, 20, 71, 0.6)
+					box-shadow: inset 0 0 6px rgba(10,20,140,0.5);
+				}
 /*::-webkit-scrollbar-button       { }
 ::-webkit-scrollbar-track        { }
 ::-webkit-scrollbar-track-piece  { }
 ::-webkit-scrollbar-thumb        { }
 ::-webkit-scrollbar-corner       { }
 ::-webkit-resizer                { }*/
-
-
 
 ////////////////////////////////////////////
 /// widget area - main control interface //
@@ -199,22 +135,18 @@ menu-icon-size = 2rem
 		background legend-bg
 		margin box-padding 0*/
 		
-		
 	
-
-
-			
-	
-////////////////////////////////////////
-/// main menu (child of widget area) //
-//////////////////////////////////////
-#main-menu 
+/////////////////
+/// main menu //
+///////////////
+#widget-area #main-menu 
 	position relative
 	top 5px	
 	line-height: 1.2em;
 	//background menu-bg
 	//color menu-col
 	transition all 0.4s
+	background alpha(menu-bg,0.9)
 
 	&:hover 
 		top 0

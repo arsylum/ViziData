@@ -7541,9 +7541,9 @@ function selectCell(i) {
     }
     var cell = cellmap[i];
     var calcTHeight = function() {
-        // only estimate height of menu launcher and cellinfo-desc
-        var h = $("#map").height() - $("#legend").height() - 150;
-        $("#cellinfo .table-wrapper").css("max-height", h + "px");
+        // only approximate height of cellinfo-desc
+        var h = $("#map").height() - $("#legend").outerHeight() - $("#menu-launcher").outerHeight() - 100;
+        $("#cellinfo tbody").css("max-height", h + "px");
     };
     if (cell === undefined) {
         selectCell(false);
