@@ -1,0 +1,198 @@
+//////////////////
+/// checkboxes //
+////////////////
+
+checkbox-size = .9em
+checkbox-margin = .6em
+checkbox-padding = .1em
+
+input[type="checkbox"]
+	display none
+	
+input[type="checkbox"] + label
+	position relative
+	cursor pointer
+	margin 0 (checkbox-size + checkbox-margin)
+	
+
+	&:before
+		content ''
+		position absolute
+		left -(checkbox-size + checkbox-margin)
+		bottom 0.1em
+		width checkbox-size
+		height checkbox-size
+		box-shadow inset 0px 0px 3px 2px rgb(0, 0, 0)
+		border 1px rgba(255, 255, 255, 0.2) solid
+		border-radius 4px
+	&:after
+		display none
+		content ''
+		position absolute
+		left -(checkbox-size + checkbox-margin - checkbox-padding*2)
+		bottom (0.1em + checkbox-padding)
+		width (checkbox-size - checkbox-padding*2)
+		height (checkbox-size - checkbox-padding*2)
+		background menu-highlight
+		box-shadow 0 0 3px 1px menu-highlight, inset -1px -1px 2px 1px rgb(226, 223, 0);
+		border-radius 2px
+		
+input[type="checkbox"]:checked + label
+	&:after
+		display block
+
+input[type="checkbox"] + label:hover,
+input[type="checkbox"]:checked + label
+	color menu-highlight
+
+
+///////////////////////
+/// inputs, sliders //
+/////////////////////
+rangeicon-size = 26px
+rangebar-margin = 5px
+
+// align checkboxes to sliders
+fieldset input[type="checkbox"]:first-child + label
+	margin-left (rangeicon-size + rangebar-margin)
+
+select, label
+	display: inline;
+	
+
+menu .controls 
+	.slider 
+		line-height: 1.5em;
+		position relative
+		margin-top -.5em
+		legend 
+			margin 0 0 -.5em (rangeicon-size + rangebar-margin)
+
+	input[type=range]
+		display: inline-block;
+		border: none;
+		vertical-align: middle;
+		width: (legend-width - 2*box-padding - 2*rangeicon-size - 2*rangebar-margin)
+		margin: 0 (rangeicon-size + rangebar-margin);
+
+	input[type=range] 
+		-webkit-appearance: none;
+	input[type=range]:focus 
+		outline none
+	
+	input[type=range]::-webkit-slider-runnable-track {
+	    height: 2px
+	    background rgb(144, 144, 144)
+	    border: none;
+	    border-radius: 1px;
+	}
+
+	input[type=range]::-webkit-slider-thumb  {
+		appearance: none;
+		border: none;
+		height: 20px;
+		width: 12px;
+		border 2px black solid
+		background: rgba(#C4D9DA, 0.8)
+		margin-top: -9px;
+		transition: background 0.4s;
+	}
+
+	input[type=range]:active::-webkit-slider-thumb,
+	input[type=range]:hover::-webkit-slider-thumb {
+		background: menu-highlight
+		cursor: pointer;
+	}
+
+	input[type=range]:disabled::-webkit-slider-thumb {
+		background: #d8d8d8;
+		cursor: default;
+	}	
+
+	input[type=range]:active::-webkit-slider-runnable-track {
+	    background: #ccc;	
+	}
+	
+	input[value=1]::-webkit-slider-thumb {
+		background red !important
+	}
+	input[value=1.0]::-webkit-slider-thumb {
+		background red !important
+	}
+		
+
+	/////////////////
+	/// range icons
+	.rangeicon-left, .rangeicon-right
+		position absolute
+		bottom 1px
+		width rangeicon-size
+		height rangeicon-size
+		&:before, &:after
+			content ''
+			position absolute
+		
+	.rangeicon-left
+		left box-padding
+	.rangeicon-right
+		right box-padding
+		
+	// tile map opacity
+	#map-opacity-wrap
+		.rangeicon-left:before, .rangeicon-right:before
+			background #D2DBDD
+			width (rangeicon-size - 8px)
+			height (rangeicon-size - 8px)
+			bottom 4px
+			left 4px
+		.rangeicon-left:before
+			border 1px dashed rgba(255,255,255,.5);
+			background transparent
+
+	// grid size
+	#reso-slider-wrap
+		.rangeicon-left:before, .rangeicon-right:before
+			background rgb(175, 207, 126)
+		.rangeicon-left:before
+			width (rangeicon-size/4)
+			height (rangeicon-size/4)
+			border-radius (rangeicon-size/8)
+			bottom (rangeicon-size/8)*3
+			left (rangeicon-size/8)*3
+		.rangeicon-right:before
+			width (rangeicon-size - 2)
+			height (rangeicon-size - 2)
+			border-radius ((rangeicon-size - 2)/2)
+			bottom 1px
+			left 1px
+
+	// drawing overlap
+	#bleed-slider-wrap
+		.rangeicon-left:before
+			background #AFCF7E
+		.rangeicon-right:before
+			background rgba(#AFCF7E,0.7)
+		.rangeicon-left:after
+			background #9D4615
+		.rangeicon-right:after
+			background rgba(#9D4615, 0.7)
+			
+		.rangeicon-left:before, .rangeicon-left:after
+			width (rangeicon-size/4)
+			height (rangeicon-size/4)
+			border-radius (rangeicon-size/8)
+			bottom ((rangeicon-size/8)*3)
+		.rangeicon-left:before
+			left (rangeicon-size/8)
+		.rangeicon-left:after
+			right (rangeicon-size/8)
+		
+		.rangeicon-right:before, .rangeicon-right:after
+			width (rangeicon-size - rangeicon-size/4)
+			height (rangeicon-size - rangeicon-size/4)
+			border-radius ((rangeicon-size/8)*3)
+			bottom (rangeicon-size/8)
+		.rangeicon-right:before
+			left 0
+		.rangeicon-right:after
+			right 0

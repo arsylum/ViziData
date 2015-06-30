@@ -9,13 +9,13 @@
 
 	<link href='http://fonts.googleapis.com/css?family=Oxygen:400,700' rel='stylesheet' type='text/css'>
 
-	<!-- external scripts - ->
+	<!-- external scripts -->
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
 	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script> 
 
-	<!-- include them locally for offline development (temporary hack) -->
+	<!-- include them locally for offline development (temporary hack) - ->
 	<link rel="stylesheet" href="../assets/leaflet.css" />
 	<script src="../assets/jquery-2.1.1.min.js"></script>
 	<script src="../assets/d3.v3.min.js" charset="utf-8"></script>
@@ -92,24 +92,17 @@
 	<menu>-->
 	<!-- main menu -->
 	
-		<div id="filter"><h2>Data Selection</h2>
+		<div id="filter"><h2>Datasets</h2>
 			<fieldset>
 				<!-- <select size="6"></select> -->
 			</fieldset>
 		</div>
 		<div id="controls-timeline" class="controls advanced">
-			<h2>Timeline Settings</h2>
+			<h2>Upper Chart</h2>
 			<!-- switch timeline mode -->
-			<fieldset id="ctrl-tlmode">
-				<legend>Timeline Data</legend>
-				<label>
-					<input type="radio" name="mapglob" value="1">
-					Global
-				</label>
-				<label>
-					<input type="radio" name="mapglob" value="0">
-					Map area only
-				</label>
+			<fieldset>
+				<input id="timeline-noglobal" type="checkbox" />
+				<label for="timeline-noglobal">Only show data in map area</label>
 			</fieldset>
 			<!--<fieldset> not implemented
 				<label>
@@ -118,59 +111,58 @@
 				</label>
 			</fieldset>-->
 		</div>
-		<div id="controls-map" class="controls">
-			<h2>Map Settings</h2>
-			<fieldset id="ctrl-maplayer" class="fieldgroup advanced">
-				<legend>Map</legend>
-				<fieldset class="slider">
-					<legend>Opacity</legend>
-					<input type="range" id="map-opacity" min="0" max="1" step="0.1" value="1" />
-<!-- 					<input type="text" id="map-opacity-display" readonly size="2" value="1" /> -->
-				</fieldset>
-				<label>
-					<input id="maplayer-shape" type="checkbox" checked 
-						data-str="(watercolor,$fff[@30],$fff[hsl-saturation@80])[@50]" />
-					Shape
-				</label>
-				<label>
-					<input type="checkbox" id="maplayer-labels" checked
-						data-str="toner-labels[@40]" />
-					Labels
-				</label>
+		<div id="controls-map" class="controls advanced">
+			<h2>Map Tiles</h2>
+			<fieldset>
+				<input id="maplayer-shape" type="checkbox" checked 
+					data-str="(watercolor,$fff[@30],$fff[hsl-saturation@80])[@50]" />
+				<label for="maplayer-shape">Land Shapes</label>
+			
+				<input type="checkbox" id="maplayer-labels" checked
+					data-str="toner-labels[@40]" />
+				<label for="maplayer-labels">Location Labels</label>
 			</fieldset>
-			<fieldset class="fieldgroup">
-				<legend>Grid</legend>
-				<fieldset class="slider">
-					<!--<label id="ctrl-reso" class="slider">-->
-					<legend>Size</legend>
-					<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1" />
-					<!--</label>-->
-					<!--<input id="reso-display" type="text" readonly size="2" value="1" />-->
-				</fieldset>
-				<fieldset class="slider advanced">
-					<legend>Drawing Overlap</legend>
-					<input id="bleed-slider" type="range" min="0.5" max="3" step="0.1" value="1.2" />
+			<fieldset id="map-opacity-wrap" class="slider">
+				<legend>Visibility</legend>
+				<span class="rangeicon-left"></span>
+				<input type="range" id="map-opacity" min="0" max="1" step="0.1" value="1" />
+				<span class="rangeicon-right"></span>
+			</fieldset>
+		</div>
+		<div id="controls-grid" class="controls">
+			<h2>Grid</h2>
+			<fieldset id="reso-slider-wrap" class="slider">
+				<!--<label id="ctrl-reso" class="slider">-->
+				<legend>Size</legend>
+				<span class="rangeicon-left"></span>
+				<input id="reso-slider" type="range" min="0.2" max="5" step="0.1" value="1" />
+				<span class="rangeicon-right"></span>
+				<!--</label>-->
+				<!--<input id="reso-display" type="text" readonly size="2" value="1" />-->
+			</fieldset>
+			<fieldset id="bleed-slider-wrap" class="slider advanced">
+				<legend>Drawing Overlap</legend>
+				<span class="rangeicon-left"></span>
+				<input id="bleed-slider" type="range" min="0.5" max="3" step="0.1" value="1.2" />
+				<span class="rangeicon-right"></span>
 <!-- 					<input id="bleed-display" type="text" readonly size="2" value="1.2" /> -->
-				</fieldset>
-				<!--<fieldset class="slider">
-					<legend>Zoom</legend>
-					<input id="zoom-slider" type="range" step="0.1" value="1" disabled />
-					<input id="zoom-display" type="text" readonly size="3" value="1.0" />
-				</fieldset>-->
-				<!--<fieldset>
-					<label id="freezer">
-						<input type="checkbox" />
-						prevent redrawing
-					</label>
-				</fieldset>-->
 			</fieldset>
+			<!--<fieldset class="slider">
+				<legend>Zoom</legend>
+				<input id="zoom-slider" type="range" step="0.1" value="1" disabled />
+				<input id="zoom-display" type="text" readonly size="3" value="1.0" />
+			</fieldset>-->
+			<!--<fieldset>
+				<label id="freezer">
+					<input type="checkbox" />
+					prevent redrawing
+				</label>
+			</fieldset>-->
 		</div>
 		<div id="controls-meta">
 			<fieldset>
-				<label id="show-advanced">
-					<input type="checkbox">
-					show advanced settings
-				</label>
+				<input type="checkbox" id="show-advanced" />
+				<label for="show-advanced">show advanced settings</label>
 			</fieldset>
 		</div>
 	</menu>

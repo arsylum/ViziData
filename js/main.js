@@ -7138,13 +7138,13 @@ function drawPlot(leavas, params) {
     }
     mapctx.globalAlpha = galph;
     var i = drawdat.draw.length, d, cx, cy;
+    // translate to compensate css transformation
+    mapctx.translate(-dx, -dy);
     while (i--) {
         d = drawdat.draw[i];
-        cx = d[0].x - dx + rr;
-        cy = d[0].y - dy + rr;
         mapctx.fillStyle = colorScale(d[1]);
         mapctx.beginPath();
-        mapctx.arc(cx, cy, rx, 0, TPI);
+        mapctx.arc(d[0].x, d[0].y, rx, 0, TPI);
         mapctx.fill();
     }
     if (drawdat.tile === undefined) {
@@ -7157,14 +7157,14 @@ function drawPlot(leavas, params) {
 
 function highlightCell(c) {
     var x, y, p, linewidth = 2;
-    var wx = drawdat.wx, rx = drawdat.rx, rr = drawdat.rr;
+    var wx = drawdat.wx, rx = drawdat.rx;
     overctx.save();
     overctx.clearRect(0, 0, canvasW, canvasH);
     // highlight the currently selected cell
     if (selectedCell !== false) {
         p = index2canvasCoord(selectedCell, drawdat.reso);
-        x = p.x + rr;
-        y = p.y + rr;
+        x = p.x;
+        y = p.y;
         // fill the point
         overctx.fillStyle = "rgba(255,120,0,0.8)";
         overctx.beginPath();
@@ -7188,8 +7188,8 @@ function highlightCell(c) {
     }
     // highlight the currently hovered cell
     p = index2canvasCoord(c, drawdat.reso);
-    x = p.x + rr;
-    y = p.y + rr;
+    x = p.x;
+    y = p.y;
     // glow circle
     var gradient = overctx.createRadialGradient(x, y, 0, x, y, wx * 2);
     gradient.addColorStop(0, "rgba(255,255,255,0");
@@ -7210,7 +7210,7 @@ function highlightCell(c) {
 /**
  * highlight all cells that contain data in key */
 function highlightCellsFor(key) {
-    var data = current_setsel.data, reso = drawdat.reso, rx = drawdat.rx, rr = drawdat.rr;
+    var data = current_setsel.data, reso = drawdat.reso, rx = drawdat.rx;
     //var bm = Date.now();
     drawWhat();
     var mAE = drawdat.bounds, mmt = drawdat.mmt;
@@ -7247,10 +7247,8 @@ function highlightCellsFor(key) {
     i = ca.length;
     while (i--) {
         p = index2canvasCoord(ca[i], reso);
-        x = p.x + rr;
-        y = p.y + rr;
         overctx.beginPath();
-        overctx.arc(x, y, rx, 0, TPI);
+        overctx.arc(p.x, p.y, rx, 0, TPI);
         overctx.fill();
         overctx.stroke();
     }
@@ -7313,7 +7311,7 @@ function changeTileSrc() {
         return false;
     }
     var upre = "http://{s}.sm.mapstack.stamen.com/", usuf = "/{z}/{x}/{y}.png", parm = "(", url;
-    $("#ctrl-maplayer input[type=checkbox]").each(function() {
+    $("#controls-map input[type=checkbox]").each(function() {
         if (this.checked) {
             if (parm !== "(") {
                 parm += ",";
@@ -8032,7 +8030,7 @@ function setupControlHandlers() {
     for (var i = 0; i < gdata.length; i++) {
         div = $('<div id="dg-' + gdata[i].id + '" class="group-container" data-gi="' + i + '">' + "<h4>" + gdata[i].id + "</h4></div>").on("click mouseenter", grouptoggle);
         for (var j = 0; j < gdata[i].datasets.length; j++) {
-            div.append($('<div data-ds="' + j + '" data-tt="' + gdata[i].datasets[j].strings.desc + '" class="tooltip">' + gdata[i].datasets[j].strings.label + "</div>").on("click", fn));
+            div.append($('<div data-ds="' + j + '" data-tt="' + gdata[i].datasets[j].strings.desc + '" class="tooltip">' + gdata[i].datasets[j].strings.label + '<span class="tray"></span></div>').on("click", fn));
         }
         filter.append(div);
     }
@@ -8078,12 +8076,12 @@ function setupControlHandlers() {
         $(leafloor._container).css("opacity", $(this).val());
         urlifyState();
     });
-    $("#ctrl-maplayer input[type=checkbox]").on("change", function() {
+    $("#controls-map input[type=checkbox]").on("change", function() {
         changeTileSrc();
         urlifyState();
     });
-    $("#ctrl-tlmode input").on("change", function() {
-        timelineIsGlobal = parseInt($(this).val());
+    $("#timeline-noglobal").on("change", function() {
+        timelineIsGlobal = !this.checked;
         //updateChartData();
         genChart();
         urlifyState();
@@ -8094,7 +8092,7 @@ function setupControlHandlers() {
     });
     /// setup menu
     // toggle extended version
-    $("#show-advanced input").on("change", function() {
+    $("#show-advanced").on("change", function() {
         if (this.checked) {
             $("#main-menu").removeClass("hide-advanced");
         } else {
@@ -8121,16 +8119,6 @@ function setupControlHandlers() {
     //function() {
     //$("#widget-area").toggleClass("open");
     //});
-    // show ui, qick and dirty
-    setTimeout(function() {
-        toggleMenu();
-        setTimeout(function() {
-            $(".init").removeClass("init");
-        }, 100);
-    }, 500);
-    // $("#widget-area").css("margin-bottom",
-    // 	-($("#main-menu").outerHeight() - $("#menu-launcher").outerHeight()))
-    // 	.removeClass("init");
     /// item table
     $("#infolist").on("scroll", infolistScroll);
     $("#map").on("mouseleave", function() {
@@ -8152,6 +8140,13 @@ function setupControlHandlers() {
         $("#infolist").trigger("scroll");
         urlifyState();
     });
+    // show ui, qick and dirty
+    setTimeout(function() {
+        toggleMenu();
+        setTimeout(function() {
+            $(".init").removeClass("init");
+        }, 100);
+    }, 500);
 }
 
 /**
@@ -8328,7 +8323,11 @@ function statifyUrl() {
     // label language
     $("#langsel").val(labellang);
     /// timeline settings
-    $("#ctrl-tlmode input[value=" + tl_mode + "]").prop("checked", true).trigger("change");
+    if (tl_mode === "false") {
+        timelineIsGlobal = false;
+        $("#timeline-noglobal").get(0).checked = true;
+    }
+    //$("#ctrl-tlmode input[value="+tl_mode+"]").prop("checked", true).trigger("change");
     //$("#tl-normalize").get(0).checked = tl_normalize;
     // time selection
     timeSel = {

@@ -223,17 +223,14 @@ function drawPlot(leavas, params) {
 
 	var i= drawdat.draw.length, d, cx, cy;
 
-  	
+	// translate to compensate css transformation
+	mapctx.translate(-dx,-dy);
 
 	while(i--) {
 		d = drawdat.draw[i];
-
-		cx = d[0].x - dx + rr;
-		cy = d[0].y - dy + rr;
-
 		mapctx.fillStyle = colorScale(d[1]);
 		mapctx.beginPath();
-		mapctx.arc(cx, cy, rx, 0, TPI);
+		mapctx.arc(d[0].x, d[0].y, rx, 0, TPI);
 		mapctx.fill();
 	}
 
@@ -251,7 +248,7 @@ function drawPlot(leavas, params) {
 function highlightCell(c) {
 
 	var x,y,p,linewidth = 2;
-	var wx = drawdat.wx, rx = drawdat.rx, rr = drawdat.rr;
+	var wx = drawdat.wx, rx = drawdat.rx;
 
 	overctx.save();
 	overctx.clearRect(0,0,canvasW,canvasH);
@@ -259,8 +256,8 @@ function highlightCell(c) {
 	// highlight the currently selected cell
 	if(selectedCell !== false) {
   		p = index2canvasCoord(selectedCell, drawdat.reso);
-  		x = p.x + rr;
-  		y = p.y + rr;
+  		x = p.x;
+  		y = p.y;
 
   		// fill the point
   		overctx.fillStyle = "rgba(255,120,0,0.8)";
@@ -287,8 +284,8 @@ function highlightCell(c) {
 	
 	// highlight the currently hovered cell
 	p = index2canvasCoord(c, drawdat.reso);
-	x = p.x + rr;
-	y = p.y + rr;
+	x = p.x;
+	y = p.y;
 	
 	// glow circle
 	var gradient = overctx.createRadialGradient(x, y, 0, x, y, wx*2);
@@ -308,13 +305,12 @@ function highlightCell(c) {
 	overctx.restore();
 }
 
- /**
+/**
  * highlight all cells that contain data in key */
 function highlightCellsFor(key) {
 	var data = current_setsel.data,	
 		reso = drawdat.reso, 
-		rx = drawdat.rx,
-		rr = drawdat.rr;
+		rx = drawdat.rx;
 
 	//var bm = Date.now();
 
@@ -352,12 +348,9 @@ function highlightCellsFor(key) {
   	var x, y, p;
 	i = ca.length;
   	while(i--) {
-  		p = index2canvasCoord(ca[i], reso);
-  		x = p.x + rr;
-  		y = p.y + rr;
- 
+  		p = index2canvasCoord(ca[i], reso); 
   		overctx.beginPath();
-  		overctx.arc(x, y, rx, 0, TPI);
+  		overctx.arc(p.x, p.y, rx, 0, TPI);
   		overctx.fill();
   		overctx.stroke();
   	}
@@ -432,7 +425,7 @@ function changeTileSrc() {
 		usuf = '/{z}/{x}/{y}.png',
 		parm = '(',
 		url;
-	$("#ctrl-maplayer input[type=checkbox]").each(function() {
+	$("#controls-map input[type=checkbox]").each(function() {
 		if(this.checked) {
 			if(parm !== '(') { parm += ','; }
 			parm += $(this).attr("data-str");

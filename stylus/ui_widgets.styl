@@ -3,7 +3,7 @@ menu-vmargin = 5px
 menu-icon-margin-right = 1rem
 menu-icon-size = 2rem
 
-
+itemtable-width = 500px
 
 #info-area, #widget-area
 	position absolute
@@ -24,19 +24,22 @@ menu-icon-size = 2rem
 		background menu-bg
 		color menu-col
 
-	#legend, #main-menu
+	#legend, #main-menu, #cellinfo
 		box-shadow boxshadow
+	#cellinfo-desc
+		box-shadow boxshadow-inv
 
 /////////////////////////////////////////
 /// info area - item table and legend //
 ///////////////////////////////////////
 #info-area
-	top 0
-	box-shadow boxshadow
-	
+	top 0	
 	
 	#legend, #cellinfo-desc
-		padding box-padding
+		padding (box-padding/2) box-padding
+		
+	//#cellinfo-desc, #cellinfo
+		//width itemtable-width
 
 	#cellinfo-desc div.inactive
 		color rgba(255,255,255,.5)
@@ -51,13 +54,10 @@ menu-icon-size = 2rem
 			//height 100%
 			width: 100%;
 
-			//thead, tbody 
-				//width: 100%;
 			tr 
 				width: 100%;
 				display: flex;
 				text-align: left;
-				//font-family: sans-serif;
 
 				td,th 
 					margin: 0 box-padding
@@ -73,7 +73,7 @@ menu-icon-size = 2rem
 						width: 30%;
 						
 				a 
-					color: #73B5CF
+					color: #59CDFF
 					text-decoration: none;
 					&:hover 
 						text-decoration: underline;
@@ -116,25 +116,18 @@ menu-icon-size = 2rem
 					background rgba(4, 20, 71, 0.6)
 					box-shadow: inset 0 0 6px rgba(10,20,140,0.5);
 				}
-/*::-webkit-scrollbar-button       { }
-::-webkit-scrollbar-track        { }
-::-webkit-scrollbar-track-piece  { }
-::-webkit-scrollbar-thumb        { }
-::-webkit-scrollbar-corner       { }
-::-webkit-resizer                { }*/
+/*::-webkit-scrollbar-button       
+::-webkit-scrollbar-track        
+::-webkit-scrollbar-track-piece 
+::-webkit-scrollbar-thumb        
+::-webkit-scrollbar-corner       
+::-webkit-resizer               */
 
 ////////////////////////////////////////////
 /// widget area - main control interface //
 //////////////////////////////////////////
 #widget-area
-	bottom 0
-
-	
-	/*&>div, #menu-launcher
-		padding box-padding
-		background legend-bg
-		margin box-padding 0*/
-		
+	bottom 0		
 	
 /////////////////
 /// main menu //
@@ -143,19 +136,11 @@ menu-icon-size = 2rem
 	position relative
 	top 5px	
 	line-height: 1.2em;
-	//background menu-bg
-	//color menu-col
 	transition all 0.4s
 	background alpha(menu-bg,0.9)
 
 	&:hover 
 		top 0
-		//background rgba(0,0,0,.8)
-		//color white
-
-	//em {
-	//	color menu-highlight
-	//}
 
 	/// LAUNCHER / description ///
 	#menu-launcher
@@ -181,12 +166,10 @@ menu-icon-size = 2rem
 		
 		#dsdesc
 			margin-right (menu-icon-margin-right + menu-icon-size)
-			
 			h4
 				margin-bottom .2rem
 			p 
 				font-size 0.85rem
-
 
 		.loading-box
 			margin-right menu-icon-margin-right
@@ -200,8 +183,6 @@ menu-icon-size = 2rem
 				font-size 0.8rem
 				line-height 1rem
 				text-align center
-
-
 	//|\ LAUNCHER ///
 
 	&>div
@@ -210,24 +191,17 @@ menu-icon-size = 2rem
 			margin-bottom 0
 			
 		&>fieldset
-			padding box-padding
+			padding (box-padding/2) box-padding
+			margin .5em 0 0
 
 	&.hide-advanced .advanced 
 		display none !important
 		
 	fieldset
 		border none
-		
-	div>fieldset
-		padding 0 box-padding	
-		//margin-top: .5em;
-		margin .5em 0 0
-		&:last-child 
-			padding-bottom: box-padding;
 			
 	.fieldgroup
 		border: 2px rgba(208, 208, 208, 0.1) solid
-		//border-radius: 0 0 $outer-border-radius/2 $outer-border-radius/2;
 		&>legend 
 			font-family: sans-serif;
 		input[type=checkbox] 
@@ -236,31 +210,24 @@ menu-icon-size = 2rem
 	h2+.fieldgroup 
 		margin-top: 0;
 		
-	h2 
-		//border: 1px orange solid;
-		//border-radius: ($outer-border-radius/2) ($outer-border-radius/2) 0 0;
-		background: #777;
+	h2
+		background: #C4D9DA
 		font-family: sans-serif;
 		font-size: 14px;
 		line-height: 20px;
 		padding: 0px box-padding;
-		color: white;
+		color: black
 		cursor: pointer;
 		height: 20px;
+		box-shadow 0px 1px 3px 1px rgba(0, 0, 0, 0.8)
 		&:hover 
-			/* text-shadow: 1px 0px 0px orange, -1px 0px 0 orange, 0 1px 0 orange, 0 -1px 0 orange; */
-			/* padding-left: 20px; */
-			//color: rgb(255, 234, 197);
-			//font-weight: bold;
-			background: #666;
-			//$tsc: rgba(255,255,255,0.6);
-			//text-shadow: 1px 0 0 $tsc, -1px 0 0 $tsc, 0 1px 0 $tsc, 0 -1px 0 $tsc;
-
+			background #E2F3F4
+		
 		&:after 
 			content: '';
 			height: 8px;
 			width: 8px;
-			border: 2px white solid;
+			border: 2px black solid;
 			float: right;
 			transform: rotate(135deg);
 			border-style: solid solid none none;
@@ -268,28 +235,19 @@ menu-icon-size = 2rem
 			position: relative;
 			top: 3px;
 			right: menu-icon-margin-right
-			
 		&.closed:after 
 			transform: rotate(45deg);
 			top: 5px;
-		
 		&:hover:after 
 			border-width: 3px;
-		
-
-
 
 #widget-area.open
 	margin-bottom 0 !important
-	#legend
-		display none
 		
 	#main-menu
-
 		top 0px
+		
 		#menu-launcher
-			//background transparent
-			//top 0
 			#menu-icon use
 				stroke white
 			&:hover #menu-icon use
@@ -300,21 +258,16 @@ menu-icon-size = 2rem
 #info-area.init
 	opacity 0
 	transition none
-	
+
 
 ////////////////////////
 /// dataset selector //
 //////////////////////
-
 #filter fieldset
-	
-
-	.group-container
-		//background transparent
-		
+	.group-container		
 		&.open
 			background rgba(4, 20, 71, 0.4)
-			border-radius: 0 0 4px 4px;
+			border-radius: 0 0 2px 2px;
 			h4
 				border 1px rgba(27, 36, 60, 1) solid
 		h4
@@ -325,18 +278,28 @@ menu-icon-size = 2rem
 		&>div
 			cursor pointer
 			display none
-			padding 0 1em
+			padding 0 20px
 			height 20px
 			font-size 14px
 			line-height 20px
 			
-			
 			&:hover
 				background rgba(menu-highlight, 0.2)
-			&.selected
-				//background rgba(menu-highlight, 0.8)
-				font-weight bold
+				
+			.tray
+				display inline-block
+				float right
 
+			&.selected .tray:before
+				content ''
+				position absolute
+				left 8px
+				bottom 8px
+				width 4px
+				height 4px
+				border-radius 2px
+				box-shadow 0 0 5px 2px rgb(226, 220, 0), inset 0 0 4px 3px rgb(175, 207, 126);
+				
 /// dataset tooltips
 .tooltip 
 	display: inline;
@@ -367,10 +330,8 @@ menu-icon-size = 2rem
 		margin-left: box-padding
 		padding: .4em .8em;
 		text-align: left;
-
-		box-shadow: boxshadow // 0px 1px 2px rgba(0, 0, 0, 0.25);
+		box-shadow: boxshadow
 		z-index: 9998;
-
 
 	&:before 
 		border: solid;
@@ -386,162 +347,18 @@ menu-icon-size = 2rem
 		z-index: 9999;
 
 
-
-
 ///////////////////////
 /// form appearance //
 /////////////////////
-
-select, label
-	display: inline;
-	
-// todo
-input[type="checkbox"]:checked + label {
- 	background black
-}
-/*menu select
-	background transparent
-	border none
-	color white
-	width 100%
-	
-
-	&::-webkit-scrollbar {
-	    height: 12px;
-	    width: 12px;
-	    background: #000;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: #393812;
-	    border-radius: 1ex;
-	    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
-	}
-
-	&::-webkit-scrollbar-corner {
-	    background: #000;
-	}
-	
-	
-	&:active, &:focus
-		//border none
-		outline none
-	option
-		//padding .4em
-		position relative
-		cursor pointer
-		
-		&.selected:before
-			content 'bla'
-			position absolute
-			top 0
-			left 0
-			width 100%
-			height 100%
-			background green			
-		
-		&:after
-			content 'bla'
-			float right
-			
-		
-		&:hover
-			background rgba(170, 85, 0, 0.25)
-			//color yelllow
-			//font-weight bold	
-		&:focus
-			background rgba(170, 85, 0, 0.75)
-		&.selected
-			background rgba(170, 85, 0, 0.75)
-*/
-menu .controls 
-	.slider 
-		line-height: 1.5em;
-		//margin: .5em 0;
-		//display: inline-block;
-		width: 100%;
-		// input {
-		// 	display: inline-block;
-		// 	width: 80%;
-		// 	&:last-child {
-		// 		width: 20%;
-		// 	}
-		// }
-		legend 
-			margin-bottom: -.5em;
+@import ui_forms
 
 
-	
-
-	input[type=range]//, input[type=text] 
-		display: inline-block;
-		//padding: 2%;
-		margin: 0;
-		border: none;
-		vertical-align: middle;
-		width: 100%;
-
-	/*input[type=text][readonly] 
-		width: 14%;
-		margin-left: 2%;
-		text-align: center;*/
-	
-
-	input[type=range] 
-		-webkit-appearance: none;
-	
-
-	input[type=range]::-webkit-slider-runnable-track {
-	    height: 3px
-	    //background: yelllow //rgba(255,255,255,0.1)
-	    background rgb(144, 144, 144)
-	    border: none;
-	    border-radius: 1px;
-	}
-
-	input[type=range]::-webkit-slider-thumb  {
-	    -webkit-appearance: none;
-	    border: none;
-	    height: 16px;
-	    width: 16px;
-	    border-radius: 8px;
-	    background: #a9a9a9;
-	    margin-top: -7px;
-	    transition: background 0.4s;
-	}
-
-	input[type=range]:active::-webkit-slider-thumb,
-	input[type=range]:hover::-webkit-slider-thumb {
-		background: #aa5500;
-		cursor: pointer;
-	}
-
-	input[type=range]:disabled::-webkit-slider-thumb {
-		background: #d8d8d8;
-		cursor: default;
-	}
-
-	input[type=range]:focus {
-	    outline: none;
-	}
-	
-
-	input[type=range]:active::-webkit-slider-runnable-track {
-	    background: #ccc;	
-	}
-	
-	input[value=1]::-webkit-slider-thumb {
-		background red !important
-	}
-	input[value=1.0]::-webkit-slider-thumb {
-		background red !important
-	}
-
-
-	// for num in (1..10)
-	// 	input[type=range].valuepc-{num}::-webkit-slider-thumb {
-	// 		height (6+num*2)px
-	// 		width (6+num*2)px
-	// 		border-radius (3+num)px
-	// 		margin-top -(2+num)px
-	// 	}
+///////////////////////////
+/// individual elements //
+/////////////////////////
+#controls-meta
+	font-size 0.9rem
+	box-shadow -2px 0px 3px 1px black
+	background rgba(55, 57, 57, 0.3)
+	&>fieldset
+		padding (box-padding/2) box-padding !important

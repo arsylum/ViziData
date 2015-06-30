@@ -29,7 +29,7 @@ function setupControlHandlers() {
 		for(var j=0; j<gdata[i].datasets.length; j++) {
 			div.append(
 				$('<div data-ds="'+j+'" data-tt="'+gdata[i].datasets[j].strings.desc+'" class="tooltip">' +
-					gdata[i].datasets[j].strings.label+'</div>').on("click", fn)
+					gdata[i].datasets[j].strings.label+'<span class="tray"></span></div>').on("click", fn)
 			);
 		}
 		filter.append(div);
@@ -77,12 +77,12 @@ function setupControlHandlers() {
 		$(leafloor._container).css("opacity",$(this).val());
 		urlifyState();
 	});
-	$("#ctrl-maplayer input[type=checkbox]").on("change", function() {
+	$("#controls-map input[type=checkbox]").on("change", function() {
 		changeTileSrc();
 		urlifyState();
 	});
-	$("#ctrl-tlmode input").on("change", function() {
-		timelineIsGlobal = parseInt($(this).val());
+	$("#timeline-noglobal").on("change", function() {
+		timelineIsGlobal = !this.checked;
 		//updateChartData();
 		genChart();
 		urlifyState();
@@ -96,7 +96,7 @@ function setupControlHandlers() {
 	
 	/// setup menu
 	// toggle extended version
-	$("#show-advanced input").on("change", function() {
+	$("#show-advanced").on("change", function() {
 		if(this.checked) {
 			$("#main-menu").removeClass("hide-advanced");
 		} else {
@@ -124,21 +124,6 @@ function setupControlHandlers() {
 		//$("#widget-area").toggleClass("open");
 	//});
 
-	// show ui, qick and dirty
-	setTimeout(function() {
-		toggleMenu();
-		setTimeout(function() {
-			$(".init").removeClass("init");
-
-		}, 100);
-	}, 500);
-
-
-	// $("#widget-area").css("margin-bottom",
-	// 	-($("#main-menu").outerHeight() - $("#menu-launcher").outerHeight()))
-	// 	.removeClass("init");
-
-
 	/// item table
 	$("#infolist").on("scroll", infolistScroll);
 
@@ -165,6 +150,15 @@ function setupControlHandlers() {
 		$("#infolist").trigger("scroll");
 		urlifyState();
 	});
+
+	// show ui, qick and dirty
+	setTimeout(function() {
+		toggleMenu();
+		setTimeout(function() {
+			$(".init").removeClass("init");
+			//toggleMenu();
+		}, 100);
+	}, 500);
 }
 
 /**
@@ -334,7 +328,11 @@ function statifyUrl() {
 	$("#langsel").val(labellang);
 
 	/// timeline settings
-	$("#ctrl-tlmode input[value="+tl_mode+"]").prop("checked", true).trigger("change");
+	if(tl_mode === 'false') {
+		timelineIsGlobal = false;
+		$("#timeline-noglobal").get(0).checked = true;
+	}
+	//$("#ctrl-tlmode input[value="+tl_mode+"]").prop("checked", true).trigger("change");
 	//$("#tl-normalize").get(0).checked = tl_normalize;
 
 	// time selection

@@ -1,0 +1,109 @@
+menu#timefilter 
+	height: chart-height
+	top 0
+	left controls-padding 
+	right controls-padding
+	
+	&>div
+		position absolute
+		top 0
+		bottom 0
+
+	#chartwrapper
+		right 0
+		left 0
+		height: 100%;
+
+	#chart
+		background: white;
+		height: 100%;
+
+		*
+			user-select none // prevent flickering highlights on interaction
+
+		.summary .flotr-labels
+			.flotr-grid-label
+				margin-top: -1.1em;
+			.last
+				right: 0;
+				left: initial !important;
+				text-align: right !important;
+				margin-right: 4px;
+
+		.detail
+			.flotr-labels
+				div
+					margin-left: 4px;
+				.last
+					display: none;
+					
+			.flotr-mouse-value
+				background: menu-bg !important;
+				opacity: 1 !important;
+				top: 100% !important;
+				margin-top 5px !important // connectionH/2 from timeline.js
+				z-index: 9;
+				left -(controls-padding) !important
+				border-radius  0 !important
+				padding floor(box-padding/3) box-padding !important
+				
+				em
+					color: menu-highlight
+					margin-right: .2em;
+				span
+					font-size: .8em;
+					color: #ddd;
+					
+			&:active
+				cursor ew-resize // indicate dragging behaviour
+				
+		// chart range arrows
+		range-tt-height = 20px
+		range-tt-margin = 39px
+		range-arrow-length = 16px
+		range-arrow-distance = 5px
+		.range-tt 
+			position: absolute;
+			z-index: 9;
+			top: (controls-padding);
+			color: rgb(255, 219, 153);
+			height range-tt-height
+			font-size (range-tt-height - 4)
+			line-height range-tt-height
+
+			.arrow 
+				border-color: rgba(0,0,0,0) menu-bg;
+				border-style: solid;
+				border-width: (range-tt-height/2) 0 (range-tt-height/2) 0;
+				display: block;
+				height: 0;
+				width: 0;
+				top: 0;
+				position: absolute;
+				z-index: 8;
+				transition: all 0.3s;
+			.arrow-left 
+				border-right-width: (range-arrow-length/2);
+				left: -(range-arrow-length/2);
+				cursor: w-resize;
+			.arrow-right 
+				border-left-width: (range-arrow-length/2);
+				right: -(range-arrow-length/2);
+				cursor: e-resize;
+			
+			.arrow:hover
+				border-color: rgba(0,0,0,0) rgb(248, 213, 150);
+
+			&#range-tt-min 
+				left range-tt-margin + range-arrow-length + range-arrow-distance
+			&#range-tt-max 
+				right range-tt-margin + range-arrow-length + range-arrow-distance
+
+				
+		&:hover .range-tt
+			.arrow-left
+				border-right-width: range-arrow-length;
+				left: -(range-arrow-length) - range-arrow-distance;
+			.arrow-right
+				border-left-width: range-arrow-length;
+				right: -(range-arrow-length) - range-arrow-distance;
