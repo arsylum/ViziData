@@ -3,7 +3,7 @@ menu-vmargin = 5px
 menu-icon-margin-right = 1rem
 menu-icon-size = 2rem
 
-itemtable-width = 500px
+itemtable-width = 400px
 
 #info-area, #widget-area
 	position absolute
@@ -32,14 +32,19 @@ itemtable-width = 500px
 /////////////////////////////////////////
 /// info area - item table and legend //
 ///////////////////////////////////////
+#info-area.table-open
+	#cellinfo-desc, #cellinfo
+		width itemtable-width
+	#cellinfo
+		display block
+
 #info-area
 	top 0	
 	
 	#legend, #cellinfo-desc
 		padding (box-padding/2) box-padding
 		
-	//#cellinfo-desc, #cellinfo
-		//width itemtable-width
+
 
 	#cellinfo-desc div.inactive
 		color rgba(255,255,255,.5)
@@ -55,29 +60,34 @@ itemtable-width = 500px
 			width: 100%;
 
 			tr 
+				cursor pointer
 				width: 100%;
 				display: flex;
+				flex-flow row nowrap
+				justify-content space-between
 				text-align: left;
-
+				position relative
+				
 				td,th 
 					margin: 0 box-padding
-					font-size: 0.8em;
+					font-size: 0.9em;
 
-					&:first-child 
-						float: left;
-						width: 70%;
+					/*&:first-child 
+						float: left;*/
 
 					&:last-child 
-						//float: right;
-						text-align: right;
-						width: 30%;
-						
+						text-align right
+						flex-shrink 0
 				a 
 					color: #59CDFF
-					text-decoration: none;
-					&:hover 
-						text-decoration: underline;
-			
+					text-decoration none
+						
+					&:after
+						content attr(data-desc)
+						margin-left 1em
+						color rgb(229, 229, 229)
+						font-style italic
+						
 			thead 
 				//flex: 0 1 auto;
 				//font-size: 1.1em;	
@@ -101,6 +111,9 @@ itemtable-width = 500px
 				tr 
 					border-bottom: 1px solid rgba(255,255,255,0.15);
 					//padding: 0.02em 0;
+					&:hover
+						background rgba(4, 11, 31, 0.6)
+
 					&:last-child
 						border none
 					

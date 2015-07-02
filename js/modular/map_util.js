@@ -170,14 +170,14 @@ function selectCell(i) {
 	if(drawdat.draw === undefined) { return false; }
 	if(i === undefined) { i = selectedCell; }
 
-	var $cinf = $("#cellinfo"),
+	var $infarea = $("#info-area"),
 		$tb = $("#infolist"),
 		$info = $("#cellinfo-desc>div");
 	$tb.html(""); // clear the list
 
 	if(i === false) {
 		//$info.hide();
-		$cinf.slideUp("fast");
+		$infarea.removeClass("table-open");
 		$info.addClass("inactive").html("(click on a point to see it's contents)");
 		selectedCell = false;
 		highlightCell(false);
@@ -198,7 +198,7 @@ function selectCell(i) {
 		selectedCell = i;
 		$info.removeClass("inactive");
 		calcTHeight();
-		$cinf.slideDown("fast");
+		$infarea.addClass("table-open");
 		//$info.show();
 		var timeout = 0;
 		if(cell.length > 100) {
@@ -265,16 +265,23 @@ function infolistScrollFkt() {
 					if(this.labels[lang].value !== undefined) {	// probably slightly overkill
 						text = this.labels[lang].value;
 			}	}	}
-			$(qarray).filter('[href$="'+this.id+'"]').removeClass("q").text(text);
+			var desc = '';
+			if(this.descriptions !== undefined) {						// TODO
+				if(this.descriptions[lang] !== undefined) {			// this sanity check is 
+					if(this.descriptions[lang].value !== undefined) {	// probably slightly overkill
+						desc = this.descriptions[lang].value;
+			}	}	}
+			$(qarray).filter('[href$="'+this.id+'"]')
+				.removeClass("q").attr("data-desc", desc).text(text);
 		});
 	};
 
 	var n = 0, m = 20; // query up to m labels simultaneously
 	var qpre = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=',
-		qsuf = '&props=labels&languages='+lang+'&languagefallback=&callback=?';
+		qsuf = '&props=labels%7Cdescriptions&languages='+lang+'&languagefallback=&callback=?';
 	var i = -1, qstr = qpre;
 	while(++i < qarray.length) {
-		if(n > 0) {	qstr += '|'; }
+		if(n > 0) {	qstr += '%7C'; }
 		qstr += $(qarray[i]).attr("data-qid");
 
 		if(++n >= m || (i+1 === qarray.length)) { // run a query, reset qstr

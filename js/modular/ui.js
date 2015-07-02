@@ -151,6 +151,13 @@ function setupControlHandlers() {
 		urlifyState();
 	});
 
+	// item table click tr > a
+	$("#cellinfo tbody").on("click", "tr", function(e) {
+		if(!$(e.target).is("a")) {
+			$(this).find("a").get(0).click();
+		}
+	});
+
 	// show ui, qick and dirty
 	setTimeout(function() {
 		toggleMenu();
