@@ -8017,7 +8017,10 @@ function setupControlHandlers() {
     for (var i = 0; i < gdata.length; i++) {
         div = $('<div id="dg-' + gdata[i].id + '" class="group-container" data-gi="' + i + '">' + "<h4>" + gdata[i].id + "</h4></div>").on("click mouseenter", grouptoggle);
         for (var j = 0; j < gdata[i].datasets.length; j++) {
-            div.append($('<div data-ds="' + j + '" data-tt="' + gdata[i].datasets[j].strings.desc + '" class="tooltip">' + gdata[i].datasets[j].strings.label + '<span class="tray"></span></div>').on("click", fn));
+            var dateString = gdata[i].datasets[j].dump_date;
+            var dateStamp = new Date(parseInt(dateString.substr(0, 4)), parseInt(dateString.substr(4, 2)), parseInt(dateString.substr(6, 2)));
+            dateString = dateStamp.getFullYear() + "/" + dateStamp.getMonth() + "/" + dateStamp.getDate();
+            div.append($('<div data-ds="' + j + '" data-tt="' + gdata[i].datasets[j].strings.desc + '" class="tooltip">' + gdata[i].datasets[j].strings.label + '<span class="tray">' + dateString + "</span></div>").on("click", fn));
         }
         filter.append(div);
     }

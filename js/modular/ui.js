@@ -11,13 +11,13 @@ function setupControlHandlers() {
 		$("#filter fieldset div").removeClass("selected");
 		$t.addClass("selected");
 		setSetSel($t.attr("data-ds"), $t.parent().attr("data-gi"));
-	}
+	};
 	var grouptoggle = function() {
 		var $t = $(this);
 		$t.filter(":not(.open)").addClass("open").children("div").slideDown("fast");
 		$('#filter .group-container:not([id="' + $t.attr("id") + '"]).open')
 			.removeClass("open").children("div").slideUp("fast");
-	}
+	};
 
 	var filter = $("#filter fieldset"),
 		div;
@@ -27,9 +27,14 @@ function setupControlHandlers() {
 				'<h4>'+gdata[i].id+'</h4></div>').on("click mouseenter", grouptoggle);
 				
 		for(var j=0; j<gdata[i].datasets.length; j++) {
+
+			var dateString = gdata[i].datasets[j].dump_date;
+			var dateStamp = new Date(parseInt(dateString.substr(0,4)), parseInt(dateString.substr(4,2)), parseInt(dateString.substr(6,2)));
+			dateString = dateStamp.getFullYear() + '/' + dateStamp.getMonth() + '/' + dateStamp.getDate();
+			
 			div.append(
 				$('<div data-ds="'+j+'" data-tt="'+gdata[i].datasets[j].strings.desc+'" class="tooltip">' +
-					gdata[i].datasets[j].strings.label+'<span class="tray"></span></div>').on("click", fn)
+					gdata[i].datasets[j].strings.label+'<span class="tray">'+dateString+'</span></div>').on("click", fn)
 			);
 		}
 		filter.append(div);

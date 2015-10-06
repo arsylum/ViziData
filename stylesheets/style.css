@@ -817,7 +817,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
 #filter fieldset .group-container>div {
   cursor: pointer;
   display: none;
-  padding: 0 20px;
+  padding: 0 10px 0 20px;
   height: 20px;
   font-size: 14px;
   line-height: 20px;
@@ -832,9 +832,11 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
 #filter fieldset .group-container>div .tray {
   display: inline-block;
   float: right;
+  font-size: 0.9em;
+  color: rgba(255,255,255,0.5);
 }
 
-/* line 307 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 309 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #filter fieldset .group-container>div.selected .tray:before {
   content: '';
   position: absolute;
@@ -846,13 +848,13 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   box-shadow: 0 0 5px 2px #e2dc00, inset 0 0 4px 3px #afcf7e;
 }
 
-/* line 318 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 320 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 .tooltip {
   display: inline;
   position: relative;
 }
 
-/* line 322 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 324 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 .tooltip:before,
 .tooltip:after {
   -webkit-transition: all 0.2s;
@@ -861,13 +863,13 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   pointer-events: none;
 }
 
-/* line 328 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 330 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 .tooltip:hover:before,
 .tooltip:hover:after {
   opacity: 1;
 }
 
-/* line 332 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 334 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 .tooltip:after {
   content: attr(data-tt);
   display: block;
@@ -887,7 +889,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   z-index: 9998;
 }
 
-/* line 350 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 352 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 .tooltip:before {
   border: solid;
   border-color: transparent transparent transparent rgba(224,145,0,0.2);
@@ -902,7 +904,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   z-index: 9999;
 }
 
-/* line 378 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 380 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 
 /* line 5 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 
@@ -1184,14 +1186,14 @@ menu .controls #bleed-slider-wrap .rangeicon-right:after {
   right: 0;
 }
 
-/* line 373 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 375 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #controls-meta {
   font-size: 0.9rem;
   box-shadow: -2px 0px 3px 1px #000;
   background: rgba(55,57,57,0.3);
 }
 
-/* line 377 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 379 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #controls-meta>fieldset {
   padding: 5px 10px !important;
 }
