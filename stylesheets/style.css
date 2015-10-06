@@ -1,20 +1,20 @@
 
-/* line 198 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 198 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 
-/* line 1 : /var/www/html/dev/ViziData/node_modules/grunt-contrib-stylus/node_modules/stylus/lib/functions/index.styl */
+/* line 1 : /usr/share/nginx/html/dev/ViziData/node_modules/grunt-contrib-stylus/node_modules/stylus/lib/functions/index.styl */
 
-/* line 6 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 6 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 @import "../stylesheets/envision.css";
 
-/* line 7 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 7 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 @import "../stylesheets/leaflet.css";
 
-/* line 40 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 40 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 * {
   box-sizing: border-box;
 }
 
-/* line 43 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 43 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 html,
 body {
   height: 100%;
@@ -23,7 +23,7 @@ body {
   font-family: 'Oxygen', sans-serif;
 }
 
-/* line 49 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 49 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 html,
 body,
 menu,
@@ -33,13 +33,13 @@ p {
   padding: 0;
 }
 
-/* line 53 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 53 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 body,
 body>* {
   position: absolute;
 }
 
-/* line 56 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 56 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 body {
   overflow: hidden;
   top: 0;
@@ -48,30 +48,30 @@ body {
   left: 0;
 }
 
-/* line 64 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 64 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 h2,
 h3,
 h4 {
   margin: 0;
 }
 
-/* line 67 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 67 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 h3 {
   font-size: 1.2rem;
 }
 
-/* line 70 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 70 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 h4 {
   font-size: 1rem;
 }
 
-/* line 74 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 74 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 em {
   font-style: italic;
   color: #a50;
 }
 
-/* line 79 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 79 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 .hover-tt {
   display: inline-block;
   padding: 0 0.3em;
@@ -79,7 +79,7 @@ em {
   color: #fff;
 }
 
-/* line 87 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 87 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 #bubble>span,
 #info-area span {
   font-size: 0.8em;
@@ -87,7 +87,7 @@ em {
   font-family: sans-serif;
 }
 
-/* line 96 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 96 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 header {
   position: fixed;
   z-index: 10;
@@ -95,7 +95,7 @@ header {
   bottom: 15px;
 }
 
-/* line 102 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 102 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 header h1 {
   clear: both;
   font-family: sans-serif;
@@ -104,12 +104,12 @@ header h1 {
   font-weight: bold;
 }
 
-/* line 109 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 109 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 header h1 span {
   font-size: 0.5em;
 }
 
-/* line 113 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 113 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 header #github_link {
   position: relative;
   float: left;
@@ -117,13 +117,13 @@ header #github_link {
   margin: 0 15px;
 }
 
-/* line 119 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 119 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 header #github_link img[src*=octocat] {
   float: right;
   margin-right: 10px;
 }
 
-/* line 123 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 123 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 header #github_link img[src*=logo] {
   float: left;
   -webkit-transition: 0.5s;
@@ -134,17 +134,17 @@ header #github_link img[src*=logo] {
   opacity: 0;
 }
 
-/* line 131 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 131 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 header:hover #github_link img[src*=logo] {
   left: 0px;
   opacity: 1;
 }
 
-/* line 286 : /var/www/html/dev/ViziData/node_modules/grunt-contrib-stylus/node_modules/stylus/lib/functions/index.styl */
+/* line 286 : /usr/share/nginx/html/dev/ViziData/node_modules/grunt-contrib-stylus/node_modules/stylus/lib/functions/index.styl */
 
-/* line 286 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 286 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 
-/* line 1 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 1 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter {
   height: 200px;
   top: 0;
@@ -152,27 +152,27 @@ menu#timefilter {
   right: 5px;
 }
 
-/* line 7 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 7 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter>div {
   position: absolute;
   top: 0;
   bottom: 0;
 }
 
-/* line 12 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 12 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chartwrapper {
   right: 0;
   left: 0;
   height: 100%;
 }
 
-/* line 17 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 17 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart {
   background: #fff;
   height: 100%;
 }
 
-/* line 21 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 21 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart * {
   -webkit-user-select: none;
      -moz-user-select: none;
@@ -180,14 +180,14 @@ menu#timefilter #chart * {
           user-select: none;
 }
 
-/* line 24 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 24 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 
-/* line 25 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 25 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .summary .flotr-labels .flotr-grid-label {
   margin-top: -1.1em;
 }
 
-/* line 27 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 27 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .summary .flotr-labels .last {
   right: 0;
   left: initial !important;
@@ -195,21 +195,21 @@ menu#timefilter #chart .summary .flotr-labels .last {
   margin-right: 4px;
 }
 
-/* line 33 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 33 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 
-/* line 34 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 34 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 
-/* line 35 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 35 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .detail .flotr-labels div {
   margin-left: 4px;
 }
 
-/* line 37 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 37 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .detail .flotr-labels .last {
   display: none;
 }
 
-/* line 40 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 40 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .detail .flotr-mouse-value {
   background: rgba(0,0,0,0.75) !important;
   opacity: 1 !important;
@@ -221,24 +221,24 @@ menu#timefilter #chart .detail .flotr-mouse-value {
   padding: 3px 10px !important;
 }
 
-/* line 50 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 50 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .detail .flotr-mouse-value em {
   color: #e09100;
   margin-right: 0.2em;
 }
 
-/* line 53 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 53 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .detail .flotr-mouse-value span {
   font-size: 0.8em;
   color: #ddd;
 }
 
-/* line 57 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 57 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .detail:active {
   cursor: ew-resize;
 }
 
-/* line 65 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 65 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .range-tt {
   position: absolute;
   z-index: 9;
@@ -249,7 +249,7 @@ menu#timefilter #chart .range-tt {
   line-height: 20px;
 }
 
-/* line 74 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 74 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .range-tt .arrow {
   border-color: rgba(0,0,0,0) rgba(0,0,0,0.75);
   border-style: solid;
@@ -264,50 +264,50 @@ menu#timefilter #chart .range-tt .arrow {
           transition: all 0.3s;
 }
 
-/* line 85 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 85 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .range-tt .arrow-left {
   border-right-width: 8px;
   left: -8px;
   cursor: w-resize;
 }
 
-/* line 89 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 89 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .range-tt .arrow-right {
   border-left-width: 8px;
   right: -8px;
   cursor: e-resize;
 }
 
-/* line 94 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 94 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .range-tt .arrow:hover {
   border-color: rgba(0,0,0,0) #f8d596;
 }
 
-/* line 97 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 97 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .range-tt#range-tt-min {
   left: 60px;
 }
 
-/* line 99 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 99 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart .range-tt#range-tt-max {
   right: 60px;
 }
 
-/* line 103 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 103 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 
-/* line 104 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 104 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart:hover .range-tt .arrow-left {
   border-right-width: 16px;
   left: -21px;
 }
 
-/* line 107 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 107 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 menu#timefilter #chart:hover .range-tt .arrow-right {
   border-left-width: 16px;
   right: -21px;
 }
 
-/* line 145 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 145 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 #map {
   position: absolute;
   top: 205px;
@@ -316,14 +316,14 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   right: 0;
 }
 
-/* line 152 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 152 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 #map #leaflet {
   position: absolute;
   z-index: 2;
   background: transparent;
 }
 
-/* line 156 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 156 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 #map #leaflet * {
   -webkit-user-select: none;
      -moz-user-select: none;
@@ -331,12 +331,12 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
           user-select: none;
 }
 
-/* line 159 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 159 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 #map .leaflet-container {
   cursor: default;
 }
 
-/* line 162 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 162 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 #map canvas {
   position: absolute;
   top: 0;
@@ -345,12 +345,12 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   pointer-events: none;
 }
 
-/* line 169 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 169 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 #map .overlay {
   z-index: 4;
 }
 
-/* line 180 : /var/www/html/dev/ViziData/stylus/main.styl */
+/* line 180 : /usr/share/nginx/html/dev/ViziData/stylus/main.styl */
 #bubble {
   position: absolute;
   z-index: 999;
@@ -367,11 +367,11 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   pointer-events: none;
 }
 
-/* line 109 : /var/www/html/dev/ViziData/stylus/chart.styl */
+/* line 109 : /usr/share/nginx/html/dev/ViziData/stylus/chart.styl */
 
-/* line 2 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 2 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 
-/* line 8 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 8 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area,
 #widget-area {
   position: absolute;
@@ -383,19 +383,19 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   color: #fff;
 }
 
-/* line 16 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 16 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area em,
 #widget-area em {
   color: #e09100;
 }
 
-/* line 19 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 19 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area span,
 #widget-area span {
   color: rgba(255,255,255,0.7);
 }
 
-/* line 23 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 23 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #legend,
 #widget-area #legend,
 #info-area #cellinfo-desc,
@@ -408,7 +408,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   color: #fff;
 }
 
-/* line 27 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 27 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #legend,
 #widget-area #legend,
 #info-area #main-menu,
@@ -418,42 +418,42 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
-/* line 29 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 29 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo-desc,
 #widget-area #cellinfo-desc {
   box-shadow: 1px -1px 2px rgba(0,0,0,0.5);
 }
 
-/* line 35 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 35 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 
-/* line 36 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 36 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area.table-open #cellinfo-desc,
 #info-area.table-open #cellinfo {
   width: 400px;
 }
 
-/* line 38 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 38 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area.table-open #cellinfo {
   display: block;
 }
 
-/* line 41 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 41 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area {
   top: 0;
 }
 
-/* line 44 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 44 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #legend,
 #info-area #cellinfo-desc {
   padding: 5px 10px;
 }
 
-/* line 49 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 49 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo-desc div.inactive {
   color: rgba(255,255,255,0.5);
 }
 
-/* line 52 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 52 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo {
   display: none;
   padding: 0;
@@ -461,12 +461,12 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   position: relative;
 }
 
-/* line 58 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 58 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table {
   width: 100%;
 }
 
-/* line 62 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 62 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tr {
   cursor: pointer;
   width: 100%;
@@ -485,7 +485,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   position: relative;
 }
 
-/* line 71 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 71 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tr td,
 #info-area #cellinfo table tr th {
   margin: 0 10px;
@@ -494,22 +494,23 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
 						float: left;*/
 }
 
-/* line 78 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 78 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tr td:last-child,
 #info-area #cellinfo table tr th:last-child {
   text-align: right;
   -webkit-flex-shrink: 0;
       -ms-flex-negative: 0;
           flex-shrink: 0;
+  float: right;
 }
 
-/* line 81 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 82 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tr a {
   color: #59cdff;
   text-decoration: none;
 }
 
-/* line 85 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 86 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tr a:after {
   content: attr(data-desc);
   margin-left: 1em;
@@ -517,33 +518,33 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   font-style: italic;
 }
 
-/* line 91 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 92 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 
-/* line 94 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 95 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table thead th {
   font-size: 1em;
   font-weight: bold;
   white-space: nowrap;
 }
 
-/* line 98 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 99 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table thead th:last-child {
   margin-right: 26px;
 }
 
-/* line 100 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 101 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table thead tr {
   margin-top: -0.3em;
 }
 
-/* line 102 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 103 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table thead select {
   display: inline;
   vertical-align: middle;
   font-size: 0.8em;
 }
 
-/* line 106 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 107 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tbody {
   display: block;
   top: 1.4em;
@@ -551,32 +552,32 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   overflow-y: scroll;
 }
 
-/* line 111 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 112 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tbody tr {
   border-bottom: 1px solid rgba(255,255,255,0.15);
 }
 
-/* line 114 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 115 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tbody tr:hover {
   background: rgba(4,11,31,0.6);
 }
 
-/* line 117 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 118 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tbody tr:last-child {
   border: none;
 }
 
-/* line 120 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 121 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tbody::-webkit-scrollbar {
   width: 16px;
 }
 
-/* line 123 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 124 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tbody::-webkit-scrollbar-track {
   box-shadow: inset 0 0 6px rgba(255,255,255,0.6);
 }
 
-/* line 126 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 127 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #info-area #cellinfo table tbody::-webkit-scrollbar-thumb {
   margin: 0 auto;
   width: 10px;
@@ -584,12 +585,12 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   box-shadow: inset 0 0 6px rgba(10,20,140,0.5);
 }
 
-/* line 142 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 143 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area {
   bottom: 0;
 }
 
-/* line 148 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 149 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu {
   position: relative;
   top: 5px;
@@ -599,12 +600,12 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   background: rgba(0,0,0,0.9);
 }
 
-/* line 155 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 156 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu:hover {
   top: 0;
 }
 
-/* line 159 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 160 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu #menu-launcher {
   position: relative;
   cursor: pointer;
@@ -612,7 +613,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   padding-right: 0;
 }
 
-/* line 165 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 166 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu #menu-launcher #menu-icon {
   position: absolute;
   right: 1rem;
@@ -622,40 +623,40 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   width: 2rem;
 }
 
-/* line 173 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 174 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu #menu-launcher #menu-icon use {
   stroke-width: 1;
   stroke: #c8c8c8;
 }
 
-/* line 177 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 178 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu #menu-launcher:hover #menu-icon use {
   stroke: #fff;
 }
 
-/* line 180 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 181 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu #menu-launcher #dsdesc {
   margin-right: 3rem;
 }
 
-/* line 182 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 183 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu #menu-launcher #dsdesc h4 {
   margin-bottom: 0.2rem;
 }
 
-/* line 184 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 185 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu #menu-launcher #dsdesc p {
   font-size: 0.85rem;
 }
 
-/* line 187 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 188 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu #menu-launcher .loading-box {
   margin-right: 1rem;
   height: 1rem;
   border: 1px rgba(255,255,255,0.4) solid;
 }
 
-/* line 192 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 193 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu #menu-launcher .loading-box .loading-bar {
   height: 100%;
   width: 0;
@@ -665,53 +666,53 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   text-align: center;
 }
 
-/* line 201 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 202 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu>div {
   margin-bottom: 5px;
 }
 
-/* line 203 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 204 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu>div:last-child {
   margin-bottom: 0;
 }
 
-/* line 206 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 207 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu>div>fieldset {
   padding: 5px 10px;
   margin: 0.5em 0 0;
 }
 
-/* line 210 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 211 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu.hide-advanced .advanced {
   display: none !important;
 }
 
-/* line 213 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 214 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu fieldset {
   border: none;
 }
 
-/* line 216 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 217 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu .fieldgroup {
   border: 2px rgba(208,208,208,0.1) solid;
 }
 
-/* line 218 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 219 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu .fieldgroup>legend {
   font-family: sans-serif;
 }
 
-/* line 220 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 221 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu .fieldgroup input[type=checkbox] {
   margin-bottom: 10px;
 }
 
-/* line 223 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 224 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu h2+.fieldgroup {
   margin-top: 0;
 }
 
-/* line 226 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 227 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu h2 {
   background: #c4d9da;
   font-family: sans-serif;
@@ -724,12 +725,12 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   box-shadow: 0px 1px 3px 1px rgba(0,0,0,0.8);
 }
 
-/* line 236 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 237 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu h2:hover {
   background: #e2f3f4;
 }
 
-/* line 239 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 240 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu h2:after {
   content: '';
   height: 8px;
@@ -747,7 +748,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   right: 1rem;
 }
 
-/* line 251 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 252 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu h2.closed:after {
   -webkit-transform: rotate(45deg);
       -ms-transform: rotate(45deg);
@@ -755,34 +756,34 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   top: 5px;
 }
 
-/* line 254 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 255 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area #main-menu h2:hover:after {
   border-width: 3px;
 }
 
-/* line 257 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 258 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area.open {
   margin-bottom: 0 !important;
 }
 
-/* line 260 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 261 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area.open #main-menu {
   top: 0px;
 }
 
-/* line 263 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 264 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 
-/* line 264 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 265 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area.open #main-menu #menu-launcher #menu-icon use {
   stroke: #fff;
 }
 
-/* line 266 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 267 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area.open #main-menu #menu-launcher:hover #menu-icon use {
   stroke: #c8c8c8;
 }
 
-/* line 270 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 271 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #widget-area.init,
 #info-area.init {
   opacity: 0;
@@ -790,29 +791,29 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
           transition: none;
 }
 
-/* line 279 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 280 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 
-/* line 280 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 281 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 
-/* line 281 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 282 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #filter fieldset .group-container.open {
   background: rgba(4,20,71,0.4);
   border-radius: 0 0 2px 2px;
 }
 
-/* line 284 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 285 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #filter fieldset .group-container.open h4 {
   border: 1px #1b243c solid;
 }
 
-/* line 286 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 287 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #filter fieldset .group-container h4 {
   background: rgba(119,119,119,0.3);
   padding: 0.4em 0.5em;
   box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
-/* line 291 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 292 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #filter fieldset .group-container>div {
   cursor: pointer;
   display: none;
@@ -822,18 +823,18 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   line-height: 20px;
 }
 
-/* line 299 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 300 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #filter fieldset .group-container>div:hover {
   background: rgba(224,145,0,0.2);
 }
 
-/* line 302 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 303 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #filter fieldset .group-container>div .tray {
   display: inline-block;
   float: right;
 }
 
-/* line 306 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 307 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #filter fieldset .group-container>div.selected .tray:before {
   content: '';
   position: absolute;
@@ -845,13 +846,13 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   box-shadow: 0 0 5px 2px #e2dc00, inset 0 0 4px 3px #afcf7e;
 }
 
-/* line 317 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 318 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 .tooltip {
   display: inline;
   position: relative;
 }
 
-/* line 321 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 322 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 .tooltip:before,
 .tooltip:after {
   -webkit-transition: all 0.2s;
@@ -860,13 +861,13 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   pointer-events: none;
 }
 
-/* line 327 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 328 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 .tooltip:hover:before,
 .tooltip:hover:after {
   opacity: 1;
 }
 
-/* line 331 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 332 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 .tooltip:after {
   content: attr(data-tt);
   display: block;
@@ -886,7 +887,7 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   z-index: 9998;
 }
 
-/* line 349 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 350 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 .tooltip:before {
   border: solid;
   border-color: transparent transparent transparent rgba(224,145,0,0.2);
@@ -901,23 +902,23 @@ menu#timefilter #chart:hover .range-tt .arrow-right {
   z-index: 9999;
 }
 
-/* line 377 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 378 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 
-/* line 5 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 5 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 
-/* line 9 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 9 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 input[type="checkbox"] {
   display: none;
 }
 
-/* line 12 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 12 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 input[type="checkbox"] + label {
   position: relative;
   cursor: pointer;
   margin: 0 1.5em;
 }
 
-/* line 18 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 18 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 input[type="checkbox"] + label:before {
   content: '';
   position: absolute;
@@ -930,7 +931,7 @@ input[type="checkbox"] + label:before {
   border-radius: 4px;
 }
 
-/* line 28 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 28 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 input[type="checkbox"] + label:after {
   display: none;
   content: '';
@@ -944,45 +945,45 @@ input[type="checkbox"] + label:after {
   border-radius: 2px;
 }
 
-/* line 40 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 40 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 
-/* line 41 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 41 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 input[type="checkbox"]:checked + label:after {
   display: block;
 }
 
-/* line 44 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 44 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 input[type="checkbox"] + label:hover,
 input[type="checkbox"]:checked + label {
   color: #e09100;
 }
 
-/* line 56 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 56 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 fieldset input[type="checkbox"]:first-child + label {
   margin-left: 31px;
 }
 
-/* line 59 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 59 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 select,
 label {
   display: inline;
 }
 
-/* line 63 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 63 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 
-/* line 64 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 64 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls .slider {
   line-height: 1.5em;
   position: relative;
   margin-top: -0.5em;
 }
 
-/* line 68 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 68 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls .slider legend {
   margin: 0 0 -0.5em 31px;
 }
 
-/* line 71 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 71 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls input[type=range] {
   display: inline-block;
   border: none;
@@ -991,17 +992,17 @@ menu .controls input[type=range] {
   margin: 0 31px;
 }
 
-/* line 78 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 78 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls input[type=range] {
   -webkit-appearance: none;
 }
 
-/* line 80 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 80 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls input[type=range]:focus {
   outline: none;
 }
 
-/* line 83 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 83 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls input[type=range]::-webkit-slider-runnable-track {
   height: 2px;
   background: #909090;
@@ -1009,7 +1010,7 @@ menu .controls input[type=range]::-webkit-slider-runnable-track {
   border-radius: 1px;
 }
 
-/* line 90 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 90 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
           appearance: none;
@@ -1023,35 +1024,35 @@ menu .controls input[type=range]::-webkit-slider-thumb {
           transition: background 0.4s;
 }
 
-/* line 101 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 101 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls input[type=range]:active::-webkit-slider-thumb,
 menu .controls input[type=range]:hover::-webkit-slider-thumb {
   background: #e09100;
   cursor: pointer;
 }
 
-/* line 107 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 107 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls input[type=range]:disabled::-webkit-slider-thumb {
   background: #d8d8d8;
   cursor: default;
 }
 
-/* line 112 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 112 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls input[type=range]:active::-webkit-slider-runnable-track {
   background: #ccc;
 }
 
-/* line 116 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 116 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls input[value=1]::-webkit-slider-thumb {
   background: #f00 !important;
 }
 
-/* line 119 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 119 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls input[value=1.0]::-webkit-slider-thumb {
   background: #f00 !important;
 }
 
-/* line 126 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 126 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls .rangeicon-left,
 menu .controls .rangeicon-right {
   position: absolute;
@@ -1060,7 +1061,7 @@ menu .controls .rangeicon-right {
   height: 26px;
 }
 
-/* line 131 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 131 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls .rangeicon-left:before,
 menu .controls .rangeicon-right:before,
 menu .controls .rangeicon-left:after,
@@ -1069,19 +1070,19 @@ menu .controls .rangeicon-right:after {
   position: absolute;
 }
 
-/* line 135 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 135 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls .rangeicon-left {
   left: 10px;
 }
 
-/* line 137 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 137 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls .rangeicon-right {
   right: 10px;
 }
 
-/* line 141 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 141 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 
-/* line 142 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 142 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #map-opacity-wrap .rangeicon-left:before,
 menu .controls #map-opacity-wrap .rangeicon-right:before {
   background: #d2dbdd;
@@ -1091,21 +1092,21 @@ menu .controls #map-opacity-wrap .rangeicon-right:before {
   left: 4px;
 }
 
-/* line 148 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 148 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #map-opacity-wrap .rangeicon-left:before {
   border: 1px dashed rgba(255,255,255,0.5);
   background: transparent;
 }
 
-/* line 153 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 153 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 
-/* line 154 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 154 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #reso-slider-wrap .rangeicon-left:before,
 menu .controls #reso-slider-wrap .rangeicon-right:before {
   background: #afcf7e;
 }
 
-/* line 156 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 156 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #reso-slider-wrap .rangeicon-left:before {
   width: 6.5px;
   height: 6.5px;
@@ -1114,7 +1115,7 @@ menu .controls #reso-slider-wrap .rangeicon-left:before {
   left: 9.75px;
 }
 
-/* line 162 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 162 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #reso-slider-wrap .rangeicon-right:before {
   width: 24px;
   height: 24px;
@@ -1123,29 +1124,29 @@ menu .controls #reso-slider-wrap .rangeicon-right:before {
   left: 1px;
 }
 
-/* line 170 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 170 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 
-/* line 171 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 171 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #bleed-slider-wrap .rangeicon-left:before {
   background: #afcf7e;
 }
 
-/* line 173 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 173 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #bleed-slider-wrap .rangeicon-right:before {
   background: rgba(175,207,126,0.7);
 }
 
-/* line 175 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 175 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #bleed-slider-wrap .rangeicon-left:after {
   background: #9d4615;
 }
 
-/* line 177 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 177 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #bleed-slider-wrap .rangeicon-right:after {
   background: rgba(157,70,21,0.7);
 }
 
-/* line 180 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 180 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #bleed-slider-wrap .rangeicon-left:before,
 menu .controls #bleed-slider-wrap .rangeicon-left:after {
   width: 6.5px;
@@ -1154,17 +1155,17 @@ menu .controls #bleed-slider-wrap .rangeicon-left:after {
   bottom: 9.75px;
 }
 
-/* line 185 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 185 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #bleed-slider-wrap .rangeicon-left:before {
   left: 3.25px;
 }
 
-/* line 187 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 187 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #bleed-slider-wrap .rangeicon-left:after {
   right: 3.25px;
 }
 
-/* line 190 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 190 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #bleed-slider-wrap .rangeicon-right:before,
 menu .controls #bleed-slider-wrap .rangeicon-right:after {
   width: 19.5px;
@@ -1173,24 +1174,24 @@ menu .controls #bleed-slider-wrap .rangeicon-right:after {
   bottom: 3.25px;
 }
 
-/* line 195 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 195 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #bleed-slider-wrap .rangeicon-right:before {
   left: 0;
 }
 
-/* line 197 : /var/www/html/dev/ViziData/stylus/ui_forms.styl */
+/* line 197 : /usr/share/nginx/html/dev/ViziData/stylus/ui_forms.styl */
 menu .controls #bleed-slider-wrap .rangeicon-right:after {
   right: 0;
 }
 
-/* line 372 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 373 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #controls-meta {
   font-size: 0.9rem;
   box-shadow: -2px 0px 3px 1px #000;
   background: rgba(55,57,57,0.3);
 }
 
-/* line 376 : /var/www/html/dev/ViziData/stylus/ui_widgets.styl */
+/* line 377 : /usr/share/nginx/html/dev/ViziData/stylus/ui_widgets.styl */
 #controls-meta>fieldset {
   padding: 5px 10px !important;
 }

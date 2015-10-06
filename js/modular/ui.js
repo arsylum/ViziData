@@ -177,13 +177,12 @@ function updateUI() {
 	$("#dsdesc").html(
 		'<h4>Dataset <em>' + 
 		//current_setsel.parent.label + '</em> &gt; <em>' + 
-		current_setsel.strings.label + '</em></h4>'
-		+ '<p>' + current_setsel.strings.desc + '</p>'
-		);
+		current_setsel.strings.label + '</em></h4>' +
+		'<p>' + current_setsel.strings.desc + '</p>');
 
 	var showDsDesc = function() {
 
-	}
+	};
 }
 
 // TODO selected cell solution
