@@ -29,8 +29,11 @@ function setupControlHandlers() {
 		for(var j=0; j<gdata[i].datasets.length; j++) {
 
 			var dateString = gdata[i].datasets[j].dump_date;
-			var dateStamp = new Date(parseInt(dateString.substr(0,4)), parseInt(dateString.substr(4,2)), parseInt(dateString.substr(6,2)));
-			dateString = dateStamp.getFullYear() + '/' + dateStamp.getMonth() + '/' + dateStamp.getDate();
+			var dateStamp = new Date(parseInt(dateString.substr(0,4)), parseInt(dateString.substr(4,2)) - 1, parseInt(dateString.substr(6,2)));
+			var y = dateStamp.getFullYear().toString(),
+				m = (dateStamp.getMonth() < 9 ? '0' + (dateStamp.getMonth() + 1) : dateStamp.getMonth() + 1), // increment because getMonth() returns range 0-11
+				d = (dateStamp.getDate() < 10 ? '0'+dateStamp.getDate() : dateStamp.getDate().toString());
+			dateString = y + '/' + m + '/' + d;
 			
 			div.append(
 				$('<div data-ds="'+j+'" data-tt="'+gdata[i].datasets[j].strings.desc+'" class="tooltip">' +
