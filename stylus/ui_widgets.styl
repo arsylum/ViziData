@@ -306,15 +306,17 @@ itemtable-width = 400px
 				font-size .9em
 				color rgba(255,255,255,0.5)
 
-			&.selected .tray:before
-				content ''
-				position absolute
-				left 8px
-				bottom 8px
-				width 4px
-				height 4px
-				border-radius 2px
-				box-shadow 0 0 5px 2px rgb(226, 220, 0), inset 0 0 4px 3px rgb(175, 207, 126);
+			&.selected 
+				color menu-highlight
+				.tray:before
+					content ''
+					position absolute
+					left 8px
+					bottom 8px
+					width 4px
+					height 4px
+					border-radius 2px
+					box-shadow 0 0 5px 2px rgb(226, 220, 0), inset 0 0 4px 3px rgb(175, 207, 126);
 				
 /// dataset tooltips
 .tooltip 

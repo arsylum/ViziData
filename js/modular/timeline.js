@@ -384,4 +384,7 @@ function appendTimelineRangeTips() {
         	stepSize = (timeSel.data.x.max - timeSel.data.x.min) / $("#chart").width();
         });
     d3.selectAll("#chart .detail").call(drag);
+
+    // registering empty event handlers to prevent weird ghost page dragging glitches
+    d3.selectAll("#chart .connection, #chart .summary").call(d3.behavior.drag());
 }
