@@ -63,7 +63,7 @@ function generateGrid(reso, mAE, data) {
 			$("#legend").html("<em>inside the visible area</em> "+
 				//"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
 				"we have registered a total of "+
-				"<em>"+count+" "+data.strings.label+"</em> "+
+				"<em>"+count+"</em> "+ filterString() + "<em>" + data.strings.label+"</em> "+
 				term.replace("%l", "<em>"+cAE.min+"</em>")
 					.replace("%h", "<em>"+cAE.max+"</em>"));
 
@@ -91,12 +91,14 @@ function generateGrid(reso, mAE, data) {
 						k = data.data[i][j].length;
 						while(k--) {										// go over each event in key and
 							a = data.data[i][j][k];
-							if(section_filter(a,mAE)) {							// if it actually lies within map bounds
-								ti = geoCoord2index(a[ARR_M_LAT],a[ARR_M_LON],reso);
-								if(cellmap[ti] === undefined) {	cellmap[ti] = []; }	// aggregate it on the grid
-								cellmap[ti].push([a[ARR_M_I],j]);
-								cellmapprog[ti] = cellmap[ti];
-								count++;
+							if(property_filter(a)) {							// if it meets the filter criteria
+								if(section_filter(a,mAE)) {							// and actually lies within map bounds
+									ti = geoCoord2index(a[ARR_M_LAT],a[ARR_M_LON],reso);
+									if(cellmap[ti] === undefined) {	cellmap[ti] = []; }	// aggregate it on the grid
+									cellmap[ti].push([a[ARR_M_I],j]);
+									cellmapprog[ti] = cellmap[ti];
+									count++;
+								}
 							}
 						}
 					}
@@ -139,6 +141,16 @@ function section_filter(obj,aE){
 			(obj[ARR_M_LON] >= (aE[0].min)) && 
 			(obj[ARR_M_LON] <= (aE[0].max))	
 		);
+}
+
+function property_filter(a) {
+	if(filterSel[0] === true) { return true; }
+	var ret = true;
+	var subj = current_datsel.props.members[a[ARR_M_I]];
+	for(var i = 1; i < subj.length; i++) {
+		if((filterSel[i][0] !== true) && (filterSel[i][subj[i]] !== true)) { ret = false; }
+	}
+	return ret;
 }
 
 //////////////////////
@@ -332,10 +344,11 @@ function highlightCellsFor(key) {
 		if((t = data[i][key]) !== undefined) {
 			j = t.length;
 			while(j--) {
-				if(section_filter(t[j],mAE)){
-					ci = geoCoord2index(t[j][ARR_M_LAT],t[j][ARR_M_LON],reso);
-					cmap[ci] = true;
-	}	}	}	}
+				if(property_filter(t[j])) {
+					if(section_filter(t[j],mAE)){
+						ci = geoCoord2index(t[j][ARR_M_LAT],t[j][ARR_M_LON],reso);
+						cmap[ci] = true;
+	}	}	}	}	}
 	$.each(cmap, function(k) { ca.push(k); });
 
 	overctx.save();

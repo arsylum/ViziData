@@ -14,7 +14,9 @@ function calcReso() {
 
 /**
 * keep map bounds and min/max tile in global object for efficency
-* (object is reset whenever a new plot drawmap is calculated, so should be ok) */
+* (object is reset whenever a new plot drawmap is calculated, so should be ok) 
+* NOT GOOD TO RELY ON THIS because of timing reasons (value can be outdated)...
+*/
 function drawWhat() {
 	if(drawdat.bounds === undefined) { drawdat.bounds = getBounds(true); }
 	if(drawdat.mmt === undefined) { drawdat.mmt = getMinMaxTile(drawdat.bounds); }
@@ -215,9 +217,13 @@ function selectCell(i) {
 			$tb.html("");
 			// TODO recursive timeouts for large arrays (around >5000)
 			$.each(cell, function() {
-				var q = current_datsel.props.members[this[0]];
+				var q = "Q" + current_datsel.props.members[this[0]][0];
+				var qp = "";
+				for(var i = 1; i<current_datsel.props.properties.length; i++) {
+					qp += " data-" + current_datsel.props.properties[i][0] + '="' + current_datsel.props.members[this[0]][1] + '"';
+				}
 				$tb.append("<tr>"+
-					"<td><a class=\"q\" href=\"https://www.wikidata.org/wiki/"+q+"\" data-qid=\""+q+"\" target=\"wikidata\">"+q+"</a></td>"+
+					"<td><a class=\"q\" href=\"https://www.wikidata.org/wiki/"+q+"\" data-qid=\""+q+"\"" + qp + " target=\"wikidata\">"+q+"</a></td>"+
 					"<td>"+this[1]+"</td>"+
 				"</tr>");
 			});

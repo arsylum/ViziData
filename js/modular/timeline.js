@@ -40,14 +40,14 @@ function updateChartDataFkt(data) {
 	console.log("/~~ generating chart data ~~\\ ");
 	var benchmark_chart = Date.now();
 
-	drawWhat();
-	var mAE = drawdat.bounds,
-	    mmt = drawdat.mmt;
+	//drawWhat();
+	var mAE = getBounds(); //drawdat.bounds,
+	var mmt = getMinMaxTile(mAE); //drawdat.mmt;
 
 	chartdat = [];
 
 	var globob = {}, locob = {},
-		i,j,l,k,d,it, itl;
+		i,j,l,k,q,p,d,it, itl;
 	
 	
 
@@ -81,16 +81,27 @@ function updateChartDataFkt(data) {
 				d = data.data[i][j];
 				l = d.length;
 				// global part
-				if(globob[j] === undefined) { globob[j] = d.length; }
-				else { globob[j] += d.length; }
+				if(filterSel[0] === true) { // everything
+					if(globob[j] === undefined) { globob[j] = d.length; }
+					else { globob[j] += d.length; }
+				} else { //filtered
+					p = 0;
+					q = l;
+					while(--q) { if(property_filter(d[q])) { p++; }	}
+					if(p > 0) { 
+						if(globob[j] === undefined) { globob[j] = p; }
+						else { globob[j] += p; }
+					}
+				}
 				// local part
-				if(locob[j] === undefined) { locob[j] = 0; }
+				if(globob[j] !== undefined && locob[j] === undefined) { locob[j] = 0; }
 				if(i >= mmt.min && i <= mmt.max) {
-					for(k = 0; k < l; k++) {
-						d = data.data[i][j][k];
-						if(section_filter(d,mAE)) {
-							locob[j]++;
-			}	}	}	}
+					q = l;
+					while(--q) {
+						d = data.data[i][j][q];
+						if(property_filter(d) && section_filter(d,mAE)) { locob[j]++; }
+					}
+			}	}
 			// } else { // out of range, just global
 			// 	while(++it < itl) {
 			// 		j = data.itarraytor[i][it];
@@ -108,12 +119,15 @@ function updateChartDataFkt(data) {
 			while(it--) {
 				j = data.itarraytor[i][it];
 				l = data.data[i][j].length;
-				if(locob[j] === undefined) { locob[j] = 0; }
-				for(k = 0; k < l; k++) {
-					d = data.data[i][j][k];
-					if(section_filter(d,mAE)) {
-						locob[j]++;
-		}	}	}	}
+				p = 0;
+				while(--l)  {
+					d = data.data[i][j][l];
+					if(property_filter(d) && section_filter(d,mAE)) { p++; }
+				}
+				if(p > 0) {
+					if(locob[j] === undefined) { locob[j] = p; }
+					else { locob[j] += p; }
+		}	}	}	
 		nvision(locob);
 	}
 	console.log("  |BM| timeline data updated in "+(Date.now()-benchmark_chart)+"ms");

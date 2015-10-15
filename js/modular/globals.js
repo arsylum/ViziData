@@ -84,6 +84,7 @@ var allow_redraw = true,  // global genGrid prevention switch
 var gdata = [],		// global rawdata (array of datagroups)
 	current_datsel,	// slected data group
 	current_setsel = {}, // selected dataset
+	filterSel = [], // dataset filter selection
 	chartdat = [], // timeline rendering data
 	timeSel, // current timeline selection
 	cellmap, // latest generated grid map

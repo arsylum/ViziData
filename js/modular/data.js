@@ -1,3 +1,22 @@
+// properties
+// 	members
+// 		[0]: ["id", "int"],
+// 		[1]: ["gender", [
+// 			[0]: "male",
+// 			[1]: "female",
+//			[2] intersex (Q1097630), 
+//			[3] transgender female (Q1052281), 
+//			[4] transgender male (Q2449503), 
+//			[5] genderqueer (Q48270)
+// 		]]
+
+// scan p21
+// 	check value one of defined
+// 	set value or null else
+// 	add to map
+
+
+
 ////////////////////////
 /// data management ///
 //////////////////////
@@ -7,13 +26,16 @@
 function setSetSel(dsi, dgi) { //, callback){
 
 	current_datsel = gdata[dgi];
+	filterSel = false;
 
 	// load properties if missing
 	if(current_datsel.props === undefined) {
 		// TODO ? more loading feedback. maybe not as long as it's quick enough
 		$.getJSON(DATA_DIR+current_datsel.properties, function(data) {
 			current_datsel.props = data;
+			current_datsel.props.labels = [];
 			console.log('~~ Member properties of "'+current_datsel.id+'" have been loaded');
+			updateFilterUI();
 		});
 	}
 
@@ -84,4 +106,17 @@ function preprocess(ds) {
 		}
 	}
 	ds.ready = true;
+}
+
+function filterIntegrity() {
+	filterSel[0] = true;
+	for(var i = 1; i < filterSel.length; i++) {
+		filterSel[i][0] = true;
+		for(var j = 1; j < filterSel[i].length; j++) {
+			if(filterSel[i][j] === true) { 
+				filterSel[i][0] = false;	
+				filterSel[0] = false;
+			}
+		}
+	}
 }

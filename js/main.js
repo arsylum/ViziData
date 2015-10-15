@@ -6446,6 +6446,93 @@ envision.templates = envision.templates || {};
     };
 })(jQuery, window);
 
+/*!
+ * hoverIntent v1.8.0 // 2014.06.29 // jQuery v1.9.1+
+ * http://cherne.net/brian/resources/jquery.hoverIntent.html
+ *
+ * You may use hoverIntent under the terms of the MIT license. Basically that
+ * means you are free to use hoverIntent as long as this header is left intact.
+ * Copyright 2007, 2014 Brian Cherne
+ */
+(function($) {
+    $.fn.hoverIntent = function(handlerIn, handlerOut, selector) {
+        var cfg = {
+            interval: 100,
+            sensitivity: 6,
+            timeout: 0
+        };
+        if (typeof handlerIn === "object") {
+            cfg = $.extend(cfg, handlerIn);
+        } else {
+            if ($.isFunction(handlerOut)) {
+                cfg = $.extend(cfg, {
+                    over: handlerIn,
+                    out: handlerOut,
+                    selector: selector
+                });
+            } else {
+                cfg = $.extend(cfg, {
+                    over: handlerIn,
+                    out: handlerIn,
+                    selector: handlerOut
+                });
+            }
+        }
+        var cX, cY, pX, pY;
+        var track = function(ev) {
+            cX = ev.pageX;
+            cY = ev.pageY;
+        };
+        var compare = function(ev, ob) {
+            ob.hoverIntent_t = clearTimeout(ob.hoverIntent_t);
+            if (Math.sqrt((pX - cX) * (pX - cX) + (pY - cY) * (pY - cY)) < cfg.sensitivity) {
+                $(ob).off("mousemove.hoverIntent", track);
+                ob.hoverIntent_s = true;
+                return cfg.over.apply(ob, [ ev ]);
+            } else {
+                pX = cX;
+                pY = cY;
+                ob.hoverIntent_t = setTimeout(function() {
+                    compare(ev, ob);
+                }, cfg.interval);
+            }
+        };
+        var delay = function(ev, ob) {
+            ob.hoverIntent_t = clearTimeout(ob.hoverIntent_t);
+            ob.hoverIntent_s = false;
+            return cfg.out.apply(ob, [ ev ]);
+        };
+        var handleHover = function(e) {
+            var ev = $.extend({}, e);
+            var ob = this;
+            if (ob.hoverIntent_t) {
+                ob.hoverIntent_t = clearTimeout(ob.hoverIntent_t);
+            }
+            if (e.type === "mouseenter") {
+                pX = ev.pageX;
+                pY = ev.pageY;
+                $(ob).on("mousemove.hoverIntent", track);
+                if (!ob.hoverIntent_s) {
+                    ob.hoverIntent_t = setTimeout(function() {
+                        compare(ev, ob);
+                    }, cfg.interval);
+                }
+            } else {
+                $(ob).off("mousemove.hoverIntent", track);
+                if (ob.hoverIntent_s) {
+                    ob.hoverIntent_t = setTimeout(function() {
+                        delay(ev, ob);
+                    }, cfg.timeout);
+                }
+            }
+        };
+        return this.on({
+            "mouseenter.hoverIntent": handleHover,
+            "mouseleave.hoverIntent": handleHover
+        }, cfg.selector);
+    };
+})(jQuery);
+
 /*
  Generic  Canvas Overlay for leaflet, 
  Stanislav Sumbera, April , 2014
@@ -6612,6 +6699,21 @@ function sizeof(object) {
     return size;
 }
 
+// properties
+// 	members
+// 		[0]: ["id", "int"],
+// 		[1]: ["gender", [
+// 			[0]: "male",
+// 			[1]: "female",
+//			[2] intersex (Q1097630), 
+//			[3] transgender female (Q1052281), 
+//			[4] transgender male (Q2449503), 
+//			[5] genderqueer (Q48270)
+// 		]]
+// scan p21
+// 	check value one of defined
+// 	set value or null else
+// 	add to map
 ////////////////////////
 /// data management ///
 //////////////////////
@@ -6621,12 +6723,15 @@ function sizeof(object) {
 function setSetSel(dsi, dgi) {
     //, callback){
     current_datsel = gdata[dgi];
+    filterSel = false;
     // load properties if missing
     if (current_datsel.props === undefined) {
         // TODO ? more loading feedback. maybe not as long as it's quick enough
         $.getJSON(DATA_DIR + current_datsel.properties, function(data) {
             current_datsel.props = data;
+            current_datsel.props.labels = [];
             console.log('~~ Member properties of "' + current_datsel.id + '" have been loaded');
+            updateFilterUI();
         });
     }
     var iS = current_datsel.datasets[dsi].options.initSelection;
@@ -6692,6 +6797,19 @@ function preprocess(ds) {
         }
     }
     ds.ready = true;
+}
+
+function filterIntegrity() {
+    filterSel[0] = true;
+    for (var i = 1; i < filterSel.length; i++) {
+        filterSel[i][0] = true;
+        for (var j = 1; j < filterSel[i].length; j++) {
+            if (filterSel[i][j] === true) {
+                filterSel[i][0] = false;
+                filterSel[0] = false;
+            }
+        }
+    }
 }
 
 ////////////////////
@@ -6784,6 +6902,7 @@ infolistTimer;
 var gdata = [], // global rawdata (array of datagroups)
 current_datsel, // slected data group
 current_setsel = {}, // selected dataset
+filterSel = [], // dataset filter selection
 chartdat = [], // timeline rendering data
 timeSel, // current timeline selection
 cellmap, // latest generated grid map
@@ -6953,7 +7072,7 @@ function generateGrid(reso, mAE, data) {
             console.log("  |BM| finished genGrid (total of " + (new Date() - bms) + "ms)");
             var term = data.strings.term || L_DEFAULT_TERM;
             $("#legend").html("<em>inside the visible area</em> " + //"<span>["+mAE[0].min.toFixed(1)+","+mAE[1].min.toFixed(1)+"]-["+mAE[0].max.toFixed(1)+","+mAE[1].max.toFixed(1)+"]</span><br>"+
-            "we have registered a total of " + "<em>" + count + " " + data.strings.label + "</em> " + term.replace("%l", "<em>" + cAE.min + "</em>").replace("%h", "<em>" + cAE.max + "</em>"));
+            "we have registered a total of " + "<em>" + count + "</em> " + filterString() + "<em>" + data.strings.label + "</em> " + term.replace("%l", "<em>" + cAE.min + "</em>").replace("%h", "<em>" + cAE.max + "</em>"));
             selectCell();
             // urlifyState(); // is always called in selectCell
             console.log("\\~~ grid generation complete~~/ ");
@@ -6987,16 +7106,19 @@ function generateGrid(reso, mAE, data) {
                         while (k--) {
                             // go over each event in key and
                             a = data.data[i][j][k];
-                            if (section_filter(a, mAE)) {
-                                // if it actually lies within map bounds
-                                ti = geoCoord2index(a[ARR_M_LAT], a[ARR_M_LON], reso);
-                                if (cellmap[ti] === undefined) {
-                                    cellmap[ti] = [];
+                            if (property_filter(a)) {
+                                // if it meets the filter criteria
+                                if (section_filter(a, mAE)) {
+                                    // and actually lies within map bounds
+                                    ti = geoCoord2index(a[ARR_M_LAT], a[ARR_M_LON], reso);
+                                    if (cellmap[ti] === undefined) {
+                                        cellmap[ti] = [];
+                                    }
+                                    // aggregate it on the grid
+                                    cellmap[ti].push([ a[ARR_M_I], j ]);
+                                    cellmapprog[ti] = cellmap[ti];
+                                    count++;
                                 }
-                                // aggregate it on the grid
-                                cellmap[ti].push([ a[ARR_M_I], j ]);
-                                cellmapprog[ti] = cellmap[ti];
-                                count++;
                             }
                         }
                     }
@@ -7036,6 +7158,20 @@ function generateGrid(reso, mAE, data) {
 // true if object geo lies within currently visible section
 function section_filter(obj, aE) {
     return obj[ARR_M_LAT] >= aE[1].min && obj[ARR_M_LAT] <= aE[1].max && (obj[ARR_M_LON] >= aE[0].min && obj[ARR_M_LON] <= aE[0].max);
+}
+
+function property_filter(a) {
+    if (filterSel[0] === true) {
+        return true;
+    }
+    var ret = true;
+    var subj = current_datsel.props.members[a[ARR_M_I]];
+    for (var i = 1; i < subj.length; i++) {
+        if (filterSel[i][0] !== true && filterSel[i][subj[i]] !== true) {
+            ret = false;
+        }
+    }
+    return ret;
 }
 
 //////////////////////
@@ -7204,9 +7340,11 @@ function highlightCellsFor(key) {
         if ((t = data[i][key]) !== undefined) {
             j = t.length;
             while (j--) {
-                if (section_filter(t[j], mAE)) {
-                    ci = geoCoord2index(t[j][ARR_M_LAT], t[j][ARR_M_LON], reso);
-                    cmap[ci] = true;
+                if (property_filter(t[j])) {
+                    if (section_filter(t[j], mAE)) {
+                        ci = geoCoord2index(t[j][ARR_M_LAT], t[j][ARR_M_LON], reso);
+                        cmap[ci] = true;
+                    }
                 }
             }
         }
@@ -7318,7 +7456,9 @@ function calcReso() {
 
 /**
 * keep map bounds and min/max tile in global object for efficency
-* (object is reset whenever a new plot drawmap is calculated, so should be ok) */
+* (object is reset whenever a new plot drawmap is calculated, so should be ok) 
+* NOT GOOD TO RELY ON THIS because of timing reasons (value can be outdated)...
+*/
 function drawWhat() {
     if (drawdat.bounds === undefined) {
         drawdat.bounds = getBounds(true);
@@ -7539,8 +7679,12 @@ function selectCell(i) {
             $tb.html("");
             // TODO recursive timeouts for large arrays (around >5000)
             $.each(cell, function() {
-                var q = current_datsel.props.members[this[0]];
-                $tb.append("<tr>" + '<td><a class="q" href="https://www.wikidata.org/wiki/' + q + '" data-qid="' + q + '" target="wikidata">' + q + "</a></td>" + "<td>" + this[1] + "</td>" + "</tr>");
+                var q = "Q" + current_datsel.props.members[this[0]][0];
+                var qp = "";
+                for (var i = 1; i < current_datsel.props.properties.length; i++) {
+                    qp += " data-" + current_datsel.props.properties[i][0] + '="' + current_datsel.props.members[this[0]][1] + '"';
+                }
+                $tb.append("<tr>" + '<td><a class="q" href="https://www.wikidata.org/wiki/' + q + '" data-qid="' + q + '"' + qp + ' target="wikidata">' + q + "</a></td>" + "<td>" + this[1] + "</td>" + "</tr>");
             });
             $info.html("the <em>selected cell</em> <span>around " + "(" + x + ", " + y + ")</span><br>" + "contains <em>" + cell.length + "</em> of them:");
             $tb.trigger("scroll");
@@ -7677,10 +7821,13 @@ function updateChartDataFkt(data) {
     // TODO
     console.log("/~~ generating chart data ~~\\ ");
     var benchmark_chart = Date.now();
-    drawWhat();
-    var mAE = drawdat.bounds, mmt = drawdat.mmt;
+    //drawWhat();
+    var mAE = getBounds();
+    //drawdat.bounds,
+    var mmt = getMinMaxTile(mAE);
+    //drawdat.mmt;
     chartdat = [];
-    var globob = {}, locob = {}, i, j, l, k, d, it, itl;
+    var globob = {}, locob = {}, i, j, l, k, q, p, d, it, itl;
     /// create envision data from the assembled object
     var nvision = function(o) {
         // create a sorted index for all o props
@@ -7714,19 +7861,39 @@ function updateChartDataFkt(data) {
                 d = data.data[i][j];
                 l = d.length;
                 // global part
-                if (globob[j] === undefined) {
-                    globob[j] = d.length;
+                if (filterSel[0] === true) {
+                    // everything
+                    if (globob[j] === undefined) {
+                        globob[j] = d.length;
+                    } else {
+                        globob[j] += d.length;
+                    }
                 } else {
-                    globob[j] += d.length;
+                    //filtered
+                    p = 0;
+                    q = l;
+                    while (--q) {
+                        if (property_filter(d[q])) {
+                            p++;
+                        }
+                    }
+                    if (p > 0) {
+                        if (globob[j] === undefined) {
+                            globob[j] = p;
+                        } else {
+                            globob[j] += p;
+                        }
+                    }
                 }
                 // local part
-                if (locob[j] === undefined) {
+                if (globob[j] !== undefined && locob[j] === undefined) {
                     locob[j] = 0;
                 }
                 if (i >= mmt.min && i <= mmt.max) {
-                    for (k = 0; k < l; k++) {
-                        d = data.data[i][j][k];
-                        if (section_filter(d, mAE)) {
+                    q = l;
+                    while (--q) {
+                        d = data.data[i][j][q];
+                        if (property_filter(d) && section_filter(d, mAE)) {
                             locob[j]++;
                         }
                     }
@@ -7742,13 +7909,18 @@ function updateChartDataFkt(data) {
             while (it--) {
                 j = data.itarraytor[i][it];
                 l = data.data[i][j].length;
-                if (locob[j] === undefined) {
-                    locob[j] = 0;
+                p = 0;
+                while (--l) {
+                    d = data.data[i][j][l];
+                    if (property_filter(d) && section_filter(d, mAE)) {
+                        p++;
+                    }
                 }
-                for (k = 0; k < l; k++) {
-                    d = data.data[i][j][k];
-                    if (section_filter(d, mAE)) {
-                        locob[j]++;
+                if (p > 0) {
+                    if (locob[j] === undefined) {
+                        locob[j] = p;
+                    } else {
+                        locob[j] += p;
                     }
                 }
             }
@@ -8003,6 +8175,7 @@ function appendTimelineRangeTips() {
 /**
 * bind control handlers */
 function setupControlHandlers() {
+    $mm = $("#main-menu");
     // build filter menu
     var fn = function(e) {
         $t = $(this);
@@ -8010,14 +8183,23 @@ function setupControlHandlers() {
         $t.addClass("selected");
         setSetSel($t.attr("data-ds"), $t.parent().attr("data-gi"));
     };
+    /*	var grouptoggle = function() {
+		var $t = $(this);
+		$t.filter(":not(.open)").addClass("open").children("div").slideDown("fast");
+		$('#filter .group-container:not([id="' + $t.attr("id") + '"]).open')
+			.removeClass("open").children("div").slideUp("fast");
+	};*/
+    // grouptoggle
     var grouptoggle = function() {
         var $t = $(this);
         $t.filter(":not(.open)").addClass("open").children("div").slideDown("fast");
-        $('#filter .group-container:not([id="' + $t.attr("id") + '"]).open').removeClass("open").children("div").slideUp("fast");
+        $t.siblings(".open").removeClass("open").children("div").slideUp("fast");
     };
+    $mm.on("click", ".group-container", grouptoggle).hoverIntent(grouptoggle, ".group-container");
     var filter = $("#filter fieldset"), div;
     for (var i = 0; i < gdata.length; i++) {
-        div = $('<div id="dg-' + gdata[i].id + '" class="group-container" data-gi="' + i + '">' + "<h4>" + gdata[i].id + "</h4></div>").on("click mouseenter", grouptoggle);
+        div = $('<div id="dg-' + gdata[i].id + '" class="group-container" data-gi="' + i + '">' + "<h4>" + gdata[i].id + "</h4></div>");
+        //.on("click mouseenter", grouptoggle);
         for (var j = 0; j < gdata[i].datasets.length; j++) {
             var dateString = gdata[i].datasets[j].dump_date;
             var dateStamp = new Date(parseInt(dateString.substr(0, 4)), parseInt(dateString.substr(4, 2)) - 1, parseInt(dateString.substr(6, 2)));
@@ -8028,6 +8210,14 @@ function setupControlHandlers() {
         }
         filter.append(div);
     }
+    // property filter interaction
+    $mm.on("click", "#filter-props input", function() {
+        var i = parseInt($(this).parents(".group-container").attr("data-i")), j = parseInt($(this).attr("data-i"));
+        filterSel[i][j] = this.checked;
+        filterIntegrity();
+        genChart();
+        genGrid();
+    });
     /*$(".controls input[type='range']")
 		.on("input", (function() {
 			//$(this).siblings("input[type='text']").val(parseFloat($(this).val()).toFixed(1));
@@ -8114,7 +8304,29 @@ function setupControlHandlers() {
     //$("#widget-area").toggleClass("open");
     //});
     /// item table
+    var $hoverdesc = $("#item-hover-desc");
     $("#infolist").on("scroll", infolistScroll);
+    // hover images TODO very raw
+    $("#infolist").hoverIntent({
+        over: function() {
+            var imgurl = "https://commons.wikimedia.org/w/thumb.php?f=", imgsize = "&w=300", qid = $(this).find("a").attr("data-qid");
+            var qstr = "https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&entity=" + qid + "&property=P18&callback=?";
+            // https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&entity=Q131234&property=P18
+            $hoverdesc.css("bottom", $("#cellinfo").height() - $(this).position().top - $(this).height() / 2 - 1);
+            $.getJSON(qstr, function(data) {
+                var img = "No_image_available.svg";
+                if (data.claims.P18 !== undefined) {
+                    img = data.claims.P18[0].mainsnak.datavalue.value;
+                }
+                $hoverdesc.html('<img src="' + imgurl + img + imgsize + '" alt="item image" />');
+                $hoverdesc.show();
+            });
+        },
+        out: function() {
+            $hoverdesc.hide();
+        },
+        selector: "tr"
+    });
     $("#map").on("mouseleave", function() {
         $bubble.css("opacity", "0");
     });
@@ -8157,6 +8369,93 @@ function updateUI() {
     $("#dsdesc").html("<h4>Dataset <em>" + //current_setsel.parent.label + '</em> &gt; <em>' + 
     current_setsel.strings.label + "</em></h4>" + "<p>" + current_setsel.strings.desc + "</p>");
     var showDsDesc = function() {};
+    updateFilterUI();
+}
+
+function updateFilterUI() {
+    if (filterSel !== false || current_datsel.props === undefined) {
+        return false;
+    }
+    filterSel = [];
+    var $fieldset = $("#filter-props fieldset"), div, props = current_datsel.props.properties, labels = current_datsel.props.labels, qidMap = {}, getLabels = true, //(labels.length === 0),
+    i, j;
+    $fieldset.html("");
+    for (i = 1; i < props.length; i++) {
+        if (getLabels) {
+            labels[i] = [];
+        }
+        filterSel[i] = [];
+        div = $('<div id="fg-' + i + '" class="group-container" data-i="' + i + '">' + "<h4>" + props[i][0] + "</h4></div>");
+        for (j = 1; j < props[i].length; j++) {
+            var id = "fg-" + i + "-" + j;
+            if (getLabels) {
+                labels[i][j] = props[i][j];
+                qidMap[props[i][j]] = [ i, j ];
+            }
+            div.append($('<div><input type="checkbox" id="' + id + '" data-i="' + j + '" /><label id="' + props[i][j] + '" for="' + id + '"">' + labels[i][j] + "</label></div>"));
+        }
+        $fieldset.append(div);
+    }
+    if (getLabels) {
+        var lang = $("#langsel").val(), ids = "", v, k;
+        for (i = 1; i < labels.length; i++) {
+            for (j = 1; j < labels[i].length; j++) {
+                ids += labels[i][j] + "%7C";
+            }
+        }
+        ids = ids.substring(ids, ids.length - 3);
+        $.getJSON("https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=" + ids + "&props=labels&languages=" + lang + "&languagefallback=&callback=?", function(data) {
+            $.each(data.entities, function() {
+                if (this.labels !== undefined) {
+                    // TODO
+                    if (this.labels[lang] !== undefined) {
+                        // this sanity check is 
+                        if ((v = this.labels[lang].value) !== undefined) {
+                            // probably slightly overkill
+                            k = qidMap[this.id];
+                            labels[k[0]][k[1]] = v;
+                            $fieldset.find("#" + this.id).text(v);
+                        }
+                    }
+                }
+            });
+        });
+    }
+    filterIntegrity();
+}
+
+function filterString() {
+    var s = "", substr, strs, ems = '<em class="logicalor">';
+    if (filterSel[0] !== true) {
+        for (var i = 1; i < filterSel.length; i++) {
+            strs = [];
+            substr = "";
+            if (filterSel[i][0] !== true) {
+                if (s.length > 0) {
+                    s += ' <em class="operator">and</em> ';
+                }
+                for (var j = 1; j < filterSel[i].length; j++) {
+                    if (filterSel[i][j] === true) {
+                        strs.push(current_datsel.props.labels[i][j]);
+                    }
+                }
+                for (j = 0; j < strs.length - 1; j++) {
+                    substr += strs[j] + ", ";
+                }
+                if (j > 0) {
+                    substr = substr.substring(0, substr.length - 2) + '</em> <em class="operator">or</em> ' + ems;
+                }
+                substr += strs[j] + "</em>";
+            }
+            if (substr.length > 0) {
+                s += "(" + ems + substr + "</em>)";
+            }
+        }
+    }
+    if (s.length > 0) {
+        s += " ";
+    }
+    return s;
 }
 
 // TODO selected cell solution

@@ -5,6 +5,8 @@
 * bind control handlers */
 function setupControlHandlers() {
 
+	$mm = $("#main-menu");
+
 	// build filter menu
 	var fn = function(e) {
 		$t = $(this);
@@ -12,19 +14,27 @@ function setupControlHandlers() {
 		$t.addClass("selected");
 		setSetSel($t.attr("data-ds"), $t.parent().attr("data-gi"));
 	};
-	var grouptoggle = function() {
+/*	var grouptoggle = function() {
 		var $t = $(this);
 		$t.filter(":not(.open)").addClass("open").children("div").slideDown("fast");
 		$('#filter .group-container:not([id="' + $t.attr("id") + '"]).open')
 			.removeClass("open").children("div").slideUp("fast");
+	};*/
+
+	// grouptoggle
+	var grouptoggle = function() {
+		var $t = $(this);
+		$t.filter(":not(.open)").addClass("open").children("div").slideDown("fast");
+		$t.siblings(".open").removeClass("open").children("div").slideUp("fast");
 	};
+	$mm.on("click", ".group-container", grouptoggle).hoverIntent(grouptoggle, ".group-container");
 
 	var filter = $("#filter fieldset"),
 		div;
 	for(var i = 0; i<gdata.length; i++) {
 
 		div = $('<div id="dg-'+gdata[i].id+'" class="group-container" data-gi="'+i+'">' + 
-				'<h4>'+gdata[i].id+'</h4></div>').on("click mouseenter", grouptoggle);
+				'<h4>'+gdata[i].id+'</h4></div>'); //.on("click mouseenter", grouptoggle);
 				
 		for(var j=0; j<gdata[i].datasets.length; j++) {
 
@@ -42,6 +52,16 @@ function setupControlHandlers() {
 		}
 		filter.append(div);
 	}
+
+	// property filter interaction
+	$mm.on("click", "#filter-props input", function() {
+		var i = parseInt($(this).parents(".group-container").attr("data-i")),
+			j = parseInt($(this).attr("data-i"));
+		filterSel[i][j] = this.checked;
+		filterIntegrity();
+		genChart();
+		genGrid();
+	});
 
 	/*$(".controls input[type='range']")
 		.on("input", (function() {
@@ -133,7 +153,38 @@ function setupControlHandlers() {
 	//});
 
 	/// item table
+	var $hoverdesc = $("#item-hover-desc");
 	$("#infolist").on("scroll", infolistScroll);
+	// hover images TODO very raw
+	$("#infolist").hoverIntent({
+		over: function() {
+			var imgurl = 'https://commons.wikimedia.org/w/thumb.php?f=',
+				imgsize = '&w=300',
+				qid = $(this).find("a").attr('data-qid');
+
+			var qstr = 'https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&entity=' + qid + '&property=P18&callback=?';
+
+			// https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&entity=Q131234&property=P18
+			$hoverdesc.css("bottom", $("#cellinfo").height() - $(this).position().top - $(this).height()/2 - 1);
+
+			
+
+			$.getJSON(qstr, function(data) {
+
+				var img = 'No_image_available.svg';
+				if(data.claims.P18 !== undefined) {
+
+					img = data.claims.P18[0].mainsnak.datavalue.value;
+				}
+				$hoverdesc.html('<img src="' + imgurl + img + imgsize + '" alt="item image" />');
+				$hoverdesc.show();
+			});
+		},
+		out: function() {
+			$hoverdesc.hide();
+		},
+		selector: 'tr'
+	});
 
 	
 	$("#map").on("mouseleave", function() {
@@ -191,6 +242,92 @@ function updateUI() {
 	var showDsDesc = function() {
 
 	};
+
+	updateFilterUI();
+}
+
+
+function updateFilterUI() {
+	if(filterSel !== false || current_datsel.props === undefined) {	return false; }
+
+	filterSel = [];
+	var $fieldset = $("#filter-props fieldset"), div,
+		props = current_datsel.props.properties,
+		labels = current_datsel.props.labels,
+		qidMap = {},
+		getLabels = true, //(labels.length === 0),
+		i,j;
+
+	$fieldset.html("");
+	for(i = 1; i < props.length; i++) {
+		if(getLabels) { labels[i] = []; }
+		filterSel[i] = [];
+		div = $('<div id="fg-' + i + '" class="group-container" data-i="'+i+'">' +
+				'<h4>' + props[i][0] + '</h4></div>');
+		for(j = 1; j < props[i].length; j++) {
+			var id = 'fg-'+i+'-'+j;
+			if(getLabels) {	
+				labels[i][j] = props[i][j];	
+				qidMap[props[i][j]] = [i,j];
+			}
+			div.append(
+				$('<div><input type="checkbox" id="'+id+'" data-i="'+j+'" /><label id="'+props[i][j]+'" for="'+id+'"">'+labels[i][j]+'</label></div>')
+			);
+		}
+		$fieldset.append(div);
+	}
+
+	if(getLabels) {
+		var lang = $("#langsel").val(),
+			ids = '', v, k;
+		for(i = 1; i<labels.length; i++) {
+			for(j = 1; j < labels[i].length; j++) {
+				ids += labels[i][j] + '%7C';
+			}
+		}
+		ids = ids.substring(ids, ids.length-3);
+		$.getJSON('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + ids + 
+		'&props=labels&languages='+lang+'&languagefallback=&callback=?', function(data) {
+			$.each(data.entities, function() {
+				if(this.labels !== undefined) {						// TODO
+					if(this.labels[lang] !== undefined) {			// this sanity check is 
+						if((v = this.labels[lang].value) !== undefined) {	// probably slightly overkill
+							k = qidMap[this.id];
+							labels[k[0]][k[1]] = v;
+							$fieldset.find("#"+this.id).text(v);
+				}	}	}
+			});
+	    });
+	}
+	filterIntegrity();
+}
+
+function filterString() {
+	var s = '', substr, strs,
+		ems = '<em class="logicalor">';
+	if(filterSel[0] !== true) {
+		for(var i = 1; i < filterSel.length; i++) {
+			strs = []; 
+			substr = '';
+			if(filterSel[i][0] !== true) {
+				if(s.length > 0) { s += ' <em class="operator">and</em> '; }
+				for(var j = 1; j < filterSel[i].length; j++) {
+					if(filterSel[i][j] === true) {
+						strs.push(current_datsel.props.labels[i][j]);
+					}
+				}
+				for(j=0; j<strs.length-1; j++) { substr += strs[j] + ', ';	}
+				
+				if(j > 0) { 
+					substr = substr.substring(0, substr.length-2) + '</em> <em class="operator">or</em> '+ems; 
+				}
+				substr += strs[j] + '</em>';
+			}
+			if(substr.length > 0) { s += '(' + ems + substr + '</em>)'; }
+		}
+	}
+	if(s.length>0) { s += ' '; }
+	return s;
 }
 
 // TODO selected cell solution
