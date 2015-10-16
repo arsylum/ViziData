@@ -137,8 +137,8 @@ function setupControlHandlers() {
 		var $wa = $("#widget-area");
 		if($wa.hasClass("open")) {
 			$(window).off("click.menufocus");
-			var mabo = -($("#main-menu").outerHeight() - $("#menu-launcher").outerHeight());
-			$wa.css("margin-bottom", mabo);
+			//var mabo = -($("#main-menu").outerHeight() - $("#menu-launcher").outerHeight());
+			//$wa.css("margin-bottom", mabo);
 		} else {
 			$(window).on("click.menufocus", function(e) {
 				if($(e.target).parents("#main-menu").length === 0) {
@@ -219,12 +219,13 @@ function setupControlHandlers() {
 
 	// show ui, qick and dirty
 	setTimeout(function() {
+		$("#widget-area").css("margin-top", -($("#menu-launcher").outerHeight()));
 		toggleMenu();
 		setTimeout(function() {
 			$(".init").removeClass("init");
 			//toggleMenu();
 		}, 100);
-	}, 500);
+	}, 100);
 }
 
 /**
@@ -243,12 +244,19 @@ function updateUI() {
 
 	};
 
+	$("#widget-area").css("margin-top", -($("#menu-launcher").outerHeight()));
+
 	updateFilterUI();
 }
 
 
 function updateFilterUI() {
 	if(filterSel !== false || current_datsel.props === undefined) {	return false; }
+	if(current_datsel.props.properties.length < 2) {
+		filterSel[0] = true;
+		$("#filter-props fieldset").html("N/A");
+		return true;
+	} else { $("#filter-props").show(); }
 
 	filterSel = [];
 	var $fieldset = $("#filter-props fieldset"), div,
@@ -300,6 +308,7 @@ function updateFilterUI() {
 	    });
 	}
 	filterIntegrity();
+	$("#menu-launcher").click().click();
 }
 
 function filterString() {

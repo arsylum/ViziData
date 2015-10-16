@@ -9,8 +9,12 @@
 /** 
 * genGrid timeout wrapper*/
 function genGrid(reso, mAE, data) {
-	if(chart === undefined) { return 0; } // depend on timeline
 	clearTimeout(redrawTimer);
+	if(chart === undefined) { // depend on timeline
+		console.warn('cannot execute genGrid: chart not ready. retry in ' + CALC_TIMEOUT + 'ms');
+		redrawTimer = setTimeout(genGrid, CALC_TIMEOUT);
+		return 0; 
+	} 
 	redrawTimer = setTimeout(function() {
 		generateGrid(reso, mAE, data);
 	}, CALC_TIMEOUT);
@@ -117,7 +121,7 @@ function generateGrid(reso, mAE, data) {
 	// set it all in motion - if no other generation is running
 	if(mutexGenGrid === 1) { mutexGenGrid = -1;	}
 	var goOn = function() {
-		if(mutexGenGrid !== 0) { setTimeout(goOn,10); }
+		if(mutexGenGrid !== 0 || !data.ready) { setTimeout(goOn,10); }
 		else {
 			mutexGenGrid = 1;
 			$("#legend").html("<em>massive calculations...</em>");

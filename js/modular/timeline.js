@@ -6,7 +6,11 @@
 ** for displaying the non geographical axis of the supplied data
 */
 function genChart(data){
-	if(current_setsel.ready !== true) { return false; }
+	if(current_setsel.ready !== true || current_datsel.props === undefined) { 
+		console.warn('cannot execute genChart: not ready. retry after 100ms');
+		setTimeout(genChart, 100);
+		return false; 
+	}
 	var benchmark_chart = new Date();
 
 	updateChartDataFkt(data);
@@ -237,12 +241,12 @@ function initChart() {
         width: containerW,
         // Flotr Configuration
         config : {
-	        'lines' : {
+	        'bars' : {
 				show : true,
 				lineWidth : 1,
 				fill : true,
 				fillOpacity : 0.2,
-				fillBorder : true
+				//fillBorder : true
 	        },
 	        xaxis : {
 	          	noTicks: 5,
@@ -384,7 +388,7 @@ function appendTimelineRangeTips() {
 				changeTimeSel(min,max);
 			}, 100);
 		}, 100);
-	}).on("mouseup", function() {
+	}).on("mouseup mousemove", function() {
 		clearTimeout(repeatTimeout);
 		clearInterval(repeatInterval);
 	});

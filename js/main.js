@@ -7019,11 +7019,13 @@ function onResize() {
 /** 
 * genGrid timeout wrapper*/
 function genGrid(reso, mAE, data) {
+    clearTimeout(redrawTimer);
     if (chart === undefined) {
+        // depend on timeline
+        console.warn("cannot execute genGrid: chart not ready. retry in " + CALC_TIMEOUT + "ms");
+        redrawTimer = setTimeout(genGrid, CALC_TIMEOUT);
         return 0;
     }
-    // depend on timeline
-    clearTimeout(redrawTimer);
     redrawTimer = setTimeout(function() {
         generateGrid(reso, mAE, data);
     }, CALC_TIMEOUT);
@@ -7141,7 +7143,7 @@ function generateGrid(reso, mAE, data) {
         mutexGenGrid = -1;
     }
     var goOn = function() {
-        if (mutexGenGrid !== 0) {
+        if (mutexGenGrid !== 0 || !data.ready) {
             setTimeout(goOn, 10);
         } else {
             mutexGenGrid = 1;
@@ -7788,7 +7790,9 @@ function setColorScale(r) {
 ** for displaying the non geographical axis of the supplied data
 */
 function genChart(data) {
-    if (current_setsel.ready !== true) {
+    if (current_setsel.ready !== true || current_datsel.props === undefined) {
+        console.warn("cannot execute genChart: not ready. retry after 100ms");
+        setTimeout(genChart, 100);
         return false;
     }
     var benchmark_chart = new Date();
@@ -8026,12 +8030,11 @@ function initChart() {
         width: containerW,
         // Flotr Configuration
         config: {
-            lines: {
+            bars: {
                 show: true,
                 lineWidth: 1,
                 fill: true,
-                fillOpacity: .2,
-                fillBorder: true
+                fillOpacity: .2
             },
             xaxis: {
                 noTicks: 5,
@@ -8153,7 +8156,7 @@ function appendTimelineRangeTips() {
                 changeTimeSel(min, max);
             }, 100);
         }, 100);
-    }).on("mouseup", function() {
+    }).on("mouseup mousemove", function() {
         clearTimeout(repeatTimeout);
         clearInterval(repeatInterval);
     });
@@ -8288,8 +8291,6 @@ function setupControlHandlers() {
         var $wa = $("#widget-area");
         if ($wa.hasClass("open")) {
             $(window).off("click.menufocus");
-            var mabo = -($("#main-menu").outerHeight() - $("#menu-launcher").outerHeight());
-            $wa.css("margin-bottom", mabo);
         } else {
             $(window).on("click.menufocus", function(e) {
                 if ($(e.target).parents("#main-menu").length === 0) {
@@ -8354,11 +8355,12 @@ function setupControlHandlers() {
     });
     // show ui, qick and dirty
     setTimeout(function() {
+        $("#widget-area").css("margin-top", -$("#menu-launcher").outerHeight());
         toggleMenu();
         setTimeout(function() {
             $(".init").removeClass("init");
         }, 100);
-    }, 500);
+    }, 100);
 }
 
 /**
@@ -8369,12 +8371,20 @@ function updateUI() {
     $("#dsdesc").html("<h4>Dataset <em>" + //current_setsel.parent.label + '</em> &gt; <em>' + 
     current_setsel.strings.label + "</em></h4>" + "<p>" + current_setsel.strings.desc + "</p>");
     var showDsDesc = function() {};
+    $("#widget-area").css("margin-top", -$("#menu-launcher").outerHeight());
     updateFilterUI();
 }
 
 function updateFilterUI() {
     if (filterSel !== false || current_datsel.props === undefined) {
         return false;
+    }
+    if (current_datsel.props.properties.length < 2) {
+        filterSel[0] = true;
+        $("#filter-props fieldset").html("N/A");
+        return true;
+    } else {
+        $("#filter-props").show();
     }
     filterSel = [];
     var $fieldset = $("#filter-props fieldset"), div, props = current_datsel.props.properties, labels = current_datsel.props.labels, qidMap = {}, getLabels = true, //(labels.length === 0),
@@ -8422,6 +8432,7 @@ function updateFilterUI() {
         });
     }
     filterIntegrity();
+    $("#menu-launcher").click().click();
 }
 
 function filterString() {
