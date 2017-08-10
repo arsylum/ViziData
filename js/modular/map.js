@@ -151,8 +151,9 @@ function property_filter(a) {
 	if(filterSel[0] === true) { return true; }
 	var ret = true;
 	var subj = current_datsel.props.members[a[ARR_M_I]];
+	//if(Math.random() > 0.995) console.log(a, subj);
 	for(var i = 1; i < subj.length; i++) {
-		if((filterSel[i][0] !== true) && (filterSel[i][subj[i]] !== true)) { ret = false; }
+		if((filterSel[i][0] !== true) && (filterSel[i][subj[i]+1] !== true)) { ret = false; }
 	}
 	return ret;
 }

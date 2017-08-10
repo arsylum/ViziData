@@ -293,7 +293,11 @@ function updateFilterUI() {
 				ids += labels[i][j] + '%7C';
 			}
 		}
-		ids = ids.substring(ids, ids.length-3);
+		console.log(ids);
+		// ids = ids.substring(ids, ids.length-3);
+		ids = ids.substr(0, ids.length-3);
+		console.log(ids);
+		//ids = ids.substr(-3);
 		$.getJSON('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + ids + 
 		'&props=labels&languages='+lang+'&languagefallback=&callback=?', function(data) {
 			$.each(data.entities, function() {

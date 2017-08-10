@@ -7168,8 +7168,9 @@ function property_filter(a) {
     }
     var ret = true;
     var subj = current_datsel.props.members[a[ARR_M_I]];
+    //if(Math.random() > 0.995) console.log(a, subj);
     for (var i = 1; i < subj.length; i++) {
-        if (filterSel[i][0] !== true && filterSel[i][subj[i]] !== true) {
+        if (filterSel[i][0] !== true && filterSel[i][subj[i] + 1] !== true) {
             ret = false;
         }
     }
@@ -8413,7 +8414,11 @@ function updateFilterUI() {
                 ids += labels[i][j] + "%7C";
             }
         }
-        ids = ids.substring(ids, ids.length - 3);
+        console.log(ids);
+        // ids = ids.substring(ids, ids.length-3);
+        ids = ids.substr(0, ids.length - 3);
+        console.log(ids);
+        //ids = ids.substr(-3);
         $.getJSON("https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=" + ids + "&props=labels&languages=" + lang + "&languagefallback=&callback=?", function(data) {
             $.each(data.entities, function() {
                 if (this.labels !== undefined) {
