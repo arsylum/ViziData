@@ -1,0 +1,8 @@
+data/humans_p.json filter=lfs diff=lfs merge=lfs -text
+data/items_d00.json filter=lfs diff=lfs merge=lfs -text
+data/items_d01.json filter=lfs diff=lfs merge=lfs -text
+data/items.json filter=lfs diff=lfs merge=lfs -text
+data/items_p.json filter=lfs diff=lfs merge=lfs -text
+data/humans_d00.json filter=lfs diff=lfs merge=lfs -text
+data/humans_d01.json filter=lfs diff=lfs merge=lfs -text
+data/humans.json filter=lfs diff=lfs merge=lfs -text
