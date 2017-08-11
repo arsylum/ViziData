@@ -9,4 +9,4 @@ This project was partly an experiment to test the limits of heavy duty data proc
 
 A working demo can currently be viewed [here](http://sylum.lima-city.de/viziData/).
 
-[[https://github.com/arsylum/ViziData/blob/master/screen.jpg|alt=screenshot]]
+![screenshot](https://github.com/arsylum/ViziData/blob/master/screen.jpg)
